@@ -1,27 +1,28 @@
 """Variational Autoencoder example on continuous Gaussian process priors."""
-
-from typing import Iterator, NamedTuple, Sequence, Tuple, Type, List
-
-import matplotlib.pyplot as plt
+from collections import namedtuple
+from typing import Iterator, NamedTuple, Sequence, Tuple, Type
 
 import haiku as hk
 import jax
 import jax.numpy as jnp
-import matplotlib.pyplot as plt
 import numpy as np
 import optax
-from absl import app, flags, logging
 from tinygp import GaussianProcess, kernels
 
-flags.DEFINE_integer("train_size", 16000, "Size of the training dataset.")
-flags.DEFINE_integer("test_size", 4000, "Size of the testing dataset.")
-flags.DEFINE_integer("batch_size", 128, "Size of the batch to train on.")
-flags.DEFINE_float("learning_rate", 0.001, "Learning rate for the optimizer.")
-flags.DEFINE_integer("training_steps", 10000, "Number of training steps.")
-flags.DEFINE_integer("eval_frequency", 100, "How often to evaluate the model.")
-flags.DEFINE_integer("plot_freq", 500, "How often to plot model comparison.")
-flags.DEFINE_integer("random_seed", 42, "Random seed.")
-FLAGS = flags.FLAGS
+
+class flags(NamedTuple):
+    train_size: int = 16000
+    test_size: int = 4000
+    batch_size: int = 128
+    learning_rate: float = 0.001
+
+    training_steps: int = 10000
+    eval_frequency: int = 100
+    random_seed: int = 42
+    alsologtostderr: bool = True
+
+FLAGS = flags()
+
 
 PRNGKey = jnp.ndarray
 Batch = Type[jnp.ndarray]
@@ -29,15 +30,14 @@ Batch = Type[jnp.ndarray]
 SAMPLE_SHAPE: Sequence[int] = (100, 1)
 
 
-
 def generate_gp_samples(
-        X: jnp.ndarray,
-        var: float,
-        scale: float,
-        num_draws: int,
-        batch_size: int,
-        sample_shape: Sequence[int] = SAMPLE_SHAPE,
-        seed: int = 1,
+    X: jnp.ndarray,
+    var: float,
+    scale: float,
+    num_draws: int,
+    batch_size: int,
+    sample_shape: Sequence[int] = SAMPLE_SHAPE,
+    seed: int = 1,
 ) -> Iterator[Batch]:
     kernel = var * kernels.ExpSquared(scale=scale)
     gp = GaussianProcess(kernel, X)
@@ -52,6 +52,15 @@ def generate_gp_samples(
 
     draws = jnp.reshape(draws, (-1, *(batch_size, *sample_shape)))
 
+    ms = np.random.uniform(-1, 1, num_draws*batch_size)
+    cs = np.random.uniform(0.2, 0.5,  num_draws*batch_size)
+    draws= jnp.array([
+        m*X + c for m, c in zip(ms, cs)
+    ])
+
+    draws = jnp.reshape(draws, (-1, *(batch_size, *sample_shape)))
+
+
     return iter(draws)
 
 
@@ -59,10 +68,10 @@ class Encoder(hk.Module):
     """Encoder model."""
 
     def __init__(
-            self,
-            hidden_size1: int = 50,
-            hidden_size2: int = 25,
-            latent_size: int = 10,
+        self,
+        hidden_size1: int = 50,
+        hidden_size2: int = 25,
+        latent_size: int = 10,
     ):
         super().__init__()
         self._hidden_size1 = hidden_size1
@@ -92,10 +101,10 @@ class Decoder(hk.Module):
     """Decoder model."""
 
     def __init__(
-            self,
-            hidden_size1: int = 25,
-            hidden_size2: int = 50,
-            output_shape: Sequence[int] = SAMPLE_SHAPE,
+        self,
+        hidden_size1: int = 25,
+        hidden_size2: int = 50,
+        output_shape: Sequence[int] = SAMPLE_SHAPE,
     ):
         super().__init__()
         self._hidden_size1 = hidden_size1
@@ -129,11 +138,11 @@ class VariationalAutoEncoder(hk.Module):
     """Main VAE model class, uses Encoder & Decoder under the hood."""
 
     def __init__(
-            self,
-            hidden_size1: int = 50,
-            hidden_size2: int = 25,
-            latent_size: int = 10,
-            output_shape: Sequence[int] = SAMPLE_SHAPE,
+        self,
+        hidden_size1: int = 50,
+        hidden_size2: int = 25,
+        latent_size: int = 10,
+        output_shape: Sequence[int] = SAMPLE_SHAPE,
     ):
         super().__init__()
         self._hidden_size1 = hidden_size1
@@ -154,13 +163,6 @@ class VariationalAutoEncoder(hk.Module):
         )(z)
 
         return VAEOutput(mean, stddev, output)
-
-    def generate(self, z: jnp.ndarray) -> jnp.ndarray:
-        return Decoder(
-            self._hidden_size2,
-            self._hidden_size1,
-            self._output_shape,
-        )(z)
 
 
 def mean_squared_error(x1: jnp.ndarray, x2: jnp.ndarray) -> jnp.ndarray:
@@ -199,19 +201,10 @@ def kl_gaussian(mean: jnp.ndarray, var: jnp.ndarray) -> jnp.ndarray:
     return 0.5 * jnp.sum(-jnp.log(var) - 1.0 + var + jnp.square(mean), axis=-1)
 
 
+def main():
 
-
-
-class TrainMetrics(NamedTuple):
-    val_loss: float
-    train_loss: float
-    mse: float
-    epoch: float
-
-
-
-def main(_):
-    FLAGS.alsologtostderr = True
+    print("STARTING")
+    # FLAGS.alsologtostderr = True
 
     model = hk.transform(
         lambda x: VariationalAutoEncoder()(x)
@@ -220,14 +213,12 @@ def main(_):
 
     @jax.jit
     def loss_fn(
-            params: hk.Params,
-            rng_key: PRNGKey,
-            batch: Batch,
+        params: hk.Params,
+        rng_key: PRNGKey,
+        batch: Batch,
     ) -> jnp.ndarray:
         """ELBO: E_p[log(x)] - KL(d||q), where p ~ Be(0.5) and q ~ N(0,1)."""
         outputs: VAEOutput = model.apply(params, rng_key, batch)
-        # Note: model.apply --> hk.transform(model(params, rng)(x))
-        # Encodes x --> z --> decodes z --> x_hat
 
         log_likelihood = -mean_squared_error(batch, outputs.output)
         kl = kl_gaussian(outputs.mean, jnp.square(outputs.stddev))
@@ -237,10 +228,10 @@ def main(_):
 
     @jax.jit
     def update(
-            params: hk.Params,
-            rng_key: PRNGKey,
-            opt_state: optax.OptState,
-            batch: Batch,
+        params: hk.Params,
+        rng_key: PRNGKey,
+        opt_state: optax.OptState,
+        batch: Batch,
     ) -> Tuple[hk.Params, optax.OptState]:
         """Single SGD update step."""
         grads = jax.grad(loss_fn)(params, rng_key, batch)
@@ -269,79 +260,19 @@ def main(_):
         batch_size=FLAGS.batch_size,
     )
 
-    fig, ax = plt.subplots()
-    plot_batch(X, next(train_ds), ax=ax, col="tab:blue", label="True")
-    plot_batch(X, next(valid_ds), ax=ax, col="tab:orange", label="Validation")
-    plt.legend()
-    plt.savefig("gp_samples.png")
-
-    train_metrics = []
-
-    COMPARISON_BATCH = next(valid_ds)
-
+    print("Begin training")
     for step in range(FLAGS.training_steps):
-        train_batch = next(train_ds)
-        train_rng = next(rng_seq)
         params, opt_state = update(
             params,
-            train_rng,
+            next(rng_seq),
             opt_state,
-            train_batch,
+            next(train_ds),
         )
 
         if step % FLAGS.eval_frequency == 0:
-            valid_batch = next(valid_ds)
-            model_out: VAEOutput = model.apply(params, train_rng, valid_batch)
-            val_loss = loss_fn(params, train_rng, valid_batch)
-            trail_loss = loss_fn(params, train_rng, train_batch)
-            mse = jnp.mean((model_out.output - valid_batch) ** 2)
-            logging.info("STEP: %5d; Validation ELBO: %.3f", step, -val_loss)
-            train_metrics.append(TrainMetrics(-val_loss, -trail_loss, mse, step))
-
-
-        if step % FLAGS.plot_freq == 0:
-            model_out: VAEOutput = model.apply(params, train_rng, COMPARISON_BATCH)
-            plot_comparision(X, COMPARISON_BATCH, model_out.output, title=f"Step{step}")
-
-    plot_train_metrics(train_metrics)
-
-def plot_comparision(x, ytrues, ypreds, title=""):
-    fig, ax = plt.subplots()
-    for i in range(5):
-        ax.plot(x, ytrues[i], color="tab:orange", lw=2, alpha=0.9)
-        ax.plot(x, ypreds[i], color="tab:orange", ls='--')
-    plt.title(title)
-    plt.savefig(f"{title}.png")
-
-
-def plot_batch(x, batch: Batch, ax=None, col="tab:blue", label='batch'):
-    if ax is None:
-        fig, ax = plt.subplots()
-
-    qtls = jnp.quantile(batch, q=np.array([0.05, 0.95]), axis=0)
-    ax.fill_between(x, qtls[0].flatten(), qtls[1].flatten(), alpha=0.5, color=col)
-    ax.plot(x, jnp.mean(batch, axis=0), label=label, color=col)
-    # 5 random samples from the batch
-    for i in range(5):
-        ax.plot(x, batch[i], color=col, alpha=0.1)
-
-
-
-def plot_train_metrics(train_metrics:List[TrainMetrics]):
-    epochs = [m.epoch for m in train_metrics]
-    val_losses = [m.val_loss for m in train_metrics]
-    train_losses = [m.train_loss for m in train_metrics]
-    mse = [m.mse for m in train_metrics]
-
-    plt.figure()
-    plt.plot(epochs, mse, label="MSE")
-    plt.plot(epochs, train_losses, label="Train Loss")
-    plt.plot(epochs, val_losses, label="Validation Loss")
-    plt.xlabel("Epoch")
-    plt.ylabel("Metric")
-    plt.legend()
-    plt.savefig("vae_losses.png")
+            val_loss = loss_fn(params, next(rng_seq), next(valid_ds))
+            print("STEP: %5d; Validation ELBO: %.3f", step, -val_loss)
 
 
 if __name__ == "__main__":
-    app.run(main)
+    main()

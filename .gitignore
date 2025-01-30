@@ -7,9 +7,10 @@ __pycache__/
 *.so
 .idea
 *.png
+tests/data
 
 *_version.py
-
+*.DS_Store
 # Distribution / packaging
 .Python
 build/
