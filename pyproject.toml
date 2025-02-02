@@ -23,12 +23,15 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
 ]
 dependencies = [
-    "numpy",
-    "jax",
-    "optax",
-    "dm-haiku",
-    "tinygp",
-    "matplotlib"
+    "absl-py==1.4.0",
+    "flax==0.8.4",
+    "numpy==1.23.5",
+    "optax==0.1.5",
+    "Pillow==10.2.0",
+    "tensorflow==2.12.0",
+    "tensorflow-datasets==4.9.2",
+    "matplotlib",
+    "clu"
 ]
 
 [project.optional-dependencies]
