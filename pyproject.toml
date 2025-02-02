@@ -24,6 +24,7 @@ classifiers = [
 ]
 dependencies = [
     "absl-py==1.4.0",
+    "ml-collections",
     "flax==0.8.4",
     "numpy==1.23.5",
     "optax==0.1.5",
