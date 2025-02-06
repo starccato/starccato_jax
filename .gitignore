@@ -2,13 +2,13 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+*.npz
 # C extensions
 *.so
 .idea
 *.png
 tests/data
-
+MODEL
 *_version.py
 *.DS_Store
 # Distribution / packaging

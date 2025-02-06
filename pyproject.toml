@@ -26,7 +26,8 @@ dependencies = [
     "jax",
     "flax",
     "numpy",
-    "orbax-checkpoint",
+    "matplotlib",
+    "pandas"
 ]
 
 [project.optional-dependencies]
