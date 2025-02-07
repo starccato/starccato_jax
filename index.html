@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>VAE+LnZ estimation &#8212; Starccato-JAX</title>
+    <title>VAE+PE &#8212; Starccato-JAX</title>
   
   
   
@@ -156,7 +156,7 @@ const thebe_selector_output = ".output, .cell_output"
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1 current active">
                 <a class="reference internal" href="#">
-                    VAE+LnZ estimation
+                    VAE+PE
                 </a>
             </li>
         </ul>
@@ -331,7 +331,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
 </div></div>
       
     </div>
@@ -342,11 +344,21 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>VAE+LnZ estimation</h1>
+    <h1>VAE+PE</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#train-vae">Train VAE</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mcmc-on-one-validation-dataset">MCMC on one validation dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exploring-better-number-of-z">Exploring better number of Z</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -356,22 +368,40 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="vae-lnz-estimation">
-<h1>VAE+LnZ estimation<a class="headerlink" href="#vae-lnz-estimation" title="Permalink to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="vae-pe">
+<h1>VAE+PE<a class="headerlink" href="#vae-pe" title="Permalink to this heading">#</a></h1>
+<section id="train-vae">
+<h2>Train VAE<a class="headerlink" href="#train-vae" title="Permalink to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span> 
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="n">HERE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-<span class="n">model_savedir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_out&quot;</span> 
+<span class="n">model_savedir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_out&quot;</span>
 
 <span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mf">2.5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">train_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">train_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">);</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_savedir</span><span class="si">}</span><span class="s2">/training_data.png&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -382,7 +412,9 @@ document.write(`
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span>
 
-<span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">)</span>
+<span class="n">LATENT_DIM</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="n">LATENT_DIM</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -403,9 +435,13 @@ document.write(`
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
 
-<span class="n">generated_signal</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="o">*</span><span class="n">load_model</span><span class="p">(</span><span class="n">model_savedir</span><span class="p">),</span> <span class="n">rng_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">generated_signal</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:orange&#39;</span><span class="p">)</span>
+<span class="n">zs</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">LATENT_DIM</span><span class="p">))</span>
+
+<span class="n">generated_signal</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="o">*</span><span class="n">load_model</span><span class="p">(</span><span class="n">model_savedir</span><span class="p">),</span> <span class="n">z</span><span class="o">=</span><span class="n">zs</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">generated_signal</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:orange&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -414,12 +450,333 @@ document.write(`
   warnings.warn(
 </pre></div>
 </div>
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D at 0x11458f510&gt;]
+<img alt="_images/1fdbcbd38b2d61a91a48f226d1aa1a3d196e083888df6435bb2dac92b019231c.png" src="_images/1fdbcbd38b2d61a91a48f226d1aa1a3d196e083888df6435bb2dac92b019231c.png" />
+</div>
+</div>
+</section>
+<section id="mcmc-on-one-validation-dataset">
+<h2>MCMC on one validation dataset<a class="headerlink" href="#mcmc-on-one-validation-dataset" title="Permalink to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.sampler</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_latent_vars_given_data</span>
+
+<span class="n">mcmc_out</span> <span class="o">=</span> <span class="n">sample_latent_vars_given_data</span><span class="p">(</span><span class="n">val_data</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">model_savedir</span><span class="p">,</span> <span class="n">rng_int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/out_mcmc&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="_images/34068b8e07d722fe0e214847c0689b1472025efc5de44d65f899aa00c37be62d.png" src="_images/34068b8e07d722fe0e214847c0689b1472025efc5de44d65f899aa00c37be62d.png" />
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/avaj0001/Documents/projects/venvs/starccato_jax/lib/python3.11/site-packages/orbax/checkpoint/_src/serialization/type_handlers.py:1175: UserWarning: Couldn&#39;t find sharding info under RestoreArgs. Populating sharding info from sharding file. Please note restoration time will be slightly increased due to reading from file instead of directly from RestoreArgs. Note also that this option is unsafe when restoring on a different topology than the checkpoint was saved with.
+  warnings.warn(
+/Users/avaj0001/Documents/projects/starccato_jax/src/starccato_jax/sampler.py:41: UserWarning: There are not enough devices to run parallel chains: expected 2 but got 1. Chains will be drawn sequentially. If you are running MCMC in CPU, consider using `numpyro.set_host_device_count(2)` at the beginning of your program. You can double-check how many devices are available in your system using `jax.local_device_count()`.
+  mcmc = MCMC(nuts_kernel, num_warmup=500, num_samples=2000, num_chains=2, progress_bar=True)
+sample: 100%|██████████| 2500/2500 [00:07&lt;00:00, 325.15it/s, 15 steps of size 3.81e-01. acc. prob=0.86]
+sample: 100%|██████████| 2500/2500 [00:03&lt;00:00, 733.79it/s, 7 steps of size 4.66e-01. acc. prob=0.84]  
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>        mean     sd  hdi_3%  hdi_97%  mcse_mean  mcse_sd  ess_bulk  ess_tail  \
+z[0]   0.665  0.255   0.167    1.000      0.004    0.003    4032.0    2538.0   
+z[1]   0.691  0.255   0.191    1.000      0.004    0.003    3499.0    2218.0   
+z[2]   0.371  0.257   0.001    0.836      0.004    0.003    3778.0    2524.0   
+z[3]   0.937  0.064   0.821    1.000      0.001    0.001    4269.0    1812.0   
+z[4]   0.930  0.063   0.813    1.000      0.001    0.001    3241.0    1865.0   
+z[5]   0.245  0.215   0.000    0.671      0.003    0.003    3919.0    1991.0   
+z[6]   0.232  0.208   0.000    0.634      0.004    0.004    3176.0    1761.0   
+z[7]   0.513  0.285   0.061    0.994      0.004    0.003    4266.0    1838.0   
+z[8]   0.397  0.282   0.001    0.905      0.005    0.004    4029.0    2473.0   
+z[9]   0.333  0.259   0.000    0.823      0.004    0.004    3750.0    2122.0   
+z[10]  0.246  0.208   0.000    0.653      0.003    0.003    3696.0    2307.0   
+z[11]  0.188  0.173   0.000    0.517      0.003    0.002    4603.0    2601.0   
+z[12]  0.950  0.049   0.860    1.000      0.001    0.000    4221.0    2303.0   
+z[13]  0.191  0.177   0.000    0.539      0.003    0.003    3562.0    2323.0   
+z[14]  0.012  0.012   0.000    0.036      0.000    0.000    2634.0    1522.0   
+z[15]  0.268  0.228   0.000    0.708      0.003    0.003    4904.0    2494.0   
+z[16]  0.833  0.168   0.513    1.000      0.003    0.002    3659.0    1990.0   
+z[17]  0.915  0.084   0.763    1.000      0.001    0.001    3760.0    2229.0   
+z[18]  0.134  0.139   0.000    0.388      0.002    0.002    3613.0    1856.0   
+z[19]  0.050  0.050   0.000    0.138      0.001    0.001    4933.0    2166.0   
+
+       r_hat  
+z[0]     1.0  
+z[1]     1.0  
+z[2]     1.0  
+z[3]     1.0  
+z[4]     1.0  
+z[5]     1.0  
+z[6]     1.0  
+z[7]     1.0  
+z[8]     1.0  
+z[9]     1.0  
+z[10]    1.0  
+z[11]    1.0  
+z[12]    1.0  
+z[13]    1.0  
+z[14]    1.0  
+z[15]    1.0  
+z[16]    1.0  
+z[17]    1.0  
+z[18]    1.0  
+z[19]    1.0  
+</pre></div>
+</div>
+<img alt="_images/8545d0b38f872a2b4ed3563c75b9253a4750973e82661f336cf463be5b878380.png" src="_images/8545d0b38f872a2b4ed3563c75b9253a4750973e82661f336cf463be5b878380.png" />
 </div>
 </div>
+<p>It’s always a good idea to check the convergence of your MCMC sampler, and we’ll use ArviZ to do that here, looking at the Gelman–Rubin (r_hat) statistic, and the effective sample sizes (e.g. ess_bulk):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">arviz</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">az</span>
+
+<span class="n">inf_data</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">from_numpyro</span><span class="p">(</span><span class="n">mcmc_out</span><span class="p">)</span>
+<span class="n">az</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">inf_data</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>z[0]</th>
+      <td>0.132</td>
+      <td>0.130</td>
+      <td>0.000</td>
+      <td>0.380</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2076.0</td>
+      <td>2045.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[1]</th>
+      <td>0.157</td>
+      <td>0.125</td>
+      <td>0.001</td>
+      <td>0.385</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>2669.0</td>
+      <td>2001.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[2]</th>
+      <td>0.285</td>
+      <td>0.194</td>
+      <td>0.000</td>
+      <td>0.630</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>1891.0</td>
+      <td>1864.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[3]</th>
+      <td>0.305</td>
+      <td>0.213</td>
+      <td>0.000</td>
+      <td>0.693</td>
+      <td>0.005</td>
+      <td>0.003</td>
+      <td>1987.0</td>
+      <td>1930.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[4]</th>
+      <td>0.081</td>
+      <td>0.102</td>
+      <td>0.000</td>
+      <td>0.271</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>2088.0</td>
+      <td>2271.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[5]</th>
+      <td>0.229</td>
+      <td>0.166</td>
+      <td>0.000</td>
+      <td>0.519</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2247.0</td>
+      <td>2025.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[6]</th>
+      <td>0.173</td>
+      <td>0.156</td>
+      <td>0.000</td>
+      <td>0.467</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2330.0</td>
+      <td>1973.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[7]</th>
+      <td>0.219</td>
+      <td>0.137</td>
+      <td>0.001</td>
+      <td>0.454</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>2785.0</td>
+      <td>1603.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[8]</th>
+      <td>0.227</td>
+      <td>0.153</td>
+      <td>0.000</td>
+      <td>0.497</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2085.0</td>
+      <td>2026.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[9]</th>
+      <td>0.091</td>
+      <td>0.082</td>
+      <td>0.000</td>
+      <td>0.242</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3014.0</td>
+      <td>2035.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[10]</th>
+      <td>0.433</td>
+      <td>0.254</td>
+      <td>0.000</td>
+      <td>0.874</td>
+      <td>0.005</td>
+      <td>0.004</td>
+      <td>2478.0</td>
+      <td>1577.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[11]</th>
+      <td>0.833</td>
+      <td>0.145</td>
+      <td>0.557</td>
+      <td>1.000</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>2049.0</td>
+      <td>1883.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Trace</p></td>
+<td><p><img alt="trace_plot" src="_images/trace_plot.png" /></p></td>
+</tr>
+<tr class="row-odd"><td><p>Corner</p></td>
+<td><p><img alt="corner_plot" src="_images/corner_plot.png" /></p></td>
+</tr>
+<tr class="row-even"><td><p>CI</p></td>
+<td><p><img alt="ci_plot" src="_images/ci_plot.png" /></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exploring-better-number-of-z">
+<h2>Exploring better number of Z<a class="headerlink" href="#exploring-better-number-of-z" title="Permalink to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span>
+
+<span class="k">for</span> <span class="n">z_size</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">]:</span>
+    <span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="n">z_size</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+              <span class="n">save_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_exploration/model_z</span><span class="si">{</span><span class="n">z_size</span><span class="si">}</span><span class="s2">&quot;</span>
+              <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">z_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+
+
+<span class="n">train_losses</span><span class="p">,</span> <span class="n">val_losses</span>  <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">z_size</span> <span class="ow">in</span> <span class="n">z_sizes</span><span class="p">:</span>
+    <span class="c1"># read the losses</span>
+    <span class="n">loss_fpath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_exploration/model_z</span><span class="si">{</span><span class="n">z_size</span><span class="si">}</span><span class="s2">/losses.txt&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">loss_fpath</span><span class="p">)</span>
+    <span class="n">train_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">val_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+
+
+<span class="c1">## PLOT</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z_sizes</span><span class="p">,</span> <span class="n">train_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Train Loss&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z_sizes</span><span class="p">,</span> <span class="n">val_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Val Loss&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Latent Dimension&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Loss&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Loss at 200 epochs&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x1327c2c90&gt;
+</pre></div>
+</div>
+<img alt="_images/bb0e1bbd466b177d6ab187e4d4d08632df308ca720c5062eed59ca233efbd16d.png" src="_images/bb0e1bbd466b177d6ab187e4d4d08632df308ca720c5062eed59ca233efbd16d.png" />
+</div>
+</div>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -458,6 +815,22 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#train-vae">Train VAE</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mcmc-on-one-validation-dataset">MCMC on one validation dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exploring-better-number-of-z">Exploring better number of Z</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>
