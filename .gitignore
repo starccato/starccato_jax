@@ -9,6 +9,8 @@ __pycache__/
 *.png
 tests/data
 MODEL
+model_exploration/
+*.txt
 *_version.py
 *.DS_Store
 # Distribution / packaging
