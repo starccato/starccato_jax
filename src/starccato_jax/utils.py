@@ -27,11 +27,22 @@ def plot_reconstructions(state, model, val_data, nrows=3, fname=None):
     axes = axes.flatten()
     for i in range(nsamples):
         axes[i].plot(orig[i], 'k', label='Original')
-        axes[i].plot(reconstructed[i], 'tab:orange', label='Reconstruction')
+        axes[i].plot(reconstructed[i], 'tab:orange', label='Reconstruction', alpha=0.5)
         axes[i].set_axis_off()
-    axes[-1].legend(framon=False, loc='lower right')
+    axes[-1].legend(frameon=False, loc='lower right')
     plt.subplots_adjust(hspace=0, wspace=0)
     if fname is not None:
         plt.savefig(fname)
 
 
+
+def plot_ci(y_obs, y_preds, fname=None):
+    quantiles = np.quantile(y_preds, [0.025, 0.5, 0.975], axis=0)
+    plt.figure(figsize=(8, 4))
+    plt.plot(y_obs, label='Observed', color='black', lw=2, zorder=1)
+    # filled region for 95% CI
+    plt.fill_between(np.arange(len(y_obs)), quantiles[0], quantiles[2], color='tab:orange', alpha=0.3, label='95% CI', lw=0)
+    plt.plot(quantiles[1], label='Median', color='tab:orange', lw=1, ls='--')
+    plt.legend()
+    if fname is not None:
+        plt.savefig(fname)

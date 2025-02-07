@@ -48,7 +48,8 @@ class VAE(nn.Module):
     return recon_x, mean, logvar
 
   def generate(self, z):
-    return nn.sigmoid(self.decoder(z))
+    return self.decoder(z)
+
 
 
 def _reparameterize(rng, mean, logvar):
@@ -56,9 +57,24 @@ def _reparameterize(rng, mean, logvar):
   eps = random.normal(rng, logvar.shape)
   return mean + eps * std
 
-def generate(state_params, latent_dim:int, rng_seed=42):
-  rng = jax.random.PRNGKey(rng_seed)
-  # Generate a random latent vector (batch size 1).
-  z = jax.random.normal(rng, shape=(1, latent_dim))
+def generate(state_params,  latent_dim:int=None, z=None, rng_seed=42, rng=None):
+  if rng is None:
+    rng = jax.random.PRNGKey(rng_seed)
+  if z is None:
+    # Generate a random latent vector (batch size 1).
+    z = jax.random.normal(rng, shape=(1, latent_dim))
   p = {'params': state_params['params']}
   return VAE(latent_dim).apply(p, z, method=VAE.generate)
+
+
+def reconstruct(x, state_params, latent_dim:int, rng_seed:int=42, rng:jax.random.PRNGKey=None, n_reps=1):
+  if rng is None:
+    rng = jax.random.PRNGKey(rng_seed)
+  p = {'params': state_params['params']}
+
+  if n_reps > 1:
+    # duplicate the same x for n_reps times so we have a batch of size n_reps
+    x = jnp.repeat(x[None, :], n_reps, axis=0)
+
+  reconstructed, _, _ = VAE(latent_dim).apply(p, x, rng)
+  return reconstructed

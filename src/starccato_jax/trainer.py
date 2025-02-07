@@ -89,7 +89,9 @@ def train_vae(train_data, val_data, latent_dim, n_epochs=1000, batch_size=32, le
     plot_loss(train_losses, val_losses, fname=f"{save_dir}/loss.png")
     plot_reconstructions(state, model, val_data, fname=f"{save_dir}/reconstructions.png")
     save_model(state, dict(latent_dim=latent_dim), filename=f"{save_dir}/MODEL")
+    _save_losses(train_losses, val_losses, fname=f"{save_dir}/losses.txt")
     print("Training complete.")
+
 
 
 # --------------------------------------------
@@ -113,3 +115,8 @@ def load_model(savedir="/tmp/flax_ckpt/"):
     """ Loads model parameters and config using Orbax CheckpointManager """
     raw_restored = checkpoints.restore_checkpoint(ckpt_dir=f"{savedir}/MODEL", target=None)
     return raw_restored["state"], raw_restored["config"]['latent_dim']
+
+
+def _save_losses(train_loss, valid_loss, fname):
+    np.savetxt(fname, np.array([train_loss, valid_loss]))
+    print(f"Losses saved to {fname}")
