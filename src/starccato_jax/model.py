@@ -16,6 +16,9 @@ class Encoder(nn.Module):
   def __call__(self, x):
     x = nn.Dense(512, name='fc1')(x)
     x = nn.relu(x)
+    x = nn.Dense(256, name='fc2')(x)
+    x = nn.relu(x)
+    x = nn.Dense(64, name='fc3')(x)
     mean_x = nn.Dense(self.latents, name='fc2_mean')(x)
     logvar_x = nn.Dense(self.latents, name='fc2_logvar')(x)
     return mean_x, logvar_x
@@ -26,7 +29,7 @@ class Decoder(nn.Module):
 
   @nn.compact
   def __call__(self, z):
-    z = nn.Dense(512, name='fc1')(z)
+    z = nn.Dense(64, name='fc1')(z)
     z = nn.relu(z)
     z = nn.Dense(256, name='fc2')(z)
     return z
