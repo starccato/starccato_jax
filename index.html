@@ -414,9 +414,24 @@ document.write(`
 
 <span class="n">LATENT_DIM</span> <span class="o">=</span> <span class="mi">20</span>
 
-<span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="n">LATENT_DIM</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">)</span>
+<span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">550</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="n">LATENT_DIM</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Epoch 0: Train Loss = 1.0900, Val Loss = 0.8432
+Epoch 100: Train Loss = 0.5139, Val Loss = 0.4606
+Epoch 200: Train Loss = 0.4879, Val Loss = 0.4394
+Epoch 300: Train Loss = 0.4738, Val Loss = 0.4283
+Epoch 400: Train Loss = 0.4607, Val Loss = 0.4163
+Epoch 500: Train Loss = 0.4843, Val Loss = 0.4429
+Model saved to /Users/avaj0001/Documents/projects/starccato_jax/docs/model_out/MODEL
+Losses saved to /Users/avaj0001/Documents/projects/starccato_jax/docs/model_out/losses.txt
+Training complete.
+</pre></div>
+</div>
+<img alt="_images/963c4e6b4ef234cf0a18084c3d7d0232e96a89e0c3038789645f2dfc01ad64ec.png" src="_images/963c4e6b4ef234cf0a18084c3d7d0232e96a89e0c3038789645f2dfc01ad64ec.png" />
+<img alt="_images/6be87cdeaff25a8f66baed68ff53741ba3ee50ad3e18509d7bead02c07335a0a.png" src="_images/6be87cdeaff25a8f66baed68ff53741ba3ee50ad3e18509d7bead02c07335a0a.png" />
 </div>
 </div>
 <table class="table">
@@ -450,7 +465,7 @@ document.write(`
   warnings.warn(
 </pre></div>
 </div>
-<img alt="_images/1fdbcbd38b2d61a91a48f226d1aa1a3d196e083888df6435bb2dac92b019231c.png" src="_images/1fdbcbd38b2d61a91a48f226d1aa1a3d196e083888df6435bb2dac92b019231c.png" />
+<img alt="_images/0f01e5c9a30fdd8697ef94da5e1fb364d7035581dc18a452798fb5454df4c580.png" src="_images/0f01e5c9a30fdd8697ef94da5e1fb364d7035581dc18a452798fb5454df4c580.png" />
 </div>
 </div>
 </section>
@@ -460,9 +475,65 @@ document.write(`
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.sampler</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_latent_vars_given_data</span>
 
-<span class="n">mcmc_out</span> <span class="o">=</span> <span class="n">sample_latent_vars_given_data</span><span class="p">(</span><span class="n">val_data</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">model_savedir</span><span class="p">,</span> <span class="n">rng_int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/out_mcmc&quot;</span><span class="p">)</span>
+<span class="n">mcmc_out</span> <span class="o">=</span> <span class="n">sample_latent_vars_given_data</span><span class="p">(</span><span class="n">train_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">model_savedir</span><span class="p">,</span> <span class="n">rng_int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/out_mcmc2&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/avaj0001/Documents/projects/venvs/starccato_jax/lib/python3.11/site-packages/orbax/checkpoint/_src/serialization/type_handlers.py:1175: UserWarning: Couldn&#39;t find sharding info under RestoreArgs. Populating sharding info from sharding file. Please note restoration time will be slightly increased due to reading from file instead of directly from RestoreArgs. Note also that this option is unsafe when restoring on a different topology than the checkpoint was saved with.
+  warnings.warn(
+/Users/avaj0001/Documents/projects/starccato_jax/src/starccato_jax/sampler.py:41: UserWarning: There are not enough devices to run parallel chains: expected 2 but got 1. Chains will be drawn sequentially. If you are running MCMC in CPU, consider using `numpyro.set_host_device_count(2)` at the beginning of your program. You can double-check how many devices are available in your system using `jax.local_device_count()`.
+  mcmc = MCMC(nuts_kernel, num_warmup=500, num_samples=2000, num_chains=nchains, progress_bar=True)
+sample: 100%|██████████| 2500/2500 [00:09&lt;00:00, 268.21it/s, 15 steps of size 2.89e-01. acc. prob=0.88]
+sample: 100%|██████████| 2500/2500 [00:03&lt;00:00, 693.77it/s, 15 steps of size 3.27e-01. acc. prob=0.87]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>        mean     sd  hdi_3%  hdi_97%  mcse_mean  mcse_sd  ess_bulk  ess_tail  \
+z[0]   0.470  0.292   0.009    0.946      0.004    0.003    6277.0    2609.0   
+z[1]   0.316  0.254   0.000    0.812      0.004    0.003    5658.0    2543.0   
+z[2]   0.091  0.094   0.000    0.261      0.001    0.001    3254.0    1465.0   
+z[3]   0.249  0.088   0.060    0.391      0.002    0.002    1821.0    1013.0   
+z[4]   0.351  0.269   0.000    0.854      0.004    0.003    5748.0    2373.0   
+z[5]   0.662  0.262   0.164    1.000      0.004    0.003    5173.0    2573.0   
+z[6]   0.609  0.284   0.101    1.000      0.005    0.003    3814.0    2581.0   
+z[7]   0.221  0.208   0.000    0.627      0.003    0.003    5173.0    1979.0   
+z[8]   0.284  0.242   0.000    0.763      0.004    0.003    6131.0    2360.0   
+z[9]   0.748  0.218   0.322    1.000      0.003    0.002    6476.0    2310.0   
+z[10]  0.710  0.242   0.229    1.000      0.004    0.003    4703.0    2315.0   
+z[11]  0.446  0.288   0.000    0.918      0.003    0.003    6349.0    2323.0   
+z[12]  0.569  0.279   0.088    0.997      0.004    0.003    6261.0    2386.0   
+z[13]  0.339  0.263   0.000    0.833      0.004    0.003    5017.0    2260.0   
+z[14]  0.522  0.285   0.073    0.999      0.004    0.003    5076.0    2403.0   
+z[15]  0.744  0.265   0.173    1.000      0.006    0.004    2616.0    2483.0   
+z[16]  0.011  0.012   0.000    0.032      0.000    0.000    4391.0    2033.0   
+z[17]  0.532  0.296   0.058    0.999      0.004    0.003    6233.0    2337.0   
+z[18]  0.509  0.293   0.000    0.942      0.004    0.003    5553.0    1786.0   
+z[19]  0.287  0.236   0.000    0.750      0.003    0.003    6998.0    2459.0   
+
+       r_hat  
+z[0]     1.0  
+z[1]     1.0  
+z[2]     1.0  
+z[3]     1.0  
+z[4]     1.0  
+z[5]     1.0  
+z[6]     1.0  
+z[7]     1.0  
+z[8]     1.0  
+z[9]     1.0  
+z[10]    1.0  
+z[11]    1.0  
+z[12]    1.0  
+z[13]    1.0  
+z[14]    1.0  
+z[15]    1.0  
+z[16]    1.0  
+z[17]    1.0  
+z[18]    1.0  
+z[19]    1.0  
+</pre></div>
+</div>
+<img alt="_images/0fcaa04e04a6e506342dc75309da6dbb96f9bf006794b791e38715df18b2b4c7.png" src="_images/0fcaa04e04a6e506342dc75309da6dbb96f9bf006794b791e38715df18b2b4c7.png" />
 </div>
 </div>
 <p>It’s always a good idea to check the convergence of your MCMC sampler, and we’ll use ArviZ to do that here, looking at the Gelman–Rubin (r_hat) statistic, and the effective sample sizes (e.g. ess_bulk):</p>
@@ -815,6 +886,8 @@ document.write(`
 <img alt="_images/bb0e1bbd466b177d6ab187e4d4d08632df308ca720c5062eed59ca233efbd16d.png" src="_images/bb0e1bbd466b177d6ab187e4d4d08632df308ca720c5062eed59ca233efbd16d.png" />
 </div>
 </div>
+<p>At 500 epochs:</p>
+<p><img alt="" src="_images/loss_vs_z.png" /></p>
 </section>
 </section>
 
