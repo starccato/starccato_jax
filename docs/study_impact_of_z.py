@@ -1,4 +1,4 @@
-from starccato_jax.trainer import train_vae
+from starccato_jax.trainer import train_vae, Config
 from starccato_jax.data import load_data
 from starccato_jax.sampler import sample_latent_vars_given_data
 import glob
@@ -12,21 +12,20 @@ HERE = os.path.dirname(__file__)
 
 
 
-# z_sizes = [8, 12, 16, 20, 24, 28, 32]
-# z_sizes = [24, 28, 32]
-#
-# ## TRAIN
-# train_data, val_data = load_data()
-# for z_size in z_sizes:
-#     train_vae(train_data, val_data, latent_dim=z_size, n_epochs=500,
-#               save_dir=f"{HERE}/model_exploration/model_z{z_size}"
-#               )
-#     sample_latent_vars_given_data(
-#         val_data[0], model_path=f"{HERE}/model_exploration/model_z{z_size}",
-#         outdir=f"{HERE}/model_exploration/model_z{z_size}/mcmc"
-#     )
-
 z_sizes = [8, 12, 16, 20, 24, 28, 32]
+
+## TRAIN
+train_data, val_data = load_data()
+for z_size in z_sizes:
+    config = Config(latent_dim=z_size, epochs=500)
+    train_vae(train_data, val_data, config,
+              save_dir=f"{HERE}/model_exploration/model_z{z_size}"
+              )
+    sample_latent_vars_given_data(
+        val_data[0], model_path=f"{HERE}/model_exploration/model_z{z_size}",
+        outdir=f"{HERE}/model_exploration/model_z{z_size}/mcmc"
+    )
+
 ## GATHER LOSS DATA
 
 train_losses, val_losses  = [], []

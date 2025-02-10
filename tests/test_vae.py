@@ -4,6 +4,7 @@ from starccato_jax.data import load_data
 from starccato_jax.model import generate
 import os
 
+
 def test_train_vae(outdir):
     train_data, val_data = load_data(train_fraction=0.8, clean=True)
     assert train_data.shape == (1411, 256)
