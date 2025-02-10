@@ -15,6 +15,11 @@ Bug Fixes
 
 * fix: minor fixes to the CI (`7da68cc`_)
 
+Chores
+------
+
+* chore(release): 0.0.2 (`5547f3e`_)
+
 Unknown
 -------
 
@@ -47,6 +52,7 @@ Unknown
 * Merge branch 'main' of github.com:starccato/starccato_jax (`5c3207d`_)
 
 .. _7da68cc: https://github.com/starccato/starccato_jax/commit/7da68cc6936527308b88d9eb2dc230b7a0499ac3
+.. _5547f3e: https://github.com/starccato/starccato_jax/commit/5547f3edfbeed96c2a8ba29df50cd03db92106ba
 .. _d63b9ec: https://github.com/starccato/starccato_jax/commit/d63b9ecd1c3db7eea043f1c0d925fc202dd70135
 .. _001f1a9: https://github.com/starccato/starccato_jax/commit/001f1a9e8521bf38dd3f4bcecbbebbc4236783a3
 .. _521bf81: https://github.com/starccato/starccato_jax/commit/521bf81aaa0f5c634ddce12f6a5627cdc08e6a6d
