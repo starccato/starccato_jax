@@ -178,3 +178,5 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 /docs/model_exploration/*/
+/src/starccato_jax/CHANGELOG.rst
+/src/starccato_jax/README.rst
