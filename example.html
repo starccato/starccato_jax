@@ -1,0 +1,1051 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>VAE+PE &#8212; Starccato-JAX</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'example';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="CHANGELOG" href="CHANGELOG.html" />
+    <link rel="prev" title="starccato_jax" href="README.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="README.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">Starccato-JAX</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="README.html">
+                    starccato_jax
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text"> </span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">VAE+PE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CHANGELOG.html">CHANGELOG</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/starccato/starccato_jax" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/starccato/starccato_jax/issues/new?title=Issue%20on%20page%20%2Fexample.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/example.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>VAE+PE</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#train-vae">Train VAE</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mcmc-on-one-validation-dataset">MCMC on one validation dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exploring-better-number-of-z">Exploring better number of Z</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="vae-pe">
+<h1>VAE+PE<a class="headerlink" href="#vae-pe" title="Link to this heading">#</a></h1>
+<section id="train-vae">
+<h2>Train VAE<a class="headerlink" href="#train-vae" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="n">HERE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">model_savedir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_out&quot;</span>
+
+<span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">train_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">);</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_savedir</span><span class="si">}</span><span class="s2">/training_data.png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><img alt="" src="_images/training_data.png" /></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span><span class="p">,</span> <span class="n">Config</span>
+
+<span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
+    <span class="n">latent_dim</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">)</span>
+
+<span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Epoch 0: Train Loss: 1.194e+00, Val Loss: 1.193e+00
+</pre></div>
+</div>
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">30</span><span class="p">],</span> <span class="n">line</span> <span class="mi">9</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span><span class="p">,</span> <span class="n">Config</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span>     <span class="n">latent_dim</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span>     <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span>     <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">0</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="p">)</span>
+<span class="ne">----&gt; </span><span class="mi">9</span> <span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">)</span>
+
+<span class="nn">File ~/Documents/projects/starccato_jax/src/starccato_jax/trainer.py:93,</span> in <span class="ni">train_vae</span><span class="nt">(train_data, val_data, config, save_dir, print_every, plot_every)</span>
+<span class="g g-Whitespace">     </span><span class="mi">91</span> <span class="n">plot_training_metrics</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_dir</span><span class="si">}</span><span class="s2">/loss.png&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">92</span> <span class="n">plot_reconstructions</span><span class="p">(</span><span class="n">model_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_dir</span><span class="si">}</span><span class="s2">/reconstructions.png&quot;</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">93</span> <span class="n">save_model</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">savedir</span><span class="o">=</span><span class="n">save_dir</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">94</span> <span class="c1"># _save_losses(train_losses, val_losses, fname=f&quot;{save_dir}/losses.txt&quot;)</span>
+<span class="g g-Whitespace">     </span><span class="mi">95</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training complete. (time: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s)&quot;</span><span class="p">)</span>
+
+<span class="nn">File ~/Documents/projects/starccato_jax/src/starccato_jax/io.py:45,</span> in <span class="ni">save_model</span><span class="nt">(state, config, train_metrics, savedir)</span>
+<span class="g g-Whitespace">     </span><span class="mi">42</span>     <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">config_json</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">44</span> <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">savedir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">LOSS_FNAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">45</span>     <span class="n">loss_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">asdict</span><span class="p">(</span><span class="n">metrics</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">46</span>     <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;losses&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">loss_json</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">49</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model saved to </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nn">File /usr/local/Cellar/python@3.11/3.11.10/Frameworks/Python.framework/Versions/3.11/lib/python3.11/json/__init__.py:231,</span> in <span class="ni">dumps</span><span class="nt">(obj, skipkeys, ensure_ascii, check_circular, allow_nan, cls, indent, separators, default, sort_keys, **kw)</span>
+<span class="g g-Whitespace">    </span><span class="mi">226</span> <span class="c1"># cached encoder</span>
+<span class="g g-Whitespace">    </span><span class="mi">227</span> <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">skipkeys</span> <span class="ow">and</span> <span class="n">ensure_ascii</span> <span class="ow">and</span>
+<span class="g g-Whitespace">    </span><span class="mi">228</span>     <span class="n">check_circular</span> <span class="ow">and</span> <span class="n">allow_nan</span> <span class="ow">and</span>
+<span class="g g-Whitespace">    </span><span class="mi">229</span>     <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">indent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">separators</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span>
+<span class="g g-Whitespace">    </span><span class="mi">230</span>     <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">sort_keys</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kw</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">231</span>     <span class="k">return</span> <span class="n">_default_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">232</span> <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">233</span>     <span class="bp">cls</span> <span class="o">=</span> <span class="n">JSONEncoder</span>
+
+<span class="nn">File /usr/local/Cellar/python@3.11/3.11.10/Frameworks/Python.framework/Versions/3.11/lib/python3.11/json/encoder.py:200,</span> in <span class="ni">JSONEncoder.encode</span><span class="nt">(self, o)</span>
+<span class="g g-Whitespace">    </span><span class="mi">196</span>         <span class="k">return</span> <span class="n">encode_basestring</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">197</span> <span class="c1"># This doesn&#39;t pass the iterator directly to &#39;&#39;.join() because the</span>
+<span class="g g-Whitespace">    </span><span class="mi">198</span> <span class="c1"># exceptions aren&#39;t as detailed.  The list call should be roughly</span>
+<span class="g g-Whitespace">    </span><span class="mi">199</span> <span class="c1"># equivalent to the PySequence_Fast that &#39;&#39;.join() would do.</span>
+<span class="ne">--&gt; </span><span class="mi">200</span> <span class="n">chunks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterencode</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">_one_shot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">201</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+<span class="g g-Whitespace">    </span><span class="mi">202</span>     <span class="n">chunks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+
+<span class="nn">File /usr/local/Cellar/python@3.11/3.11.10/Frameworks/Python.framework/Versions/3.11/lib/python3.11/json/encoder.py:258,</span> in <span class="ni">JSONEncoder.iterencode</span><span class="nt">(self, o, _one_shot)</span>
+<span class="g g-Whitespace">    </span><span class="mi">253</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">254</span>     <span class="n">_iterencode</span> <span class="o">=</span> <span class="n">_make_iterencode</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">255</span>         <span class="n">markers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">_encoder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span><span class="p">,</span> <span class="n">floatstr</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">256</span>         <span class="bp">self</span><span class="o">.</span><span class="n">key_separator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_separator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_keys</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">257</span>         <span class="bp">self</span><span class="o">.</span><span class="n">skipkeys</span><span class="p">,</span> <span class="n">_one_shot</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">258</span> <span class="k">return</span> <span class="n">_iterencode</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="nn">File /usr/local/Cellar/python@3.11/3.11.10/Frameworks/Python.framework/Versions/3.11/lib/python3.11/json/encoder.py:180,</span> in <span class="ni">JSONEncoder.default</span><span class="nt">(self, o)</span>
+<span class="g g-Whitespace">    </span><span class="mi">161</span> <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">162</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;Implement this method in a subclass such that it returns</span>
+<span class="g g-Whitespace">    </span><span class="mi">163</span><span class="sd">     a serializable object for ``o``, or calls the base implementation</span>
+<span class="g g-Whitespace">    </span><span class="mi">164</span><span class="sd">     (to raise a ``TypeError``).</span>
+<span class="sd">   (...)</span>
+<span class="g g-Whitespace">    </span><span class="mi">178</span><span class="sd"> </span>
+<span class="g g-Whitespace">    </span><span class="mi">179</span><span class="sd">     &quot;&quot;&quot;</span>
+<span class="ne">--&gt; </span><span class="mi">180</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Object of type </span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> &#39;</span>
+<span class="g g-Whitespace">    </span><span class="mi">181</span>                     <span class="sa">f</span><span class="s1">&#39;is not JSON serializable&#39;</span><span class="p">)</span>
+
+<span class="ne">TypeError</span>: Object of type ArrayImpl is not JSON serializable
+</pre></div>
+</div>
+<img alt="_images/9bd9b0417f09de783c7ce10247060bf3014db64191cacc83463f136224af4262.png" src="_images/9bd9b0417f09de783c7ce10247060bf3014db64191cacc83463f136224af4262.png" />
+<img alt="_images/ed2760217c064837ac11654ffb452ee1b8eda73aad05553767cea23919526ed5.png" src="_images/ed2760217c064837ac11654ffb452ee1b8eda73aad05553767cea23919526ed5.png" />
+<img alt="_images/61636c89125601f03767ca87f00ab7c32c20a69d1105eefffae03c49ab76c299.png" src="_images/61636c89125601f03767ca87f00ab7c32c20a69d1105eefffae03c49ab76c299.png" />
+<img alt="_images/d83d69dcfc639728a538bfe1c118a8bb81f21ddca377d25722ba82fab05c4494.png" src="_images/d83d69dcfc639728a538bfe1c118a8bb81f21ddca377d25722ba82fab05c4494.png" />
+</div>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Loss</p></th>
+<th class="head"><p>Reconstruction</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><img alt="loss" src="_images/loss.png" /></p></td>
+<td><p><img alt="reconstructions" src="_images/reconstructions.png" /></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_data</span><span class="p">)</span>
+<span class="n">zs</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">latent_dim</span><span class="p">))</span>
+<span class="n">model_data</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="n">model_savedir</span><span class="p">)</span>
+
+<span class="n">generated_signal</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="n">model_data</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">zs</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">kwgs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">generated_signal</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:orange&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwgs</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">val_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwgs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/033e7da6bf69008764c78b1aabc88a55e9138c81e05c96816ec67d7a7a841f82.png" src="_images/033e7da6bf69008764c78b1aabc88a55e9138c81e05c96816ec67d7a7a841f82.png" />
+</div>
+</div>
+</section>
+<section id="mcmc-on-one-validation-dataset">
+<h2>MCMC on one validation dataset<a class="headerlink" href="#mcmc-on-one-validation-dataset" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.sampler</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_latent_vars_given_data</span>
+
+<span class="n">mcmc_out</span> <span class="o">=</span> <span class="n">sample_latent_vars_given_data</span><span class="p">(</span><span class="n">train_data</span><span class="p">[</span><span class="mi">54</span><span class="p">],</span> <span class="n">model_savedir</span><span class="p">,</span> <span class="n">rng_int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/out_mcmc2&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/avaj0001/Documents/projects/starccato_jax/src/starccato_jax/sampler.py:40: UserWarning: There are not enough devices to run parallel chains: expected 2 but got 1. Chains will be drawn sequentially. If you are running MCMC in CPU, consider using `numpyro.set_host_device_count(2)` at the beginning of your program. You can double-check how many devices are available in your system using `jax.local_device_count()`.
+  mcmc = MCMC(nuts_kernel, num_warmup=500, num_samples=2000, num_chains=nchains, progress_bar=True)
+sample: 100%|██████████| 2500/2500 [00:05&lt;00:00, 430.70it/s, 31 steps of size 8.65e-02. acc. prob=0.80]
+sample: 100%|██████████| 2500/2500 [00:03&lt;00:00, 725.51it/s, 31 steps of size 9.18e-02. acc. prob=0.81]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>       mean     sd  hdi_3%  hdi_97%  mcse_mean  mcse_sd  ess_bulk  ess_tail  \
+z[0]  0.732  0.233   0.258    1.000      0.005    0.004    1782.0    1784.0   
+z[1]  0.722  0.225   0.296    1.000      0.005    0.004    1898.0    2120.0   
+z[2]  0.492  0.280   0.001    0.932      0.006    0.005    1818.0    1695.0   
+z[3]  0.342  0.255   0.001    0.818      0.006    0.005    1864.0    1748.0   
+z[4]  0.070  0.073   0.000    0.205      0.001    0.001    1853.0    1544.0   
+z[5]  0.424  0.265   0.000    0.886      0.006    0.005    1879.0    1963.0   
+z[6]  0.656  0.229   0.228    0.999      0.006    0.004    1635.0    1780.0   
+z[7]  0.882  0.117   0.664    1.000      0.002    0.002    2249.0    1867.0   
+
+      r_hat  
+z[0]    1.0  
+z[1]    1.0  
+z[2]    1.0  
+z[3]    1.0  
+z[4]    1.0  
+z[5]    1.0  
+z[6]    1.0  
+z[7]    1.0  
+</pre></div>
+</div>
+<img alt="_images/3579d2c584fedff3160092a82b1082eaa5bc58133ce6dbec75e3eba56a0cf11b.png" src="_images/3579d2c584fedff3160092a82b1082eaa5bc58133ce6dbec75e3eba56a0cf11b.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">arviz</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">az</span>
+
+<span class="n">inf_data</span> <span class="o">=</span> <span class="n">az</span><span class="o">.</span><span class="n">from_numpyro</span><span class="p">(</span><span class="n">mcmc_out</span><span class="p">)</span>
+<span class="n">az</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">inf_data</span><span class="p">,</span> <span class="n">var_names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>hdi_3%</th>
+      <th>hdi_97%</th>
+      <th>mcse_mean</th>
+      <th>mcse_sd</th>
+      <th>ess_bulk</th>
+      <th>ess_tail</th>
+      <th>r_hat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>z[0]</th>
+      <td>0.665</td>
+      <td>0.255</td>
+      <td>0.167</td>
+      <td>1.000</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>4032.0</td>
+      <td>2538.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[1]</th>
+      <td>0.691</td>
+      <td>0.255</td>
+      <td>0.191</td>
+      <td>1.000</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>3499.0</td>
+      <td>2218.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[2]</th>
+      <td>0.371</td>
+      <td>0.257</td>
+      <td>0.001</td>
+      <td>0.836</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>3778.0</td>
+      <td>2524.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[3]</th>
+      <td>0.937</td>
+      <td>0.064</td>
+      <td>0.821</td>
+      <td>1.000</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4269.0</td>
+      <td>1812.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[4]</th>
+      <td>0.930</td>
+      <td>0.063</td>
+      <td>0.813</td>
+      <td>1.000</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3241.0</td>
+      <td>1865.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[5]</th>
+      <td>0.245</td>
+      <td>0.215</td>
+      <td>0.000</td>
+      <td>0.671</td>
+      <td>0.003</td>
+      <td>0.003</td>
+      <td>3919.0</td>
+      <td>1991.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[6]</th>
+      <td>0.232</td>
+      <td>0.208</td>
+      <td>0.000</td>
+      <td>0.634</td>
+      <td>0.004</td>
+      <td>0.004</td>
+      <td>3176.0</td>
+      <td>1761.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[7]</th>
+      <td>0.513</td>
+      <td>0.285</td>
+      <td>0.061</td>
+      <td>0.994</td>
+      <td>0.004</td>
+      <td>0.003</td>
+      <td>4266.0</td>
+      <td>1838.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[8]</th>
+      <td>0.397</td>
+      <td>0.282</td>
+      <td>0.001</td>
+      <td>0.905</td>
+      <td>0.005</td>
+      <td>0.004</td>
+      <td>4029.0</td>
+      <td>2473.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[9]</th>
+      <td>0.333</td>
+      <td>0.259</td>
+      <td>0.000</td>
+      <td>0.823</td>
+      <td>0.004</td>
+      <td>0.004</td>
+      <td>3750.0</td>
+      <td>2122.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[10]</th>
+      <td>0.246</td>
+      <td>0.208</td>
+      <td>0.000</td>
+      <td>0.653</td>
+      <td>0.003</td>
+      <td>0.003</td>
+      <td>3696.0</td>
+      <td>2307.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[11]</th>
+      <td>0.188</td>
+      <td>0.173</td>
+      <td>0.000</td>
+      <td>0.517</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>4603.0</td>
+      <td>2601.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[12]</th>
+      <td>0.950</td>
+      <td>0.049</td>
+      <td>0.860</td>
+      <td>1.000</td>
+      <td>0.001</td>
+      <td>0.000</td>
+      <td>4221.0</td>
+      <td>2303.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[13]</th>
+      <td>0.191</td>
+      <td>0.177</td>
+      <td>0.000</td>
+      <td>0.539</td>
+      <td>0.003</td>
+      <td>0.003</td>
+      <td>3562.0</td>
+      <td>2323.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[14]</th>
+      <td>0.012</td>
+      <td>0.012</td>
+      <td>0.000</td>
+      <td>0.036</td>
+      <td>0.000</td>
+      <td>0.000</td>
+      <td>2634.0</td>
+      <td>1522.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[15]</th>
+      <td>0.268</td>
+      <td>0.228</td>
+      <td>0.000</td>
+      <td>0.708</td>
+      <td>0.003</td>
+      <td>0.003</td>
+      <td>4904.0</td>
+      <td>2494.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[16]</th>
+      <td>0.833</td>
+      <td>0.168</td>
+      <td>0.513</td>
+      <td>1.000</td>
+      <td>0.003</td>
+      <td>0.002</td>
+      <td>3659.0</td>
+      <td>1990.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[17]</th>
+      <td>0.915</td>
+      <td>0.084</td>
+      <td>0.763</td>
+      <td>1.000</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>3760.0</td>
+      <td>2229.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[18]</th>
+      <td>0.134</td>
+      <td>0.139</td>
+      <td>0.000</td>
+      <td>0.388</td>
+      <td>0.002</td>
+      <td>0.002</td>
+      <td>3613.0</td>
+      <td>1856.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>z[19]</th>
+      <td>0.050</td>
+      <td>0.050</td>
+      <td>0.000</td>
+      <td>0.138</td>
+      <td>0.001</td>
+      <td>0.001</td>
+      <td>4933.0</td>
+      <td>2166.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head"><p></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Trace</p></td>
+<td><p><img alt="trace_plot" src="_images/trace_plot.png" /></p></td>
+</tr>
+<tr class="row-odd"><td><p>Corner</p></td>
+<td><p><img alt="corner_plot" src="_images/corner_plot.png" /></p></td>
+</tr>
+<tr class="row-even"><td><p>CI</p></td>
+<td><p><img alt="ci_plot" src="_images/ci_plot.png" /></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="exploring-better-number-of-z">
+<h2>Exploring better number of Z<a class="headerlink" href="#exploring-better-number-of-z" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span><span class="p">,</span> <span class="n">Config</span>
+
+<span class="k">for</span> <span class="n">z_size</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">]:</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="n">z_size</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span>
+              <span class="n">save_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_exploration/model_z</span><span class="si">{</span><span class="n">z_size</span><span class="si">}</span><span class="s2">&quot;</span>
+              <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">z_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+
+<span class="n">train_losses</span><span class="p">,</span> <span class="n">val_losses</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">z_size</span> <span class="ow">in</span> <span class="n">z_sizes</span><span class="p">:</span>
+    <span class="c1"># read the losses</span>
+    <span class="n">loss_fpath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_exploration/model_z</span><span class="si">{</span><span class="n">z_size</span><span class="si">}</span><span class="s2">/losses.txt&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">loss_fpath</span><span class="p">)</span>
+    <span class="n">train_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">val_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+<span class="c1">## PLOT</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z_sizes</span><span class="p">,</span> <span class="n">train_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Train Loss&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z_sizes</span><span class="p">,</span> <span class="n">val_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Val Loss&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Latent Dimension&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Loss&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>At 500 epochs:</p>
+<p><img alt="" src="_images/loss_vs_z.png" /></p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="README.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">starccato_jax</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="CHANGELOG.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">CHANGELOG</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#train-vae">Train VAE</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mcmc-on-one-validation-dataset">MCMC on one validation dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exploring-better-number-of-z">Exploring better number of Z</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By starccato devs
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
