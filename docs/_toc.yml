@@ -2,12 +2,12 @@
 # Learn more at https://jupyterbook.org/customize/toc.html
 
 format: jb-book
-root: index.ipynb
-#parts:
-#- caption: " "
-#  chapters:
-#  - file: api.rst
-#  - file: example.ipynb
+root: README.rst
+parts:
+- caption: " "
+  chapters:
+  - file: example.ipynb
+  - file: CHANGELOG.rst
 #- caption:  Case Studies
 #  chapters:
 #  - url: https://www.youtube.com/watch?v=dQw4w9WgXcQ&themeRefresh=1

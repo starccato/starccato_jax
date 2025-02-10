@@ -25,7 +25,9 @@ jobs:
           cache: 'pip' # Enable caching for pip dependencies
 
       - run: python -m pip install -e .[dev]
-      - run: jupyter-book build docs/
+      - run: |
+          cp *.rst docs/
+          jupyter-book build docs/
 
       # Push the book's HTML to github-pages
       - name: GitHub Pages action
