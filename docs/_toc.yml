@@ -7,8 +7,9 @@ parts:
 - caption: " "
   chapters:
   - file: example.ipynb
+  - file: impact_of_zs.ipynb
+- caption: "------"
   - file: CHANGELOG.rst
-#- caption:  Case Studies
 #  chapters:
 #  - url: https://www.youtube.com/watch?v=dQw4w9WgXcQ&themeRefresh=1
 #    title: LISA white-dwarf

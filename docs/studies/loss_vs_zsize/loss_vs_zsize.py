@@ -6,11 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import os
+
 HERE = os.path.dirname(__file__)
-
-
-
-
 
 z_sizes = [8, 12, 16, 20, 24, 28, 32]
 
@@ -25,7 +22,6 @@ for z_size in z_sizes:
         val_data[0], model_path=f"{HERE}/model_exploration/model_z{z_size}",
         outdir=f"{HERE}/model_exploration/model_z{z_size}/mcmc"
     )
-
 
 #
 # ## GATHER LOSS DATA
@@ -48,4 +44,3 @@ for z_size in z_sizes:
 # plt.ylabel('Loss')
 # plt.legend()
 # plt.savefig(f"{HERE}/model_exploration/loss_vs_z.png")
-

@@ -1,7 +1,7 @@
 .. _changelog:
 
 =========
-CHANGELOG
+Changelog
 =========
 
 
