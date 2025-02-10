@@ -9,7 +9,7 @@ execute:
 
 
 repository:
-  url: https://github.com/starccato/starccato-jax
+  url: https://github.com/starccato/starccato_jax
   path_to_book: docs
   branch: main
 
