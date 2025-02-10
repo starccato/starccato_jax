@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "starccato_jax"
 dynamic = ["version"] # scm versioning (using tags)
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 description = "JAX-VAE stellar core collapse waveform"
 readme = "README.rst"
 authors = [
@@ -27,7 +27,8 @@ dependencies = [
     "flax",
     "numpy",
     "matplotlib",
-    "pandas"
+    "pandas",
+    "h5py"
 ]
 
 [project.optional-dependencies]
