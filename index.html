@@ -410,28 +410,92 @@ document.write(`
 <p><img alt="" src="_images/training_data.png" /></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span><span class="p">,</span> <span class="n">Config</span>
 
-<span class="n">LATENT_DIM</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
+    <span class="n">latent_dim</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">0</span>
+<span class="p">)</span>
 
-<span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">550</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="n">LATENT_DIM</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">)</span>
+<span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Epoch 0: Train Loss = 1.0900, Val Loss = 0.8432
-Epoch 100: Train Loss = 0.5139, Val Loss = 0.4606
-Epoch 200: Train Loss = 0.4879, Val Loss = 0.4394
-Epoch 300: Train Loss = 0.4738, Val Loss = 0.4283
-Epoch 400: Train Loss = 0.4607, Val Loss = 0.4163
-Epoch 500: Train Loss = 0.4843, Val Loss = 0.4429
-Model saved to /Users/avaj0001/Documents/projects/starccato_jax/docs/model_out/MODEL
-Losses saved to /Users/avaj0001/Documents/projects/starccato_jax/docs/model_out/losses.txt
-Training complete.
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Epoch 0: Train Loss: 1.194e+00, Val Loss: 1.193e+00
 </pre></div>
 </div>
-<img alt="_images/963c4e6b4ef234cf0a18084c3d7d0232e96a89e0c3038789645f2dfc01ad64ec.png" src="_images/963c4e6b4ef234cf0a18084c3d7d0232e96a89e0c3038789645f2dfc01ad64ec.png" />
-<img alt="_images/6be87cdeaff25a8f66baed68ff53741ba3ee50ad3e18509d7bead02c07335a0a.png" src="_images/6be87cdeaff25a8f66baed68ff53741ba3ee50ad3e18509d7bead02c07335a0a.png" />
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">TypeError</span><span class="g g-Whitespace">                                 </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">30</span><span class="p">],</span> <span class="n">line</span> <span class="mi">9</span>
+<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span><span class="p">,</span> <span class="n">Config</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
+<span class="g g-Whitespace">      </span><span class="mi">4</span>     <span class="n">latent_dim</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<span class="g g-Whitespace">      </span><span class="mi">5</span>     <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span>     <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">0</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span> <span class="p">)</span>
+<span class="ne">----&gt; </span><span class="mi">9</span> <span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">)</span>
+
+<span class="nn">File ~/Documents/projects/starccato_jax/src/starccato_jax/trainer.py:93,</span> in <span class="ni">train_vae</span><span class="nt">(train_data, val_data, config, save_dir, print_every, plot_every)</span>
+<span class="g g-Whitespace">     </span><span class="mi">91</span> <span class="n">plot_training_metrics</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_dir</span><span class="si">}</span><span class="s2">/loss.png&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">92</span> <span class="n">plot_reconstructions</span><span class="p">(</span><span class="n">model_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_dir</span><span class="si">}</span><span class="s2">/reconstructions.png&quot;</span><span class="p">)</span>
+<span class="ne">---&gt; </span><span class="mi">93</span> <span class="n">save_model</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">savedir</span><span class="o">=</span><span class="n">save_dir</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">94</span> <span class="c1"># _save_losses(train_losses, val_losses, fname=f&quot;{save_dir}/losses.txt&quot;)</span>
+<span class="g g-Whitespace">     </span><span class="mi">95</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training complete. (time: </span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">t0</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">s)&quot;</span><span class="p">)</span>
+
+<span class="nn">File ~/Documents/projects/starccato_jax/src/starccato_jax/io.py:45,</span> in <span class="ni">save_model</span><span class="nt">(state, config, train_metrics, savedir)</span>
+<span class="g g-Whitespace">     </span><span class="mi">42</span>     <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">config_json</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">44</span> <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">savedir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">LOSS_FNAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="ne">---&gt; </span><span class="mi">45</span>     <span class="n">loss_json</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">asdict</span><span class="p">(</span><span class="n">metrics</span><span class="p">))</span>
+<span class="g g-Whitespace">     </span><span class="mi">46</span>     <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;losses&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">loss_json</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">49</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model saved to </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nn">File /usr/local/Cellar/python@3.11/3.11.10/Frameworks/Python.framework/Versions/3.11/lib/python3.11/json/__init__.py:231,</span> in <span class="ni">dumps</span><span class="nt">(obj, skipkeys, ensure_ascii, check_circular, allow_nan, cls, indent, separators, default, sort_keys, **kw)</span>
+<span class="g g-Whitespace">    </span><span class="mi">226</span> <span class="c1"># cached encoder</span>
+<span class="g g-Whitespace">    </span><span class="mi">227</span> <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">skipkeys</span> <span class="ow">and</span> <span class="n">ensure_ascii</span> <span class="ow">and</span>
+<span class="g g-Whitespace">    </span><span class="mi">228</span>     <span class="n">check_circular</span> <span class="ow">and</span> <span class="n">allow_nan</span> <span class="ow">and</span>
+<span class="g g-Whitespace">    </span><span class="mi">229</span>     <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">indent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">separators</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span>
+<span class="g g-Whitespace">    </span><span class="mi">230</span>     <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">sort_keys</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">kw</span><span class="p">):</span>
+<span class="ne">--&gt; </span><span class="mi">231</span>     <span class="k">return</span> <span class="n">_default_encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">232</span> <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">233</span>     <span class="bp">cls</span> <span class="o">=</span> <span class="n">JSONEncoder</span>
+
+<span class="nn">File /usr/local/Cellar/python@3.11/3.11.10/Frameworks/Python.framework/Versions/3.11/lib/python3.11/json/encoder.py:200,</span> in <span class="ni">JSONEncoder.encode</span><span class="nt">(self, o)</span>
+<span class="g g-Whitespace">    </span><span class="mi">196</span>         <span class="k">return</span> <span class="n">encode_basestring</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">197</span> <span class="c1"># This doesn&#39;t pass the iterator directly to &#39;&#39;.join() because the</span>
+<span class="g g-Whitespace">    </span><span class="mi">198</span> <span class="c1"># exceptions aren&#39;t as detailed.  The list call should be roughly</span>
+<span class="g g-Whitespace">    </span><span class="mi">199</span> <span class="c1"># equivalent to the PySequence_Fast that &#39;&#39;.join() would do.</span>
+<span class="ne">--&gt; </span><span class="mi">200</span> <span class="n">chunks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterencode</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">_one_shot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">201</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+<span class="g g-Whitespace">    </span><span class="mi">202</span>     <span class="n">chunks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+
+<span class="nn">File /usr/local/Cellar/python@3.11/3.11.10/Frameworks/Python.framework/Versions/3.11/lib/python3.11/json/encoder.py:258,</span> in <span class="ni">JSONEncoder.iterencode</span><span class="nt">(self, o, _one_shot)</span>
+<span class="g g-Whitespace">    </span><span class="mi">253</span> <span class="k">else</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">254</span>     <span class="n">_iterencode</span> <span class="o">=</span> <span class="n">_make_iterencode</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">255</span>         <span class="n">markers</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">_encoder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span><span class="p">,</span> <span class="n">floatstr</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">256</span>         <span class="bp">self</span><span class="o">.</span><span class="n">key_separator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">item_separator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_keys</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">257</span>         <span class="bp">self</span><span class="o">.</span><span class="n">skipkeys</span><span class="p">,</span> <span class="n">_one_shot</span><span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">258</span> <span class="k">return</span> <span class="n">_iterencode</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="nn">File /usr/local/Cellar/python@3.11/3.11.10/Frameworks/Python.framework/Versions/3.11/lib/python3.11/json/encoder.py:180,</span> in <span class="ni">JSONEncoder.default</span><span class="nt">(self, o)</span>
+<span class="g g-Whitespace">    </span><span class="mi">161</span> <span class="k">def</span><span class="w"> </span><span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
+<span class="g g-Whitespace">    </span><span class="mi">162</span><span class="w">     </span><span class="sd">&quot;&quot;&quot;Implement this method in a subclass such that it returns</span>
+<span class="g g-Whitespace">    </span><span class="mi">163</span><span class="sd">     a serializable object for ``o``, or calls the base implementation</span>
+<span class="g g-Whitespace">    </span><span class="mi">164</span><span class="sd">     (to raise a ``TypeError``).</span>
+<span class="sd">   (...)</span>
+<span class="g g-Whitespace">    </span><span class="mi">178</span><span class="sd"> </span>
+<span class="g g-Whitespace">    </span><span class="mi">179</span><span class="sd">     &quot;&quot;&quot;</span>
+<span class="ne">--&gt; </span><span class="mi">180</span>     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Object of type </span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> &#39;</span>
+<span class="g g-Whitespace">    </span><span class="mi">181</span>                     <span class="sa">f</span><span class="s1">&#39;is not JSON serializable&#39;</span><span class="p">)</span>
+
+<span class="ne">TypeError</span>: Object of type ArrayImpl is not JSON serializable
+</pre></div>
+</div>
+<img alt="_images/9bd9b0417f09de783c7ce10247060bf3014db64191cacc83463f136224af4262.png" src="_images/9bd9b0417f09de783c7ce10247060bf3014db64191cacc83463f136224af4262.png" />
+<img alt="_images/ed2760217c064837ac11654ffb452ee1b8eda73aad05553767cea23919526ed5.png" src="_images/ed2760217c064837ac11654ffb452ee1b8eda73aad05553767cea23919526ed5.png" />
+<img alt="_images/61636c89125601f03767ca87f00ab7c32c20a69d1105eefffae03c49ab76c299.png" src="_images/61636c89125601f03767ca87f00ab7c32c20a69d1105eefffae03c49ab76c299.png" />
+<img alt="_images/d83d69dcfc639728a538bfe1c118a8bb81f21ddca377d25722ba82fab05c4494.png" src="_images/d83d69dcfc639728a538bfe1c118a8bb81f21ddca377d25722ba82fab05c4494.png" />
 </div>
 </div>
 <table class="table">
@@ -448,24 +512,24 @@ Training complete.
 </table>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_model</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
 
-<span class="n">zs</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">LATENT_DIM</span><span class="p">))</span>
+<span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">val_data</span><span class="p">)</span>
+<span class="n">zs</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">latent_dim</span><span class="p">))</span>
+<span class="n">model_data</span> <span class="o">=</span> <span class="n">load_model</span><span class="p">(</span><span class="n">model_savedir</span><span class="p">)</span>
 
-<span class="n">generated_signal</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="o">*</span><span class="n">load_model</span><span class="p">(</span><span class="n">model_savedir</span><span class="p">),</span> <span class="n">z</span><span class="o">=</span><span class="n">zs</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">generated_signal</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:orange&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">generated_signal</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="n">model_data</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">zs</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">kwgs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">generated_signal</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;tab:orange&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwgs</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">val_data</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwgs</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/avaj0001/Documents/projects/venvs/starccato_jax/lib/python3.11/site-packages/orbax/checkpoint/_src/serialization/type_handlers.py:1175: UserWarning: Couldn&#39;t find sharding info under RestoreArgs. Populating sharding info from sharding file. Please note restoration time will be slightly increased due to reading from file instead of directly from RestoreArgs. Note also that this option is unsafe when restoring on a different topology than the checkpoint was saved with.
-  warnings.warn(
-</pre></div>
-</div>
-<img alt="_images/0f01e5c9a30fdd8697ef94da5e1fb364d7035581dc18a452798fb5454df4c580.png" src="_images/0f01e5c9a30fdd8697ef94da5e1fb364d7035581dc18a452798fb5454df4c580.png" />
+<img alt="_images/033e7da6bf69008764c78b1aabc88a55e9138c81e05c96816ec67d7a7a841f82.png" src="_images/033e7da6bf69008764c78b1aabc88a55e9138c81e05c96816ec67d7a7a841f82.png" />
 </div>
 </div>
 </section>
@@ -475,68 +539,41 @@ Training complete.
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.sampler</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_latent_vars_given_data</span>
 
-<span class="n">mcmc_out</span> <span class="o">=</span> <span class="n">sample_latent_vars_given_data</span><span class="p">(</span><span class="n">train_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">model_savedir</span><span class="p">,</span> <span class="n">rng_int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/out_mcmc2&quot;</span><span class="p">)</span>
+<span class="n">mcmc_out</span> <span class="o">=</span> <span class="n">sample_latent_vars_given_data</span><span class="p">(</span><span class="n">train_data</span><span class="p">[</span><span class="mi">54</span><span class="p">],</span> <span class="n">model_savedir</span><span class="p">,</span> <span class="n">rng_int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/out_mcmc2&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/avaj0001/Documents/projects/venvs/starccato_jax/lib/python3.11/site-packages/orbax/checkpoint/_src/serialization/type_handlers.py:1175: UserWarning: Couldn&#39;t find sharding info under RestoreArgs. Populating sharding info from sharding file. Please note restoration time will be slightly increased due to reading from file instead of directly from RestoreArgs. Note also that this option is unsafe when restoring on a different topology than the checkpoint was saved with.
-  warnings.warn(
-/Users/avaj0001/Documents/projects/starccato_jax/src/starccato_jax/sampler.py:41: UserWarning: There are not enough devices to run parallel chains: expected 2 but got 1. Chains will be drawn sequentially. If you are running MCMC in CPU, consider using `numpyro.set_host_device_count(2)` at the beginning of your program. You can double-check how many devices are available in your system using `jax.local_device_count()`.
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/avaj0001/Documents/projects/starccato_jax/src/starccato_jax/sampler.py:40: UserWarning: There are not enough devices to run parallel chains: expected 2 but got 1. Chains will be drawn sequentially. If you are running MCMC in CPU, consider using `numpyro.set_host_device_count(2)` at the beginning of your program. You can double-check how many devices are available in your system using `jax.local_device_count()`.
   mcmc = MCMC(nuts_kernel, num_warmup=500, num_samples=2000, num_chains=nchains, progress_bar=True)
-sample: 100%|██████████| 2500/2500 [00:09&lt;00:00, 268.21it/s, 15 steps of size 2.89e-01. acc. prob=0.88]
-sample: 100%|██████████| 2500/2500 [00:03&lt;00:00, 693.77it/s, 15 steps of size 3.27e-01. acc. prob=0.87]
+sample: 100%|██████████| 2500/2500 [00:05&lt;00:00, 430.70it/s, 31 steps of size 8.65e-02. acc. prob=0.80]
+sample: 100%|██████████| 2500/2500 [00:03&lt;00:00, 725.51it/s, 31 steps of size 9.18e-02. acc. prob=0.81]
 </pre></div>
 </div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>        mean     sd  hdi_3%  hdi_97%  mcse_mean  mcse_sd  ess_bulk  ess_tail  \
-z[0]   0.470  0.292   0.009    0.946      0.004    0.003    6277.0    2609.0   
-z[1]   0.316  0.254   0.000    0.812      0.004    0.003    5658.0    2543.0   
-z[2]   0.091  0.094   0.000    0.261      0.001    0.001    3254.0    1465.0   
-z[3]   0.249  0.088   0.060    0.391      0.002    0.002    1821.0    1013.0   
-z[4]   0.351  0.269   0.000    0.854      0.004    0.003    5748.0    2373.0   
-z[5]   0.662  0.262   0.164    1.000      0.004    0.003    5173.0    2573.0   
-z[6]   0.609  0.284   0.101    1.000      0.005    0.003    3814.0    2581.0   
-z[7]   0.221  0.208   0.000    0.627      0.003    0.003    5173.0    1979.0   
-z[8]   0.284  0.242   0.000    0.763      0.004    0.003    6131.0    2360.0   
-z[9]   0.748  0.218   0.322    1.000      0.003    0.002    6476.0    2310.0   
-z[10]  0.710  0.242   0.229    1.000      0.004    0.003    4703.0    2315.0   
-z[11]  0.446  0.288   0.000    0.918      0.003    0.003    6349.0    2323.0   
-z[12]  0.569  0.279   0.088    0.997      0.004    0.003    6261.0    2386.0   
-z[13]  0.339  0.263   0.000    0.833      0.004    0.003    5017.0    2260.0   
-z[14]  0.522  0.285   0.073    0.999      0.004    0.003    5076.0    2403.0   
-z[15]  0.744  0.265   0.173    1.000      0.006    0.004    2616.0    2483.0   
-z[16]  0.011  0.012   0.000    0.032      0.000    0.000    4391.0    2033.0   
-z[17]  0.532  0.296   0.058    0.999      0.004    0.003    6233.0    2337.0   
-z[18]  0.509  0.293   0.000    0.942      0.004    0.003    5553.0    1786.0   
-z[19]  0.287  0.236   0.000    0.750      0.003    0.003    6998.0    2459.0   
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>       mean     sd  hdi_3%  hdi_97%  mcse_mean  mcse_sd  ess_bulk  ess_tail  \
+z[0]  0.732  0.233   0.258    1.000      0.005    0.004    1782.0    1784.0   
+z[1]  0.722  0.225   0.296    1.000      0.005    0.004    1898.0    2120.0   
+z[2]  0.492  0.280   0.001    0.932      0.006    0.005    1818.0    1695.0   
+z[3]  0.342  0.255   0.001    0.818      0.006    0.005    1864.0    1748.0   
+z[4]  0.070  0.073   0.000    0.205      0.001    0.001    1853.0    1544.0   
+z[5]  0.424  0.265   0.000    0.886      0.006    0.005    1879.0    1963.0   
+z[6]  0.656  0.229   0.228    0.999      0.006    0.004    1635.0    1780.0   
+z[7]  0.882  0.117   0.664    1.000      0.002    0.002    2249.0    1867.0   
 
-       r_hat  
-z[0]     1.0  
-z[1]     1.0  
-z[2]     1.0  
-z[3]     1.0  
-z[4]     1.0  
-z[5]     1.0  
-z[6]     1.0  
-z[7]     1.0  
-z[8]     1.0  
-z[9]     1.0  
-z[10]    1.0  
-z[11]    1.0  
-z[12]    1.0  
-z[13]    1.0  
-z[14]    1.0  
-z[15]    1.0  
-z[16]    1.0  
-z[17]    1.0  
-z[18]    1.0  
-z[19]    1.0  
+      r_hat  
+z[0]    1.0  
+z[1]    1.0  
+z[2]    1.0  
+z[3]    1.0  
+z[4]    1.0  
+z[5]    1.0  
+z[6]    1.0  
+z[7]    1.0  
 </pre></div>
 </div>
-<img alt="_images/0fcaa04e04a6e506342dc75309da6dbb96f9bf006794b791e38715df18b2b4c7.png" src="_images/0fcaa04e04a6e506342dc75309da6dbb96f9bf006794b791e38715df18b2b4c7.png" />
+<img alt="_images/3579d2c584fedff3160092a82b1082eaa5bc58133ce6dbec75e3eba56a0cf11b.png" src="_images/3579d2c584fedff3160092a82b1082eaa5bc58133ce6dbec75e3eba56a0cf11b.png" />
 </div>
 </div>
-<p>It’s always a good idea to check the convergence of your MCMC sampler, and we’ll use ArviZ to do that here, looking at the Gelman–Rubin (r_hat) statistic, and the effective sample sizes (e.g. ess_bulk):</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">arviz</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">az</span>
@@ -844,10 +881,11 @@ z[19]    1.0
 <h2>Exploring better number of Z<a class="headerlink" href="#exploring-better-number-of-z" title="Permalink to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span><span class="p">,</span> <span class="n">Config</span>
 
 <span class="k">for</span> <span class="n">z_size</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">]:</span>
-    <span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">latent_dim</span><span class="o">=</span><span class="n">z_size</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="n">z_size</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span>
               <span class="n">save_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_exploration/model_z</span><span class="si">{</span><span class="n">z_size</span><span class="si">}</span><span class="s2">&quot;</span>
               <span class="p">)</span>
 </pre></div>
@@ -858,7 +896,7 @@ z[19]    1.0
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">z_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
 
-<span class="n">train_losses</span><span class="p">,</span> <span class="n">val_losses</span>  <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="n">train_losses</span><span class="p">,</span> <span class="n">val_losses</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">z_size</span> <span class="ow">in</span> <span class="n">z_sizes</span><span class="p">:</span>
     <span class="c1"># read the losses</span>
     <span class="n">loss_fpath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_exploration/model_z</span><span class="si">{</span><span class="n">z_size</span><span class="si">}</span><span class="s2">/losses.txt&quot;</span>
@@ -866,24 +904,15 @@ z[19]    1.0
     <span class="n">train_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
     <span class="n">val_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 
-
-
 <span class="c1">## PLOT</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z_sizes</span><span class="p">,</span> <span class="n">train_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Train Loss&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z_sizes</span><span class="p">,</span> <span class="n">val_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Val Loss&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Latent Dimension&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Loss&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Loss at 200 epochs&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend at 0x1327c2c90&gt;
-</pre></div>
-</div>
-<img alt="_images/bb0e1bbd466b177d6ab187e4d4d08632df308ca720c5062eed59ca233efbd16d.png" src="_images/bb0e1bbd466b177d6ab187e4d4d08632df308ca720c5062eed59ca233efbd16d.png" />
 </div>
 </div>
 <p>At 500 epochs:</p>
