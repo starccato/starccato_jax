@@ -1,6 +1,10 @@
 starccato_jax
 -------------
 
+.. image:: https://coveralls.io/repos/github/starccato/starccato_jax/badge.svg?branch=main
+:target: https://coveralls.io/github/starccato/starccato_jax?branch=main
 
-Look at instructions to install JAX:
-https://github.com/jax-ml/jax?tab=readme-ov-file#instructions
+
+.. code-block::bash
+
+    pip install starccato_jax
