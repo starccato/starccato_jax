@@ -69,6 +69,9 @@ changelog_file = "CHANGELOG.rst"
 [tool.setuptools]
 package-data = { "starccato_jax" = [""] }
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 
 
 [tool.black]

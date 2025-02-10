@@ -1,7 +1,9 @@
-from starccato_jax.trainer import train_vae, load_model
+from starccato_jax.trainer import train_vae
+from starccato_jax.config import Config
 import jax.numpy as jnp
 from starccato_jax.data import load_data
 from starccato_jax.model import generate
+from starccato_jax.io import load_model
 import os
 
 
@@ -11,11 +13,13 @@ def test_train_vae(outdir):
     assert isinstance(train_data, jnp.ndarray)
 
     # Train the VAE model
-    train_vae(train_data, val_data, n_epochs=2, batch_size=32, latent_dim=2, save_dir=outdir)
+    train_vae(
+        train_data, val_data,
+        config=Config(latent_dim=2, epochs=1, cyclical_annealing_cycles=0),
+        save_dir=outdir
+    )
     assert os.path.exists(outdir)
 
     # load and use VAE
-    signal = generate(*load_model(outdir), rng_seed=42)[0]
+    signal = generate(load_model(outdir))[0]
     assert signal.shape == (256,)
-
-
