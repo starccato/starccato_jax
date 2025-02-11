@@ -48,11 +48,6 @@ We try three cases:
            :alt: CI Plot Case 3
            :align: center
 
-Code
-----
-
-.. literalinclude:: cyclical_beta.py
-   :language: python
 
 
 Code
