@@ -2,6 +2,7 @@ Investigating different Betas
 ==============================
 
 We try three cases:
+
 - Case 1: Beta is constant at 0 (ie KL divergence isnt used)
 - Case 2: Beta is constant at 1 (vanilla VAE)
 - Case 3: Beta is cyclical between 0 and 1 and stays at 1 for 50% of the time
