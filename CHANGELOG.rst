@@ -1,8 +1,57 @@
 .. _changelog:
 
 =========
-Changelog
+CHANGELOG
 =========
+
+
+.. _changelog-v0.1.0:
+
+v0.1.0 (2025-02-11)
+===================
+
+Features
+--------
+
+* feat: add lnz estimation using stepping stone (`77cdae0`_)
+
+Unknown
+-------
+
+* add stepping stone (`8c7c6a8`_)
+
+* fix doc structure (`917cdeb`_)
+
+* fix the bullet list (`f7cf34a`_)
+
+* remove extra codeblock (`2e11f55`_)
+
+* fix docs (`dbcdbb7`_)
+
+* add plotting module and gif generator (`4ab460e`_)
+
+* add description (`2c21ee3`_)
+
+* add sampler requirements (`12c1258`_)
+
+* black formatting (`3f01c26`_)
+
+* remove illegal char from docs (`2499de3`_)
+
+* adjust the docs structre (`7310a72`_)
+
+.. _77cdae0: https://github.com/starccato/starccato_jax/commit/77cdae03a73a74ec31968076c5ff5dd423e9fc91
+.. _8c7c6a8: https://github.com/starccato/starccato_jax/commit/8c7c6a8cd9cd5813db12481f85e23e7dd279c38f
+.. _917cdeb: https://github.com/starccato/starccato_jax/commit/917cdeb2ed427b5b6b9dfa76112f3e03d0162bb9
+.. _f7cf34a: https://github.com/starccato/starccato_jax/commit/f7cf34a4246346d6216b5c7698935ce06be75665
+.. _2e11f55: https://github.com/starccato/starccato_jax/commit/2e11f55c743bb1120a87199645dd4956e864d6d0
+.. _dbcdbb7: https://github.com/starccato/starccato_jax/commit/dbcdbb7a905b71fd112adb314cd656787415ff75
+.. _4ab460e: https://github.com/starccato/starccato_jax/commit/4ab460e547fb51654c240482eb980cf4e15c3e0d
+.. _2c21ee3: https://github.com/starccato/starccato_jax/commit/2c21ee396496abda1e453d18e5e8bd97f931276a
+.. _12c1258: https://github.com/starccato/starccato_jax/commit/12c125833bc95d049cdc022e94fb2a575be51e6b
+.. _3f01c26: https://github.com/starccato/starccato_jax/commit/3f01c2600865360b0859c4fc13e34bfb8c3c5feb
+.. _2499de3: https://github.com/starccato/starccato_jax/commit/2499de3ef377aa2a584055d894eed26db7e0b8fc
+.. _7310a72: https://github.com/starccato/starccato_jax/commit/7310a7264922f6633d8613a85efa71592f3392b3
 
 
 .. _changelog-v0.0.2:
@@ -17,6 +66,8 @@ Bug Fixes
 
 Chores
 ------
+
+* chore(release): 0.0.2 (`c9e9e01`_)
 
 * chore(release): 0.0.2 (`5547f3e`_)
 
@@ -52,6 +103,7 @@ Unknown
 * Merge branch 'main' of github.com:starccato/starccato_jax (`5c3207d`_)
 
 .. _7da68cc: https://github.com/starccato/starccato_jax/commit/7da68cc6936527308b88d9eb2dc230b7a0499ac3
+.. _c9e9e01: https://github.com/starccato/starccato_jax/commit/c9e9e0164232ebdbf1b01eefd56a6c682ff6a1b5
 .. _5547f3e: https://github.com/starccato/starccato_jax/commit/5547f3edfbeed96c2a8ba29df50cd03db92106ba
 .. _d63b9ec: https://github.com/starccato/starccato_jax/commit/d63b9ecd1c3db7eea043f1c0d925fc202dd70135
 .. _001f1a9: https://github.com/starccato/starccato_jax/commit/001f1a9e8521bf38dd3f4bcecbbebbc4236783a3
