@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import jax
@@ -12,6 +13,8 @@ from ..model import reconstruct
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from typing import List
+
+import warnings
 
 
 def plot_training_metrics(
@@ -30,7 +33,7 @@ def plot_training_metrics(
     # Top plot (Beta values)
     ax_top.plot(metrics.train_metrics.beta, label="Beta", color="tab:red", alpha=1, lw=2)
     ax_top.set_ylabel(r"$\beta$")
-    ax_top.set_ylim(0, 1.05)
+    ax_top.set_ylim(-.05, 1.05)
     ax_top.set_yticks([0, 1])
 
     # Bottom plot (main loss)
@@ -51,6 +54,7 @@ def plot_training_metrics(
     ax_top.tick_params(labelbottom=False)
 
     if fname is not None:
+        os.makedirs(os.path.dirname(fname), exist_ok=True)
         plt.savefig(fname, bbox_inches="tight")
 
     plt.show()
@@ -66,25 +70,29 @@ def plot_reconstructions(
     val_data: np.ndarray,
     nrows: int = 3,
     fname: str = None,
+    title: str = None,
+    rng: jax.random.PRNGKey = None,
 ):
     ncols = nrows
     nsamples = nrows * ncols
-    rng = jax.random.PRNGKey(0)
-    idx = np.random.choice(val_data.shape[0], nsamples, replace=False)
-    orig = val_data[idx]
 
     fig, axes = plt.subplots(nrows, ncols, figsize=(2.5 * ncols, 2.5 * nrows))
     axes = axes.flatten()
     for i in range(nsamples):
-        recon = reconstruct(orig[i], model_data, rng, n_reps=100)
+        recon = reconstruct(val_data[i], model_data, rng, n_reps=100)
         qtls = jnp.quantile(recon, jnp.array([0.025, 0.5, 0.975]), axis=0)
         _add_quantiles(
-            axes[i], qtls, "Reconstruction", "tab:gray", y_obs=orig[i]
+            axes[i], qtls, "Reconstruction", "tab:orange", y_obs=val_data[i]
         )
         axes[i].set_axis_off()
     axes[-1].legend(frameon=False, loc="lower right")
     plt.subplots_adjust(hspace=0, wspace=0)
+
+    if title is not None:
+        plt.suptitle(title)
+
     if fname is not None:
+        os.makedirs(os.path.dirname(fname), exist_ok=True)
         plt.savefig(fname)
 
 
@@ -93,9 +101,13 @@ def _add_quantiles(
     y_ci: np.ndarray,
     label: str,
     color: str,
-    alpha: float = 0.3,
+    alpha: float = 0.5,
     y_obs: np.ndarray = None,
 ):
+    # assert that the y_ci are differnt values (no bug in reconstruction)
+    if np.allclose(y_ci[0], y_ci[1]):
+        warnings.warn("Quantiles are the same, no uncertainty in reconstruction... SUSPICIOUS")
+
     _, xlen = y_ci.shape
     x = np.arange(xlen)
     ax.fill_between(
@@ -104,3 +116,5 @@ def _add_quantiles(
     ax.plot(y_ci[1], color=color, lw=1, ls="--")
     if y_obs is not None:
         ax.plot(y_obs, color="black", lw=2, zorder=-1, label="Observed")
+        # set ylim _slightly_ above and below the y_obs
+        ax.set_ylim(np.min(y_obs) - 0.1, np.max(y_obs) + 0.1)

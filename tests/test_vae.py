@@ -10,6 +10,12 @@ from starccato_jax.trainer import train_vae
 from starccato_jax.sampler import sample_latent_vars_given_data
 
 
+def test_version():
+    from starccato_jax import __version__
+
+    assert isinstance(__version__, str)
+
+
 def test_train_vae(outdir):
     train_data, val_data = load_data(train_fraction=0.8, clean=True)
     assert train_data.shape == (1411, 256)

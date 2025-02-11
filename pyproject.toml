@@ -32,6 +32,8 @@ dependencies = [
     "numpyro",
     "arviz",
     "corner",
+    "pillow",
+    "natsort",
 ]
 
 [project.optional-dependencies]

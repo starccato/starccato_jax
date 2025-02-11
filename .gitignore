@@ -40,7 +40,7 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
-
+*.nc
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -181,3 +181,5 @@ cython_debug/
 /docs/model_exploration/*/
 /src/starccato_jax/CHANGELOG.rst
 /src/starccato_jax/README.rst
+/docs/README.rst
+/docs/CHANGELOG.rst

@@ -7,5 +7,6 @@ parts:
 - caption: " "
   chapters:
   - file: example.ipynb
-  - file: impact_of_zs.ipynb
+  - file: studies/loss_vs_zsize/loss_vs_zsize.rst
+  - file: studies/cyclical_beta/cyclical_beta.rst
   - file: CHANGELOG.rst

@@ -18,7 +18,7 @@ from .loss import (
     vae_loss,
 )
 from .model import VAE, ModelData
-from .plotting import plot_reconstructions, plot_training_metrics
+from .plotting import plot_reconstructions, plot_training_metrics, generate_gif
 
 __all__ = ["train_vae"]
 
@@ -65,7 +65,7 @@ def train_vae(
     config: Config,
     save_dir="vae_outdir",
     print_every=100,
-    plot_every=1000,
+    plot_every=np.inf,
 ):
     os.makedirs(save_dir, exist_ok=True)
     data_len = train_data.shape[1]
@@ -79,7 +79,8 @@ def train_vae(
     n_train = train_data.shape[0]
     step = 0
     beta = cyclical_annealing_beta(
-        n_epoch=config.epochs, n_cycle=config.cyclical_annealing_cycles
+        n_epoch=config.epochs, n_cycle=config.cyclical_annealing_cycles,
+        start=config.beta_start, stop=config.beta_end
     )
 
     for epoch in range(config.epochs):
@@ -111,7 +112,8 @@ def train_vae(
             plot_reconstructions(
                 model_data,
                 val_data,
-                fname=f"{save_dir}/reconstructions_E{epoch}.png",
+                fname=f"{save_dir}/reconstructions/E{epoch}.png",
+                title=f"Epoch {epoch}",
             )
 
     model_data = ModelData(params=state.params, latent_dim=config.latent_dim)
@@ -120,5 +122,18 @@ def train_vae(
         model_data, val_data, fname=f"{save_dir}/reconstructions.png"
     )
     save_model(state, config, metrics, savedir=save_dir)
-    # _save_losses(train_losses, val_losses, fname=f"{save_dir}/losses.txt")
+
     print(f"Training complete. (time: {time.time() - t0:.2f}s)")
+
+
+    if plot_every < np.inf:
+        plot_reconstructions(
+            model_data,
+            val_data,
+            fname=f"{save_dir}/reconstructions/E{config.epochs}.png",
+            title=f"Epoch {config.epochs}",
+        )
+        generate_gif(
+            image_pattern=f"{save_dir}/reconstructions/E*.png",
+            output_gif=f"{save_dir}/training_reconstructions.gif",
+        )

@@ -1,6 +1,6 @@
 
 Loss vs latent dimension
-------------------------
+========================
 
 After 500 epochs:
 
@@ -9,6 +9,9 @@ After 500 epochs:
    :width: 600px
    :align: center
 
+
+Code
+----
 
 .. literalinclude:: loss_vs_zsize.py
    :language: python

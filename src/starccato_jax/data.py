@@ -19,6 +19,12 @@ def load_data(
         _download_and_save_data()
     data = np.load(CACHE)["data"]
 
+    # shuffle data
+    np.random.seed(0)
+    np.random.shuffle(data)
+
+
+
     # standardise using max value from entire dataset, and zero mean for each row
     # data = data / np.max(np.abs(data))
     # data = data - np.mean(data, axis=1, keepdims=True)
