@@ -12,6 +12,7 @@ tests/data
 MODEL
 model_exploration/
 *.txt
+*.gif
 *_version.py
 *.DS_Store
 # Distribution / packaging

@@ -5,9 +5,9 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .io import ModelData
-from .loss import Losses, TrainValMetrics, aggregate_metrics
-from .model import reconstruct
+from ..io import ModelData
+from ..loss import Losses, TrainValMetrics, aggregate_metrics
+from ..model import reconstruct
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
