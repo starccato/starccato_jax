@@ -6,8 +6,8 @@ from starccato_jax.config import Config
 from starccato_jax.data import load_data
 from starccato_jax.io import load_model
 from starccato_jax.model import generate
-from starccato_jax.trainer import train_vae
 from starccato_jax.sampler import sample_latent_vars_given_data
+from starccato_jax.trainer import train_vae
 
 
 def test_version():
@@ -41,6 +41,6 @@ def test_train_vae(outdir):
         num_chains=1,
         num_warmup=20,
         num_samples=100,
-        num_temps=1,
+        num_temps=8,
     )
     assert os.path.exists(outdir)
