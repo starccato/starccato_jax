@@ -63,7 +63,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'example';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="" href="impact_of_zs.html" />
+    <link rel="next" title="Loss vs latent dimension" href="studies/loss_vs_zsize/loss_vs_zsize.html" />
     <link rel="prev" title="starccato_jax" href="README.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -165,7 +165,8 @@
         <p aria-level="2" class="caption" role="heading"><span class="caption-text"> </span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="impact_of_zs.html"></a></li>
+<li class="toctree-l1"><a class="reference internal" href="studies/loss_vs_zsize/loss_vs_zsize.html">Loss vs latent dimension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="studies/cyclical_beta/cyclical_beta.html">Investigating different Betas</a></li>
 <li class="toctree-l1"><a class="reference internal" href="CHANGELOG.html">Changelog</a></li>
 </ul>
 
@@ -383,17 +384,18 @@
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+
+<span class="err">!</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">starccato_jax</span> <span class="o">-</span><span class="n">q</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="err">!</span> <span class="n">pip</span> <span class="n">install</span> <span class="n">starccato_jax</span> <span class="o">-</span><span class="n">q</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">starccato_jax</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">starccato_jax</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;starccato_jax version: </span><span class="si">{</span><span class="n">starccato_jax</span><span class="o">.</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;starccato_jax version: </span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -408,6 +410,7 @@
 
 <span class="n">HERE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
 <span class="n">model_savedir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_out&quot;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">model_savedir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
 
@@ -424,9 +427,9 @@
 <div class="cell_input docutils container">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_vae</span><span class="p">,</span> <span class="n">Config</span>
 
-<span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-<span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">)</span>
+<span class="n">train_vae</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="n">model_savedir</span><span class="p">,</span> <span class="n">plot_every</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -474,7 +477,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.sampler</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_latent_vars_given_data</span>
 
 <span class="n">mcmc_out</span> <span class="o">=</span> <span class="n">sample_latent_vars_given_data</span><span class="p">(</span>
-    <span class="n">train_data</span><span class="p">[</span><span class="mi">54</span><span class="p">],</span> <span class="n">model_savedir</span><span class="p">,</span> <span class="n">rng_int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/out_mcmc2&quot;</span>
+    <span class="n">train_data</span><span class="p">[</span><span class="mi">54</span><span class="p">],</span> <span class="n">model_savedir</span><span class="p">,</span> <span class="n">rng_int</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">outdir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/out_mcmc&quot;</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -552,11 +555,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="impact_of_zs.html"
+       href="studies/loss_vs_zsize/loss_vs_zsize.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"></p>
+        <p class="prev-next-title">Loss vs latent dimension</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

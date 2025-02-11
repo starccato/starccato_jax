@@ -8,6 +8,8 @@ starccato_jax
    :alt: PyPI - Version
 
 
+JAX-VAE stellar core collapse waveform and tools for parameter estimation with VAE model.
+
 
 Install with:
 
