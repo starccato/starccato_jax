@@ -7,6 +7,7 @@ from starccato_jax.data import load_data
 from starccato_jax.io import load_model
 from starccato_jax.model import generate
 from starccato_jax.trainer import train_vae
+from starccato_jax.sampler import sample_latent_vars_given_data
 
 
 def test_train_vae(outdir):
@@ -26,3 +27,13 @@ def test_train_vae(outdir):
     # load and use VAE
     signal = generate(load_model(outdir))[0]
     assert signal.shape == (256,)
+
+    sample_latent_vars_given_data(
+        data=val_data[10],
+        model_path=outdir,
+        outdir=outdir,
+        num_chains=1,
+        num_warmup=20,
+        num_samples=100,
+    )
+    assert os.path.exists(outdir)

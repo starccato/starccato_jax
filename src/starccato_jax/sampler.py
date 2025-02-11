@@ -33,7 +33,9 @@ def sample_latent_vars_given_data(
     model_path: str,
     rng_int: int = 0,
     outdir="out_mcmc",
-    nchains=2,
+    num_chains=2,
+    num_warmup=500,
+    num_samples=2000,
 ) -> MCMC:
     """
     Sample latent variables given the data.
@@ -48,9 +50,9 @@ def sample_latent_vars_given_data(
     nuts_kernel = NUTS(lambda y_obs: _bayesian_model(y_obs, vae_data))
     mcmc = MCMC(
         nuts_kernel,
-        num_warmup=500,
-        num_samples=2000,
-        num_chains=nchains,
+        num_warmup=num_warmup,
+        num_samples=num_samples,
+        num_chains=num_chains,
         progress_bar=True,
     )
     mcmc.run(rng_key, y_obs=data)

@@ -28,7 +28,10 @@ dependencies = [
     "numpy",
     "matplotlib",
     "pandas",
-    "h5py"
+    "h5py",
+    "numpyro",
+    "arviz",
+    "corner",
 ]
 
 [project.optional-dependencies]
