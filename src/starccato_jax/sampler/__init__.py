@@ -1,0 +1,1 @@
+from .sampler import sample_latent_vars_given_data

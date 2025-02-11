@@ -25,7 +25,7 @@ def test_train_vae(outdir):
     train_vae(
         train_data,
         val_data,
-        config=Config(latent_dim=2, epochs=1, cyclical_annealing_cycles=0),
+        config=Config(latent_dim=8, epochs=10, cyclical_annealing_cycles=0),
         save_dir=outdir,
     )
     assert os.path.exists(outdir)
@@ -41,5 +41,6 @@ def test_train_vae(outdir):
         num_chains=1,
         num_warmup=20,
         num_samples=100,
+        num_temps=1,
     )
     assert os.path.exists(outdir)
