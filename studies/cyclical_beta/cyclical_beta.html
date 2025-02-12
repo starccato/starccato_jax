@@ -164,7 +164,7 @@
         <p aria-level="2" class="caption" role="heading"><span class="caption-text"> </span></p>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../../example.html">Example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../CHANGELOG.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../CHANGELOG.html">CHANGELOG</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Studies</span></p>
 <ul class="current nav bd-sidenav">
@@ -381,6 +381,7 @@
 <li><p>Case 1: Beta is constant at 0 (ie KL divergence isnt used)</p></li>
 <li><p>Case 2: Beta is constant at 1 (vanilla VAE)</p></li>
 <li><p>Case 3: Beta is cyclical between 0 and 1 and stays at 1 for 50% of the time</p></li>
+<li><p>Case 4: Beta is monotonic, starts at 0, ramps up till 1 for firsst 50% of the time.</p></li>
 </ul>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
@@ -388,6 +389,7 @@
 <th class="head"><p>Case 1</p></th>
 <th class="head"><p>Case 2</p></th>
 <th class="head"><p>Case 3</p></th>
+<th class="head"><p>Case 4</p></th>
 </tr>
 </thead>
 <tbody>
@@ -398,6 +400,8 @@
 </td>
 <td><img alt="Loss Plot Case 3" class="align-center" src="../../_images/loss3.png" />
 </td>
+<td><img alt="Loss Plot Case 4" class="align-center" src="../../_images/loss4.png" />
+</td>
 </tr>
 <tr class="row-odd"><td><p>Reconstructions</p></td>
 <td><img alt="Training Reconstructions Case 1" class="align-center" src="../../_images/training_reconstructions.gif" />
@@ -406,6 +410,8 @@
 </td>
 <td><img alt="Training Reconstructions Case 3" class="align-center" src="studies/cyclical_beta/out_models/beta_cyclical/training_reconstructions.gif" />
 </td>
+<td><img alt="Training Reconstructions Case 4" class="align-center" src="studies/cyclical_beta/out_models/beta_monotonic/training_reconstructions.gif" />
+</td>
 </tr>
 <tr class="row-even"><td><p>CI Plot</p></td>
 <td><img alt="CI Plot Case 1" class="align-center" src="../../_images/ci_plot1.png" />
@@ -413,6 +419,8 @@
 <td><img alt="CI Plot Case 2" class="align-center" src="../../_images/ci_plot2.png" />
 </td>
 <td><img alt="CI Plot Case 3" class="align-center" src="../../_images/ci_plot3.png" />
+</td>
+<td><img alt="CI Plot Case 4" class="align-center" src="../../_images/ci_plot4.png" />
 </td>
 </tr>
 </tbody>
@@ -423,10 +431,11 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">train_vae</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.sampler</span><span class="w"> </span><span class="kn">import</span> <span class="n">sample_latent_vars_given_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">train_vae</span>
 
 <span class="n">HERE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">OUT_BETA_RAMP</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;out_models/beta_monotonic&quot;</span><span class="p">)</span>
 <span class="n">OUT_BETA_1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;out_models/beta_1&quot;</span><span class="p">)</span>
 <span class="n">OUT_BETA_0</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;out_models/beta_0&quot;</span><span class="p">)</span>
 <span class="n">OUT_BETA_CYCLICAL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;out_models/beta_cyclical&quot;</span><span class="p">)</span>
@@ -437,12 +446,26 @@
 
 <span class="n">kwargs</span> <span class="o">=</span> <span class="p">[</span>
     <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">save_dir</span><span class="o">=</span><span class="n">OUT_BETA_RAMP</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span>
+            <span class="n">beta_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">beta_end</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">config_args</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="nb">dict</span><span class="p">(</span>
         <span class="n">save_dir</span><span class="o">=</span><span class="n">OUT_BETA_0</span><span class="p">,</span>
         <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">beta_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beta_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">config_args</span><span class="p">),</span>
     <span class="p">),</span>
     <span class="nb">dict</span><span class="p">(</span>
         <span class="n">save_dir</span><span class="o">=</span><span class="n">OUT_BETA_CYCLICAL</span><span class="p">,</span>
-        <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">beta_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beta_end</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="o">**</span><span class="n">config_args</span><span class="p">),</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span>
+            <span class="n">beta_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">beta_end</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">config_args</span><span class="p">,</span>
+        <span class="p">),</span>
     <span class="p">),</span>
     <span class="nb">dict</span><span class="p">(</span>
         <span class="n">save_dir</span><span class="o">=</span><span class="n">OUT_BETA_1</span><span class="p">,</span>
