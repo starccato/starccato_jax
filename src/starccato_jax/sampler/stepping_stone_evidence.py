@@ -1,13 +1,16 @@
+from typing import Tuple
+
 import jax
 import matplotlib.pyplot as plt
 import numpy as np
 from jax import numpy as jnp
 from jax.random import PRNGKey
 from jax.scipy.special import logsumexp
-from typing import Tuple
 
 
-def stepping_stone_evidence(ln_likes: jnp.ndarray, betas: jnp.ndarray, outdir: str, rng: PRNGKey)-> Tuple[float, float]:
+def stepping_stone_evidence(
+    ln_likes: jnp.ndarray, betas: jnp.ndarray, outdir: str, rng: PRNGKey
+) -> Tuple[float, float]:
     """
     Compute the evidence using the stepping stone approximation.
 
@@ -16,6 +19,19 @@ def stepping_stone_evidence(ln_likes: jnp.ndarray, betas: jnp.ndarray, outdir: s
 
     The uncertainty calculation is hopefully combining the evidence in each
     of the steps.
+
+    Parameters
+    ----------
+    ln_likes: jnp.ndarray
+        Array of log-likelihoods for each sample at each beta.
+        (n_samples, n_temps-1)
+    betas: jnp.ndarray
+        Array of inverse temperatures.
+        (n_temps,)
+    outdir: str
+        Output directory for plots.
+    rng: PRNGKey
+
 
     Returns
     -------
@@ -51,14 +67,21 @@ def stepping_stone_evidence(ln_likes: jnp.ndarray, betas: jnp.ndarray, outdir: s
     return ln_z, ln_z_err
 
 
-def _calculate_stepping_stone(ln_likes: jnp.ndarray, betas: jnp.ndarray)-> Tuple[float, jnp.ndarray]:
-    n_samples = ln_likes.shape[0]
-    d_betas = betas[1:] - betas[:-1]
-    ln_ratio = logsumexp(d_betas * ln_likes[:,:-1], axis=0) - jnp.log(n_samples)
+def _calculate_stepping_stone(
+    ln_likes: jnp.ndarray, betas: jnp.ndarray
+) -> Tuple[float, jnp.ndarray]:
+    """
+    log z = Sum_k^(K−1)  Log Sum_i^(n)  L(X|θ_i, β_k-1) ** (β_k - β_k-1) - log n (k-1)
+    """
+    n, k = ln_likes.shape
+
+    d_betas = betas[1:] - betas[:-1]  # beta_k - beta_{k-1}
+    lnls = ln_likes[:, :-1]  # only the k-1 LnLs chains (discard
+    ln_ratio = logsumexp(d_betas * lnls, axis=0) - jnp.log(n)
     return jnp.sum(ln_ratio), ln_ratio
 
 
-def _create_stepping_stone_plot(means:jnp.ndarray, outdir:str):
+def _create_stepping_stone_plot(means: jnp.ndarray, outdir: str):
     n_steps = len(means)
 
     fig, axes = plt.subplots(nrows=2, figsize=(8, 10))

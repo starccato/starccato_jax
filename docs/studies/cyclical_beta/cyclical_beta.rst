@@ -10,10 +10,10 @@ We try three cases:
 
 
 
-
-
 .. list-table::
    :header-rows: 1
+   :width: 170%
+   :widths: 5 30 30 30 30
 
    * - Plot Type
      - Case 1
@@ -33,19 +33,6 @@ We try three cases:
      - .. image:: out_models/beta_monotonic/loss.png
            :alt: Loss Plot Case 4
            :align: center
-   * - Reconstructions
-     - .. image:: out_models/beta_0/training_reconstructions.gif
-           :alt: Training Reconstructions Case 1
-           :align: center
-     - .. image:: out_models/beta_1/training_reconstructions.gif
-           :alt: Training Reconstructions Case 2
-           :align: center
-     - .. image:: out_models/beta_cyclical/training_reconstructions.gif
-           :alt: Training Reconstructions Case 3
-           :align: center
-     - .. image:: out_models/beta_monotonic/training_reconstructions.gif
-           :alt: Training Reconstructions Case 4
-           :align: center
    * - CI Plot
      - .. image:: out_models/beta_0/ci_plot.png
            :alt: CI Plot Case 1
@@ -58,6 +45,19 @@ We try three cases:
            :align: center
      - .. image:: out_models/beta_monotonic/ci_plot.png
            :alt: CI Plot Case 4
+           :align: center
+   * - Reconstructions
+     - .. image:: out_models/beta_0/training_reconstructions.gif
+           :alt: Training Reconstructions Case 1
+           :align: center
+     - .. image:: out_models/beta_1/training_reconstructions.gif
+           :alt: Training Reconstructions Case 2
+           :align: center
+     - .. image:: out_models/beta_cyclical/training_reconstructions.gif
+           :alt: Training Reconstructions Case 3
+           :align: center
+     - .. image:: out_models/beta_monotonic/training_reconstructions.gif
+           :alt: Training Reconstructions Case 4
            :align: center
 
 

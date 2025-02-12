@@ -10,6 +10,7 @@ from ..io import load_model
 from ..plotting import plot_ci, sampler_diagnostic_plots
 from .core import _run_mcmc
 from .stepping_stone_evidence import stepping_stone_evidence
+from .utils import beta_spaced_samples
 
 
 def sample_latent_vars_given_data(
@@ -45,18 +46,25 @@ def sample_latent_vars_given_data(
     )
     inf_object = az.from_numpyro(mcmc)
 
-    if num_temps > 2:
-        beta_schedule = jnp.linspace(1e-8, 1.0, num_temps)
+    if num_temps > 3:
+        tempering_betas = beta_spaced_samples(
+            num_temps,
+            0.3,
+            1,
+        )
         tempered_lnls = []
-        for beta in tqdm(beta_schedule, "Tempering"):
+        for i in tqdm(range(num_temps), "Tempering"):
             temp_mcmc = _run_mcmc(
-                **kwgs, beta=beta, num_chains=1, progress_bar=False
+                **kwgs,
+                beta=tempering_betas[i],
+                num_chains=1,
+                progress_bar=False,
             )
             tempered_lnls.append(temp_mcmc.get_samples()["untempered_loglike"])
 
         tempered_lnls = jnp.array(tempered_lnls).T
         log_z, log_z_uncertainty = stepping_stone_evidence(
-            tempered_lnls, beta_schedule, outdir, rng
+            tempered_lnls, tempering_betas, outdir, rng
         )
         print(f"Log Z: {log_z:.3e} +/- {log_z_uncertainty:.3e}")
         # add these to the inference object
