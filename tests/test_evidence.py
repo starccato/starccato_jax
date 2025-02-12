@@ -52,8 +52,9 @@ def lartillot_data(tmp_path):
     rng = jax.random.PRNGKey(42)
     samples = simulate_posterior_samples(p, v, nsamples, rng)
 
+    # THIS ISNT QUITE CORRECT...
     # Compute log-likelihoods for each sample at each beta
-    ln_likes = jnp.array([[log_like(theta, p, v) * beta for theta in samples] for beta in betas]).T
+    ln_likes = jnp.array([[log_like(theta, p, v)  for theta in samples] for beta in betas]).T
 
     return {
         "ln_likes": ln_likes,
