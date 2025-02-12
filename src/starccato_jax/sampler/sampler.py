@@ -6,22 +6,21 @@ import jax.random as random
 from numpyro.infer import MCMC, NUTS
 from tqdm.auto import tqdm
 
-from .core import _run_mcmc
 from ..io import load_model
-from ..plotting import sampler_diagnostic_plots, plot_ci
-
+from ..plotting import plot_ci, sampler_diagnostic_plots
+from .core import _run_mcmc
 from .stepping_stone_evidence import stepping_stone_evidence
 
 
 def sample_latent_vars_given_data(
-        data: jnp.ndarray,
-        model_path: str,
-        rng_int: int = 0,
-        outdir="out_mcmc",
-        num_warmup=500,
-        num_samples=2000,
-        num_chains=2,
-        num_temps=1,
+    data: jnp.ndarray,
+    model_path: str,
+    rng_int: int = 0,
+    outdir="out_mcmc",
+    num_warmup=500,
+    num_samples=2000,
+    num_chains=2,
+    num_temps=1,
 ) -> MCMC:
     """
     Sample latent variables given the data.
@@ -41,28 +40,30 @@ def sample_latent_vars_given_data(
         rng=rng,
     )
 
-    mcmc = _run_mcmc(**kwgs, beta=1.0, num_chains=num_chains, progress_bar=True)
+    mcmc = _run_mcmc(
+        **kwgs, beta=1.0, num_chains=num_chains, progress_bar=True
+    )
     inf_object = az.from_numpyro(mcmc)
 
     if num_temps > 2:
         beta_schedule = jnp.linspace(1e-8, 1.0, num_temps)
         tempered_lnls = []
         for beta in tqdm(beta_schedule, "Tempering"):
-            temp_mcmc = _run_mcmc(**kwgs, beta=beta, num_chains=1, progress_bar=False)
+            temp_mcmc = _run_mcmc(
+                **kwgs, beta=beta, num_chains=1, progress_bar=False
+            )
             tempered_lnls.append(temp_mcmc.get_samples()["untempered_loglike"])
 
-        tempered_lnls = jnp.array(tempered_lnls)
+        tempered_lnls = jnp.array(tempered_lnls).T
         log_z, log_z_uncertainty = stepping_stone_evidence(
             tempered_lnls, beta_schedule, outdir, rng
         )
-        print(f"Log Z: {log_z} +/- {log_z_uncertainty}")
+        print(f"Log Z: {log_z:.3e} +/- {log_z_uncertainty:.3e}")
         # add these to the inference object
         inf_object.sample_stats["log_z"] = log_z
         inf_object.sample_stats["log_z_uncertainty"] = log_z_uncertainty
 
-
     os.makedirs(outdir, exist_ok=True)
-
 
     print(az.summary(inf_object, var_names=["z"]))
     sampler_diagnostic_plots(inf_object, outdir)
