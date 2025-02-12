@@ -13,6 +13,7 @@ from lartillot_model import LartillotModel
 from starccato_jax.sampler.stepping_stone_evidence import (
     stepping_stone_evidence,
 )
+from starccato_jax.sampler.utils import beta_spaced_samples
 
 
 def plot_estimate(lnz, lnz_err, true_lnZ, outdir):
@@ -41,8 +42,8 @@ def test_lartillot_model():
 def test_stepping_stone_evidence(outdir):
     lartillot_model = LartillotModel(p=20, v=0.01)
     rng = random.PRNGKey(0)
-    ntemps = 20
-    betas = np.linspace(0, 1, ntemps)
+    ntemps = 32
+    betas = beta_spaced_samples(ntemps, 0.3, 1)
     lnl_chains = lartillot_model.generate_lnl_chains(1000, betas, rng).T
 
     """Ensure stepping stone evidence runs without errors."""
