@@ -2,10 +2,12 @@ from typing import Tuple
 
 import jax
 import matplotlib.pyplot as plt
+import numpy as jnp
 import numpy as np
-from jax import numpy as jnp
 from jax.random import PRNGKey
 from jax.scipy.special import logsumexp
+
+# from jax import numpy as jnp
 
 
 def stepping_stone_evidence(

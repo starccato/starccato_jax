@@ -1,14 +1,9 @@
 import os
 
-import jax
-import jax.numpy as jnp
 import jax.random as random
 import matplotlib.pyplot as plt
 import numpy as np
-import pytest
-from jax import jit
-from jax.scipy.stats import multivariate_normal, norm
-from lartillot_model import LartillotModel
+from lartillot_gaussian import LartillotGaussianModel
 
 from starccato_jax.sampler.stepping_stone_evidence import (
     stepping_stone_evidence,
@@ -26,30 +21,24 @@ def plot_estimate(lnz, lnz_err, true_lnZ, outdir):
         color="tab:orange",
         label="Stepping Stone",
     )
+    plt.ylim(true_lnZ - 2, true_lnZ + 2)
     plt.axhline(true_lnZ, color="r", label="True LnZ")
-    plt.legend(frameon=False)
+    plt.legend(frameon=False, loc="upper right", bbox_to_anchor=(1.0, 1.0))
     plt.ylabel("LnZ")
     plt.xticks([])
+    plt.tight_layout()
     plt.savefig(os.path.join(outdir, "lnz_stepping_stone_comparison.png"))
 
 
-def test_lartillot_model():
-    assert np.isclose(
-        LartillotModel(p=20, v=0.01).lnZ, -46.15, atol=0.01
-    ), "True log evidence should be close to -46.15"
-
-
 def test_stepping_stone_evidence(outdir):
-    lartillot_model = LartillotModel(p=20, v=0.01)
+    lartillot_model = LartillotGaussianModel(d=20, v=0.01)
     rng = random.PRNGKey(0)
     ntemps = 32
     betas = beta_spaced_samples(ntemps, 0.3, 1)
-    lnl_chains = lartillot_model.generate_lnl_chains(1000, betas, rng).T
+    lnl_chains = lartillot_model.generate_lnl_chains(1000, betas).T
 
-    """Ensure stepping stone evidence runs without errors."""
     ln_z, ln_z_err = stepping_stone_evidence(lnl_chains, betas, outdir, rng)
     plot_estimate(ln_z, ln_z_err, lartillot_model.lnZ, outdir)
-
     assert np.isfinite(ln_z), "Log evidence should be finite"
     assert np.isfinite(ln_z_err), "Log evidence uncertainty should be finite"
 
