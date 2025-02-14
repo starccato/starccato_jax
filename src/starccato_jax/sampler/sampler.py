@@ -22,6 +22,7 @@ def sample_latent_vars_given_data(
     num_samples=2000,
     num_chains=2,
     num_temps=1,
+    verbose=True,
 ) -> MCMC:
     """
     Sample latent variables given the data.
@@ -42,7 +43,7 @@ def sample_latent_vars_given_data(
     )
 
     mcmc = _run_mcmc(
-        **kwgs, beta=1.0, num_chains=num_chains, progress_bar=True
+        **kwgs, beta=1.0, num_chains=num_chains, progress_bar=verbose
     )
     inf_object = az.from_numpyro(mcmc)
 
@@ -73,7 +74,8 @@ def sample_latent_vars_given_data(
 
     os.makedirs(outdir, exist_ok=True)
 
-    print(az.summary(inf_object, var_names=["z"]))
+    if verbose:
+        print(az.summary(inf_object, var_names=["z"]))
     sampler_diagnostic_plots(inf_object, outdir)
     z_samples = inf_object.posterior["z"].values.reshape(
         -1, vae_data.latent_dim
