@@ -5,10 +5,49 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.1:
+
+v0.1.1 (2025-02-13)
+===================
+
+Bug Fixes
+---------
+
+* fix: added test for stepping stone llnz (`0b535b1`_)
+
+Unknown
+-------
+
+* tweak values (`0780254`_)
+
+* evidence hacking (`6497499`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`1ea2e6f`_)
+
+* Merge branch 'main' of https://github.com/starccato/starccato_jax into main (`5eaf62f`_)
+
+* add note on evidence test (`6c639c5`_)
+
+* add monotonic schedule investigation (`050399b`_)
+
+.. _0b535b1: https://github.com/starccato/starccato_jax/commit/0b535b1859b402c035ea239ab92c297282b3b113
+.. _0780254: https://github.com/starccato/starccato_jax/commit/078025440e3a39dc5c7a77dc5d065c2f21171e79
+.. _6497499: https://github.com/starccato/starccato_jax/commit/649749994381823593132d5112c3a4d80492e370
+.. _1ea2e6f: https://github.com/starccato/starccato_jax/commit/1ea2e6f753c4106c4522872bcf7b563a6c02cafb
+.. _5eaf62f: https://github.com/starccato/starccato_jax/commit/5eaf62fb4c7cff1ff7ad4391c86743239c8bffff
+.. _6c639c5: https://github.com/starccato/starccato_jax/commit/6c639c59678534bd6c07d9152de86c815a5874ce
+.. _050399b: https://github.com/starccato/starccato_jax/commit/050399b1914de36b0e0964b7518f47c600c5058e
+
+
 .. _changelog-v0.1.0:
 
 v0.1.0 (2025-02-11)
 ===================
+
+Chores
+------
+
+* chore(release): 0.1.0 (`01d6f61`_)
 
 Features
 --------
@@ -40,6 +79,7 @@ Unknown
 
 * adjust the docs structre (`7310a72`_)
 
+.. _01d6f61: https://github.com/starccato/starccato_jax/commit/01d6f61afd0e7dc5381accc9f299ff7e371454ec
 .. _77cdae0: https://github.com/starccato/starccato_jax/commit/77cdae03a73a74ec31968076c5ff5dd423e9fc91
 .. _8c7c6a8: https://github.com/starccato/starccato_jax/commit/8c7c6a8cd9cd5813db12481f85e23e7dd279c38f
 .. _917cdeb: https://github.com/starccato/starccato_jax/commit/917cdeb2ed427b5b6b9dfa76112f3e03d0162bb9

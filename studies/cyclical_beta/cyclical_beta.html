@@ -452,19 +452,19 @@
 <span class="n">config_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">latent_dim</span><span class="o">=</span><span class="n">Z_SIZE</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 
 <span class="n">kwargs</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="c1"># dict(</span>
-    <span class="c1">#     save_dir=OUT_BETA_RAMP,</span>
-    <span class="c1">#     config=Config(</span>
-    <span class="c1">#         beta_start=0,</span>
-    <span class="c1">#         beta_end=1,</span>
-    <span class="c1">#         cyclical_annealing_cycles=1,</span>
-    <span class="c1">#         **config_args,</span>
-    <span class="c1">#     ),</span>
-    <span class="c1"># ),</span>
-    <span class="c1"># dict(</span>
-    <span class="c1">#     save_dir=OUT_BETA_0,</span>
-    <span class="c1">#     config=Config(beta_start=0, beta_end=0, **config_args),</span>
-    <span class="c1"># ),</span>
+    <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">save_dir</span><span class="o">=</span><span class="n">OUT_BETA_RAMP</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span>
+            <span class="n">beta_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">beta_end</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">config_args</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">save_dir</span><span class="o">=</span><span class="n">OUT_BETA_0</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">beta_start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">beta_end</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">config_args</span><span class="p">),</span>
+    <span class="p">),</span>
     <span class="nb">dict</span><span class="p">(</span>
         <span class="n">save_dir</span><span class="o">=</span><span class="n">OUT_BETA_CYCLICAL</span><span class="p">,</span>
         <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span>
@@ -474,10 +474,10 @@
             <span class="o">**</span><span class="n">config_args</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">),</span>
-    <span class="c1"># dict(</span>
-    <span class="c1">#     save_dir=OUT_BETA_1,</span>
-    <span class="c1">#     config=Config(beta_start=1, beta_end=1, **config_args),</span>
-    <span class="c1"># ),</span>
+    <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">save_dir</span><span class="o">=</span><span class="n">OUT_BETA_1</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">beta_start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">beta_end</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">config_args</span><span class="p">),</span>
+    <span class="p">),</span>
 <span class="p">]</span>
 
 
