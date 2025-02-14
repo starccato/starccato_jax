@@ -15,19 +15,19 @@ Z_SIZE = 24
 config_args = dict(latent_dim=Z_SIZE, epochs=1000)
 
 kwargs = [
-    # dict(
-    #     save_dir=OUT_BETA_RAMP,
-    #     config=Config(
-    #         beta_start=0,
-    #         beta_end=1,
-    #         cyclical_annealing_cycles=1,
-    #         **config_args,
-    #     ),
-    # ),
-    # dict(
-    #     save_dir=OUT_BETA_0,
-    #     config=Config(beta_start=0, beta_end=0, **config_args),
-    # ),
+    dict(
+        save_dir=OUT_BETA_RAMP,
+        config=Config(
+            beta_start=0,
+            beta_end=1,
+            cyclical_annealing_cycles=1,
+            **config_args,
+        ),
+    ),
+    dict(
+        save_dir=OUT_BETA_0,
+        config=Config(beta_start=0, beta_end=0, cyclical_annealing_cycles=0, **config_args),
+    ),
     dict(
         save_dir=OUT_BETA_CYCLICAL,
         config=Config(
@@ -37,10 +37,10 @@ kwargs = [
             **config_args,
         ),
     ),
-    # dict(
-    #     save_dir=OUT_BETA_1,
-    #     config=Config(beta_start=1, beta_end=1, **config_args),
-    # ),
+    dict(
+        save_dir=OUT_BETA_1,
+        config=Config(beta_start=1, beta_end=1, cyclical_annealing_cycles=0, **config_args),
+    ),
 ]
 
 

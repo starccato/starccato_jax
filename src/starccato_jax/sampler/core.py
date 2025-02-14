@@ -8,8 +8,10 @@ from numpyro.infer import MCMC, NUTS
 from ..model import ModelData, generate
 
 
+
+
 def _bayesian_model(
-    y_obs: jnp.ndarray, vae_data: ModelData, beta: float = 1.0
+    y_obs: jnp.ndarray, vae_data: ModelData,  rng:PRNGKey, beta: float = 1.0,
 ):
     """
     Bayesian model with tempering.
@@ -25,9 +27,9 @@ def _bayesian_model(
         "z", dist.Uniform(0, 1).expand([vae_data.latent_dim])
     )
     # Generate the signal
-    y_model = generate(vae_data, z=theta, rng=random.PRNGKey(0))
+    y_model = generate(vae_data, z=theta, rng=rng)
 
-    sigma = numpyro.sample("sigma", dist.HalfNormal(0.1))  # Noise level
+    sigma = numpyro.sample("sigma", dist.HalfNormal(0.01))  # Noise level
 
     # Compute the untempered log–likelihood (Assuming Gaussian noise)
     lnl = dist.Normal(y_model, sigma).log_prob(y_obs).sum()
@@ -62,7 +64,7 @@ def _run_mcmc(
       beta        : tempering parameter; beta=1 corresponds to full posterior.
     """
     nuts_kernel = NUTS(
-        lambda y_obs: _bayesian_model(y_obs, vae_data, beta=beta)
+        lambda y_obs: _bayesian_model(y_obs, vae_data, rng, beta=beta)
     )
     mcmc = MCMC(
         nuts_kernel,
