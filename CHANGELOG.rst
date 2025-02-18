@@ -5,6 +5,37 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.2:
+
+v0.1.2 (2025-02-18)
+===================
+
+Bug Fixes
+---------
+
+* fix: remove sampler to its own repo (`b925a56`_)
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`76de062`_)
+
+* hacking on optimizer to improve start point (`b63c5b6`_)
+
+* hacking on optimizer to improve start point (`f32b24c`_)
+
+* add harmonic code (`56cc4a3`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`77af03f`_)
+
+.. _b925a56: https://github.com/starccato/starccato_jax/commit/b925a56af9e004c30cb1c71f2f383c705e4ace09
+.. _76de062: https://github.com/starccato/starccato_jax/commit/76de06255512f39395c6d9e316371dd038e74e03
+.. _b63c5b6: https://github.com/starccato/starccato_jax/commit/b63c5b6ff3d3c52799b74a4297f5f2ad3bf1eb4e
+.. _f32b24c: https://github.com/starccato/starccato_jax/commit/f32b24ca350193f9573a4057c48d0d84ecc6cbfe
+.. _56cc4a3: https://github.com/starccato/starccato_jax/commit/56cc4a3ff0185541b5fa9de5bd2a6ff5bb114b99
+.. _77af03f: https://github.com/starccato/starccato_jax/commit/77af03f49ff05fd2d7f0de901f8f02f38bc8356d
+
+
 .. _changelog-v0.1.1:
 
 v0.1.1 (2025-02-13)
@@ -13,7 +44,16 @@ v0.1.1 (2025-02-13)
 Bug Fixes
 ---------
 
+* fix: tests pass for SS, tests failing for harmonic... dang (`6ff8a18`_)
+
+* fix: tests pass for SS, tests failing for harmonic... dang (`0eda5c5`_)
+
 * fix: added test for stepping stone llnz (`0b535b1`_)
+
+Chores
+------
+
+* chore(release): 0.1.1 (`576364a`_)
 
 Unknown
 -------
@@ -30,7 +70,10 @@ Unknown
 
 * add monotonic schedule investigation (`050399b`_)
 
+.. _6ff8a18: https://github.com/starccato/starccato_jax/commit/6ff8a18c6c68c47a5603de047c85754f04e3a171
+.. _0eda5c5: https://github.com/starccato/starccato_jax/commit/0eda5c5e5d4a1095811b96ed10aef5b43bdc92fd
 .. _0b535b1: https://github.com/starccato/starccato_jax/commit/0b535b1859b402c035ea239ab92c297282b3b113
+.. _576364a: https://github.com/starccato/starccato_jax/commit/576364ac2a27248dc698a5c8aaa17e810cdf607e
 .. _0780254: https://github.com/starccato/starccato_jax/commit/078025440e3a39dc5c7a77dc5d065c2f21171e79
 .. _6497499: https://github.com/starccato/starccato_jax/commit/649749994381823593132d5112c3a4d80492e370
 .. _1ea2e6f: https://github.com/starccato/starccato_jax/commit/1ea2e6f753c4106c4522872bcf7b563a6c02cafb
