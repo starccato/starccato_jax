@@ -10,11 +10,15 @@ __all__ = ["StarccatoVAE"]
 
 
 class StarccatoVAE:
-    def __init__(self, model_dir="default_model"):
+    def __init__(self, model_dir: str = None):
         self.model_dir = model_dir
-        if model_dir == "default_model":
+        if model_dir is None or model_dir == "default_model":
             self.model_dir = get_default_weights()
-        self.model: ModelData = load_model(self.model_dir)
+        self._data: ModelData = load_model(self.model_dir)
+
+    @property
+    def latent_dim(self) -> int:
+        return self._data.latent_dim
 
     @classmethod
     def train(
@@ -28,9 +32,7 @@ class StarccatoVAE:
         train_data, val_data = load_training_data(
             train_fraction=train_fraction
         )
-        config = config or Config(
-            latent_dim=8, epochs=10, cyclical_annealing_cycles=0
-        )
+        config = config or Config()
         train_vae(
             train_data,
             val_data,
@@ -44,9 +46,9 @@ class StarccatoVAE:
     def generate(
         self, z: jnp.ndarray = None, rng: PRNGKey = None
     ) -> jnp.ndarray:
-        return generate(self.model, z, rng)
+        return generate(self._data, z, rng)
 
     def reconstruct(
         self, x: jnp.ndarray, rng: PRNGKey = None, n_reps: int = 1
     ) -> jnp.ndarray:
-        return reconstruct(x, self.model, rng=rng, n_reps=n_reps)
+        return reconstruct(x, self._data, rng=rng, n_reps=n_reps)
