@@ -23,17 +23,6 @@ class TrainValMetrics:
         return f"Train Loss: {tl:.3e}, Val Loss: {vl:.3e}"
 
 
-# def compute_beta(step: int, cycle_length: int=0) -> float:
-#     """Cyclical linear annealing from 0 to 1 over `cycle_length` steps.
-#
-#     - Setting `cycle_length` to the number of steps in an epoch will result in a linear annealing schedule within each epoch.
-#     - Setting `cycle_length` to the number of steps in a training loop will result in a linear annealing schedule across the entire training loop.
-#     - Setting `cycle_length` to a small number (0) will result in a constant value of 1 (no annealing).
-#     """
-#     cycle_step = step % cycle_length
-#     return min(cycle_step / cycle_length, 1.0)
-
-
 def cyclical_annealing_beta(
     n_epoch, start=0.0, stop=1.0, n_cycle=4, ratio=0.5
 ):
@@ -124,12 +113,15 @@ def vae_loss(params, x, rng, model, beta: float) -> Losses:
 
     # BATCH AVERAGE KL DIVERGENCE
     # which would compute the mean KL divergence over the batch.
-    kl_divergence = -0.5 * jnp.mean(1 + logvar - jnp.square(mean) - jnp.exp(logvar))
+    kl_divergence = -0.5 * jnp.mean(
+        1 + logvar - jnp.square(mean) - jnp.exp(logvar)
+    )
 
     # Total loss: reconstruction loss plus beta-scaled KL divergence.
     net_loss = reconstruction_loss + beta * kl_divergence
 
     return Losses(reconstruction_loss, kl_divergence, net_loss, beta)
+
 
 def compute_metrics(
     state, x, rng, model, validation_x, beta

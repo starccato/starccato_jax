@@ -29,16 +29,12 @@ dependencies = [
     "matplotlib",
     "pandas",
     "h5py",
-    "numpyro",
-    "arviz",
-    "corner",
     "pillow",
     "natsort",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "lartillot_gaussian",
     "pytest",
     "pytest-cov",
     "flake8>=5.0.4",

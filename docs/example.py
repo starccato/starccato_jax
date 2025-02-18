@@ -7,7 +7,6 @@ import numpy as np
 from starccato_jax.data import load_data
 from starccato_jax.io import load_model
 from starccato_jax.model import reconstruct
-from starccato_jax.sampler import sample_latent_vars_given_data
 from starccato_jax.trainer import Config, train_vae
 
 HERE = os.path.dirname(__file__)

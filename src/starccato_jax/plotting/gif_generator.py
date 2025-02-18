@@ -1,12 +1,20 @@
-import re
 import glob
+
 from natsort import natsorted
 from PIL import Image
 
 
-def generate_gif(image_pattern: str, output_gif: str, duration: float = 100, final_pause: float = 500):
+def generate_gif(
+    image_pattern: str,
+    output_gif: str,
+    duration: float = 100,
+    final_pause: float = 500,
+):
     """
     Generate a looping GIF from PNG images matching a regex pattern.
+
+    Example usage:
+    generate_gif("frames/*.png", "output.gif", duration=100, final_pause=500)
 
     Parameters:
     - image_pattern (str): Regex pattern to match PNG images.
@@ -36,10 +44,7 @@ def generate_gif(image_pattern: str, output_gif: str, duration: float = 100, fin
         save_all=True,
         append_images=images[1:],
         duration=durations,
-        loop=0  # Loop forever
+        loop=0,  # Loop forever
     )
 
     print(f"GIF saved as {output_gif}")
-
-# Example usage:
-# generate_gif("frames/*.png", "output.gif", duration=100, final_pause=500)
