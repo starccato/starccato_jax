@@ -100,7 +100,7 @@ def plot_reconstructions(
     for i in range(nsamples):
         recon = reconstruct(val_data[i], model_data, rng, n_reps=100)
         qtls = jnp.quantile(recon, jnp.array([0.025, 0.5, 0.975]), axis=0)
-        _add_quantiles(
+        add_quantiles(
             axes[i], qtls, "Reconstruction", "tab:orange", y_obs=val_data[i]
         )
         axes[i].set_axis_off()
@@ -115,7 +115,7 @@ def plot_reconstructions(
         plt.savefig(fname)
 
 
-def _add_quantiles(
+def add_quantiles(
     ax: plt.Axes,
     y_ci: np.ndarray,
     label: str,
