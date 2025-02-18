@@ -8,7 +8,7 @@ import numpy as np
 from flax.core.frozen_dict import freeze
 from flax.training.train_state import TrainState
 
-from .config import Config
+from ..config import Config
 from .loss import Losses, TrainValMetrics, aggregate_metrics
 from .model import ModelData
 
@@ -58,9 +58,9 @@ def save_model(
     print(f"Model saved to {filename}")
 
 
-def load_model(savedir: str) -> ModelData:
+def load_model(savedir: str, model_fname: str = MODEL_FNAME) -> ModelData:
     """Loads model parameters and configs"""
-    filename = f"{savedir}/{MODEL_FNAME}"
+    filename = f"{savedir}/{model_fname}"
 
     def recursively_load(h5group):
         """Recursively load parameters from HDF5 into a nested dict."""

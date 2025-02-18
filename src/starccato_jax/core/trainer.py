@@ -9,7 +9,12 @@ import numpy as np
 import optax
 from flax.training import train_state
 
-from .config import Config
+from ..config import Config
+from ..plotting import (
+    generate_gif,
+    plot_reconstructions,
+    plot_training_metrics,
+)
 from .io import save_model
 from .loss import (
     TrainValMetrics,
@@ -18,7 +23,6 @@ from .loss import (
     vae_loss,
 )
 from .model import VAE, ModelData
-from .plotting import generate_gif, plot_reconstructions, plot_training_metrics
 
 __all__ = ["train_vae"]
 

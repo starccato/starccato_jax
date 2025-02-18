@@ -5,14 +5,13 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 
-_ROOT_URL = "https://raw.githubusercontent.com/starccato/data/main/training"
-SIGNALS_CSV = f"{_ROOT_URL}/richers_1764.csv"
-PARAMETERS_CSV = f"{_ROOT_URL}/richers_1764_parameters.csv"
+from .urls import PARAMETERS_CSV_URL, SIGNALS_CSV_URL
+
 HERE = os.path.dirname(__file__)
 CACHE = f"{HERE}/data.npz"
 
 
-def load_data(
+def load_training_data(
     train_fraction: float = 0.8, clean: bool = False
 ) -> Tuple[jnp.ndarray, jnp.ndarray]:
     if not os.path.exists(CACHE) or clean:
@@ -22,8 +21,6 @@ def load_data(
     # shuffle data
     np.random.seed(0)
     np.random.shuffle(data)
-
-
 
     # standardise using max value from entire dataset, and zero mean for each row
     # data = data / np.max(np.abs(data))
@@ -47,8 +44,8 @@ def load_data(
 
 
 def _download_and_save_data():
-    parameters = pd.read_csv(PARAMETERS_CSV)
-    data = pd.read_csv(SIGNALS_CSV).astype("float32")[
+    parameters = pd.read_csv(PARAMETERS_CSV_URL)
+    data = pd.read_csv(SIGNALS_CSV_URL).astype("float32")[
         parameters["beta1_IC_b"] > 0
     ]
     data = data.values.T[:, 140:]  # cut the first few datapoints

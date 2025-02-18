@@ -8,9 +8,9 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..io import ModelData
-from ..loss import Losses, TrainValMetrics, aggregate_metrics
-from ..model import reconstruct
+from ..core.io import ModelData
+from ..core.loss import Losses, TrainValMetrics, aggregate_metrics
+from ..core.model import reconstruct
 
 
 def plot_training_metrics(
