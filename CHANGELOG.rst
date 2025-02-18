@@ -5,6 +5,28 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.3:
+
+v0.1.3 (2025-02-18)
+===================
+
+Bug Fixes
+---------
+
+* fix: cleanup VAE iAPI (`1637468`_)
+
+Unknown
+-------
+
+* expose add_quantiles (`4f0c5ce`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`5daaed1`_)
+
+.. _1637468: https://github.com/starccato/starccato_jax/commit/1637468e3ecdecf9e95cbdcb2c0b9c9e726cf274
+.. _4f0c5ce: https://github.com/starccato/starccato_jax/commit/4f0c5ce5a59a668cb9e118f981d995fcec41673f
+.. _5daaed1: https://github.com/starccato/starccato_jax/commit/5daaed1be097105e7e0c2c05f37cb6a2c682f662
+
+
 .. _changelog-v0.1.2:
 
 v0.1.2 (2025-02-18)
@@ -13,7 +35,14 @@ v0.1.2 (2025-02-18)
 Bug Fixes
 ---------
 
+* fix: add defaul model weights (`b0a41d2`_)
+
 * fix: remove sampler to its own repo (`b925a56`_)
+
+Chores
+------
+
+* chore(release): 0.1.2 (`957f07c`_)
 
 Unknown
 -------
@@ -28,7 +57,9 @@ Unknown
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`77af03f`_)
 
+.. _b0a41d2: https://github.com/starccato/starccato_jax/commit/b0a41d212f43d46c13fe150eb4a44d98cb444e58
 .. _b925a56: https://github.com/starccato/starccato_jax/commit/b925a56af9e004c30cb1c71f2f383c705e4ace09
+.. _957f07c: https://github.com/starccato/starccato_jax/commit/957f07cbdf63a31a6ec54e8832217adcb862c1ca
 .. _76de062: https://github.com/starccato/starccato_jax/commit/76de06255512f39395c6d9e316371dd038e74e03
 .. _b63c5b6: https://github.com/starccato/starccato_jax/commit/b63c5b6ff3d3c52799b74a4297f5f2ad3bf1eb4e
 .. _f32b24c: https://github.com/starccato/starccato_jax/commit/f32b24ca350193f9573a4057c48d0d84ecc6cbfe
