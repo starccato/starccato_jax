@@ -11,6 +11,7 @@ import numpy as np
 from ..core.io import ModelData
 from ..core.loss import Losses, TrainValMetrics, aggregate_metrics
 from ..core.model import reconstruct
+from .credible_intervals import pointwise_ci, uniform_ci
 
 
 def plot_training_metrics(
@@ -91,6 +92,7 @@ def plot_reconstructions(
     fname: str = None,
     title: str = None,
     rng: jax.random.PRNGKey = None,
+    uniform_ci: bool = False,
 ):
     ncols = nrows
     nsamples = nrows * ncols
@@ -99,7 +101,10 @@ def plot_reconstructions(
     axes = axes.flatten()
     for i in range(nsamples):
         recon = reconstruct(val_data[i], model_data, rng, n_reps=100)
-        qtls = jnp.quantile(recon, jnp.array([0.025, 0.5, 0.975]), axis=0)
+        if uniform_ci:
+            qtls = uniform_ci(recon, ci=0.9)
+        else:
+            qtls = pointwise_ci(recon, ci=0.9)
         add_quantiles(
             axes[i], qtls, "Reconstruction", "tab:orange", y_obs=val_data[i]
         )
