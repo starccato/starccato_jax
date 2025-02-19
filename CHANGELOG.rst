@@ -5,16 +5,41 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.6:
+
+v0.1.6 (2025-02-19)
+===================
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`774c50b`_)
+
+.. _774c50b: https://github.com/starccato/starccato_jax/commit/774c50b4448a67df0ba46cf05d93aac4f12e939d
+
+
 .. _changelog-v0.1.5:
 
 v0.1.5 (2025-02-19)
 ===================
+
+Bug Fixes
+---------
+
+* fix: add plotting and credible interval computer (`9d3ba42`_)
+
+Chores
+------
+
+* chore(release): 0.1.5 (`ad775ab`_)
 
 Unknown
 -------
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`54361e8`_)
 
+.. _9d3ba42: https://github.com/starccato/starccato_jax/commit/9d3ba425e22899831c51a71beef632e8b21fab79
+.. _ad775ab: https://github.com/starccato/starccato_jax/commit/ad775ab04c156bf28b879468c6149766bfc1b008
 .. _54361e8: https://github.com/starccato/starccato_jax/commit/54361e810c29a02853f16cc93e9c4d95f025f2f1
 
 
