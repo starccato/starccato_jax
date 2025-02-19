@@ -5,6 +5,25 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.4:
+
+v0.1.4 (2025-02-19)
+===================
+
+Bug Fixes
+---------
+
+* fix: update docs (`534e1e7`_)
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`011872a`_)
+
+.. _534e1e7: https://github.com/starccato/starccato_jax/commit/534e1e7843aab229cd9e23a1bd8fdb63faf1812d
+.. _011872a: https://github.com/starccato/starccato_jax/commit/011872a4c5dfdaa3348b9e4f9c7dc8780c0b5dc0
+
+
 .. _changelog-v0.1.3:
 
 v0.1.3 (2025-02-18)
@@ -15,14 +34,23 @@ Bug Fixes
 
 * fix: cleanup VAE iAPI (`1637468`_)
 
+Chores
+------
+
+* chore(release): 0.1.3 (`400d057`_)
+
 Unknown
 -------
+
+* update plots (`a1e6b3e`_)
 
 * expose add_quantiles (`4f0c5ce`_)
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`5daaed1`_)
 
 .. _1637468: https://github.com/starccato/starccato_jax/commit/1637468e3ecdecf9e95cbdcb2c0b9c9e726cf274
+.. _400d057: https://github.com/starccato/starccato_jax/commit/400d0573472f4a86d0a5026fbc49d5f808600728
+.. _a1e6b3e: https://github.com/starccato/starccato_jax/commit/a1e6b3e9c43a5c2f1c3a1da9d2394ddb95035427
 .. _4f0c5ce: https://github.com/starccato/starccato_jax/commit/4f0c5ce5a59a668cb9e118f981d995fcec41673f
 .. _5daaed1: https://github.com/starccato/starccato_jax/commit/5daaed1be097105e7e0c2c05f37cb6a2c682f662
 
