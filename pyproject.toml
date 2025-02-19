@@ -31,6 +31,7 @@ dependencies = [
     "h5py",
     "pillow",
     "natsort",
+    "tqdm",
 ]
 
 [project.optional-dependencies]
