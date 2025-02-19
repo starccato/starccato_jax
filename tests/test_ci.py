@@ -2,7 +2,7 @@ import jax
 import jax.numpy as jnp
 import pytest
 
-from starccato_jax.plotting.credible_intervals import pointwise_ci, uniform_ci
+from starccato_jax.credible_intervals import pointwise_ci, uniform_ci
 
 
 @pytest.fixture

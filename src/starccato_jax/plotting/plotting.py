@@ -11,7 +11,7 @@ import numpy as np
 from ..core.io import ModelData
 from ..core.loss import Losses, TrainValMetrics, aggregate_metrics
 from ..core.model import reconstruct
-from .credible_intervals import pointwise_ci, uniform_ci
+from ..credible_intervals import pointwise_ci, uniform_ci
 
 
 def plot_training_metrics(
@@ -123,8 +123,8 @@ def plot_reconstructions(
 def add_quantiles(
     ax: plt.Axes,
     y_ci: np.ndarray,
-    label: str,
-    color: str,
+    label: str = None,
+    color: str = "tab:orange",
     alpha: float = 0.5,
     y_obs: np.ndarray = None,
 ):
