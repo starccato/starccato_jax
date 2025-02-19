@@ -5,6 +5,19 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.5:
+
+v0.1.5 (2025-02-19)
+===================
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`54361e8`_)
+
+.. _54361e8: https://github.com/starccato/starccato_jax/commit/54361e810c29a02853f16cc93e9c4d95f025f2f1
+
+
 .. _changelog-v0.1.4:
 
 v0.1.4 (2025-02-19)
@@ -13,14 +26,29 @@ v0.1.4 (2025-02-19)
 Bug Fixes
 ---------
 
+* fix: add tqdm (`b53ad32`_)
+
 * fix: update docs (`534e1e7`_)
+
+Chores
+------
+
+* chore(release): 0.1.4 (`eb53ebf`_)
 
 Unknown
 -------
 
+* add CI (`0284ae7`_)
+
+* add CI (`a081795`_)
+
 * Merge branch 'main' of github.com:starccato/starccato_jax (`011872a`_)
 
+.. _b53ad32: https://github.com/starccato/starccato_jax/commit/b53ad32c8982f360a6db746f6e8a2b0b4c74d566
 .. _534e1e7: https://github.com/starccato/starccato_jax/commit/534e1e7843aab229cd9e23a1bd8fdb63faf1812d
+.. _eb53ebf: https://github.com/starccato/starccato_jax/commit/eb53ebfe69dcf29dc6113741b86c19db67e16a21
+.. _0284ae7: https://github.com/starccato/starccato_jax/commit/0284ae7e414dd85274205606a9eef7a3b7ce4d2b
+.. _a081795: https://github.com/starccato/starccato_jax/commit/a08179591f67c8c778ba88436c4e499c7e145edf
 .. _011872a: https://github.com/starccato/starccato_jax/commit/011872a4c5dfdaa3348b9e4f9c7dc8780c0b5dc0
 
 
