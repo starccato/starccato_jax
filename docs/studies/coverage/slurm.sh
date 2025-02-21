@@ -4,7 +4,7 @@
 #SBATCH --output=logs/vae_mcmc_%a.log
 #SBATCH --ntasks=1
 #SBATCH --time=00:03:30
-#SBATCH --mem=750MB
+#SBATCH --mem=500MB
 #SBATCH --cpus-per-task=1
 #SBATCH --array=0-352
 

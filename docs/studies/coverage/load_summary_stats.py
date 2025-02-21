@@ -4,6 +4,7 @@ import arviz
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from tqdm.auto import tqdm
 
 REGEX = "out_mcmc/val*/inference.nc"
 
@@ -21,7 +22,7 @@ KEYS = [
 def load_all_summary_stats():
     files = glob.glob(REGEX)
     summary_stats = []
-    for file in files:
+    for file in tqdm(files, desc="Loading summary stats"):
         inf = arviz.from_netcdf(file)
         stats = {key: float(inf.sample_stats[key].values) for key in KEYS}
         summary_stats.append(stats)
