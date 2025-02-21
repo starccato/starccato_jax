@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from jax.random import PRNGKey
 from starccato_sampler.sampler import sample
@@ -11,9 +12,11 @@ RNG = PRNGKey(0)
 
 def main(i: int):
     print(f"Running sampler on validation data {i}")
+    outdir = f"out_mcmc/val{i}"
+    os.makedirs(outdir, exist_ok=True)
     sample(
         VAL_DATA[i],
-        outdir="out_mcmc/val{i}",
+        outdir=outdir,
         num_warmup=500,
         num_samples=1000,
         num_chains=1,
