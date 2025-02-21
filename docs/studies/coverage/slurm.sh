@@ -6,7 +6,7 @@
 #SBATCH --time=00:03:30
 #SBATCH --mem=750MB
 #SBATCH --cpus-per-task=1
-#SBATCH --array=0-200
+#SBATCH --array=0-352
 
 ml gcc/12.3.0 python/3.11.3
 source /fred/oz303/avajpeyi/venvs/starccato_jax_venv/bin/activate

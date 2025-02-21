@@ -183,3 +183,4 @@ cython_debug/
 /src/starccato_jax/README.rst
 /docs/README.rst
 /docs/CHANGELOG.rst
+/docs/studies/coverage/summary_stats.csv

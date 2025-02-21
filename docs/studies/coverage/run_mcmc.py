@@ -11,7 +11,7 @@ RNG = PRNGKey(0)
 
 
 def main(i: int):
-    print(f"Running sampler on validation data {i}")
+    print(f"Running sampler on validation data {i}/{len(VAL_DATA)}")
     outdir = f"out_mcmc/val{i}"
     os.makedirs(outdir, exist_ok=True)
     sample(
