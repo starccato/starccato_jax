@@ -47,9 +47,14 @@ def main(
     )
 
 
-RUN_ON_VALIDATION = True
-
 if __name__ == "__main__":
+    load_injections()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("i", type=int)
+    parser.add_argument("--dataset", type=str, default="val")
+    args = parser.parse_args()
+
+    RUN_ON_VALIDATION = args.dataset == "val"
     if RUN_ON_VALIDATION:
         _, data = load_training_data()
         z = None
@@ -57,10 +62,5 @@ if __name__ == "__main__":
     else:
         data, z = load_injections()
         label = "inj"
-
-    load_injections()
-    parser = argparse.ArgumentParser()
-    parser.add_argument("i", type=int)
-    args = parser.parse_args()
 
     main(args.i, data, z, label)

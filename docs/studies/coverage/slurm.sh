@@ -10,4 +10,4 @@
 
 ml gcc/12.3.0 python/3.11.3
 source /fred/oz303/avajpeyi/venvs/starccato_jax_venv/bin/activate
-python run_mcmc.py $SLURM_ARRAY_TASK_ID
+python run_mcmc.py $SLURM_ARRAY_TASK_ID --dataset "injection"
