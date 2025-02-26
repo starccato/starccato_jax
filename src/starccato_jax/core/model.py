@@ -70,11 +70,14 @@ class ModelData:
 
 
 def generate(
-    model_data: ModelData, z: jnp.ndarray = None, rng: PRNGKey = None
+    model_data: ModelData,
+    z: jnp.ndarray = None,
+    rng: PRNGKey = None,
+    n: int = 1,
 ) -> jnp.ndarray:
     rng = rng if rng is not None else PRNGKey(0)
     z = (
-        jax.random.normal(rng, shape=(1, model_data.latent_dim))
+        jax.random.normal(rng, shape=(n, model_data.latent_dim))
         if z is None
         else z
     )

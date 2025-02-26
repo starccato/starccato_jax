@@ -11,7 +11,7 @@ import numpy as np
 from ..core.io import ModelData
 from ..core.loss import Losses, TrainValMetrics, aggregate_metrics
 from ..core.model import reconstruct
-from ..credible_intervals import pointwise_ci, uniform_ci
+from ..credible_intervals import coverage_probability, pointwise_ci, uniform_ci
 
 
 def plot_training_metrics(
@@ -136,11 +136,15 @@ def add_quantiles(
 
     _, xlen = y_ci.shape
     x = np.arange(xlen)
-    ax.fill_between(
-        x, y_ci[0], y_ci[2], color=color, alpha=alpha, label=label, lw=0
-    )
-    ax.plot(y_ci[1], color=color, lw=1, ls="--")
+
     if y_obs is not None:
         ax.plot(y_obs, color="black", lw=2, zorder=-1, label="Observed")
         # set ylim _slightly_ above and below the y_obs
         ax.set_ylim(np.min(y_obs) - 0.1, np.max(y_obs) + 0.1)
+        coverage = coverage_probability(y_ci, y_obs)
+        label = f"{label} ({coverage:.0%})"
+
+    ax.fill_between(
+        x, y_ci[0], y_ci[2], color=color, alpha=alpha, label=label, lw=0
+    )
+    ax.plot(y_ci[1], color=color, lw=1, ls="--")

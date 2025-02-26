@@ -51,9 +51,9 @@ class StarccatoVAE:
         return cls(model_dir)
 
     def generate(
-        self, z: jnp.ndarray = None, rng: PRNGKey = None
+        self, z: jnp.ndarray = None, rng: PRNGKey = None, n: int = 1
     ) -> jnp.ndarray:
-        return generate(self._data, z, rng)
+        return generate(self._data, z, rng, n)
 
     def reconstruct(
         self, x: jnp.ndarray, rng: PRNGKey = None, n_reps: int = 1
