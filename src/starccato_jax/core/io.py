@@ -58,27 +58,37 @@ def save_model(
     print(f"Model saved to {filename}")
 
 
+def _recursively_load(h5group):
+    """Recursively load parameters from HDF5 into a nested dict."""
+    data = {}
+    for key in h5group.keys():
+        if isinstance(h5group[key], h5py.Group):  # If it's a group, recurse
+            data[key] = _recursively_load(h5group[key])
+        else:  # Load dataset
+            data[key] = jnp.array(h5group[key][()])
+    return data
+
+
 def load_model(savedir: str, model_fname: str = MODEL_FNAME) -> ModelData:
     """Loads model parameters and configs"""
     filename = f"{savedir}/{model_fname}"
 
-    def recursively_load(h5group):
-        """Recursively load parameters from HDF5 into a nested dict."""
-        data = {}
-        for key in h5group.keys():
-            if isinstance(
-                h5group[key], h5py.Group
-            ):  # If it's a group, recurse
-                data[key] = recursively_load(h5group[key])
-            else:  # Load dataset
-                data[key] = jnp.array(h5group[key][()])
-        return data
-
     with h5py.File(filename, "r") as f:
         # Load params
-        params = freeze(recursively_load(f["model_params"]))
+        params = freeze(_recursively_load(f["model_params"]))
 
         # Load config: Read JSON string and convert back to dictionary
         config = Config(**json.loads(f["config"][()].decode("utf-8")))
 
     return ModelData(params, config.latent_dim)
+
+
+def load_loss_h5(fname: str) -> TrainValMetrics:
+    """Loads loss metrics from HDF5 file"""
+    with h5py.File(fname, "r") as f:
+        # Load params
+        data = _recursively_load(f["losses"])
+        return TrainValMetrics(
+            train_metrics=Losses(**data["train_metrics"]),
+            val_metrics=Losses(**data["val_metrics"]),
+        )

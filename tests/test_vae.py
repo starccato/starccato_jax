@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from starccato_jax import Config, StarccatoVAE
+from starccato_jax.core.io import TrainValMetrics, load_loss_h5
 from starccato_jax.data import get_default_weights, load_training_data
 
 
@@ -32,6 +33,11 @@ def test_train_vae(outdir):
     # load and use VAE
     signal = vae.generate()[0]
     assert signal.shape == (256,)
+
+    losses: TrainValMetrics = load_loss_h5(f"{outdir}/losses.h5")
+    assert isinstance(losses, TrainValMetrics)
+    assert losses.train_metrics.loss.shape == (10,)
+    assert losses.val_metrics.loss.shape == (10,)
 
 
 def test_default(outdir):

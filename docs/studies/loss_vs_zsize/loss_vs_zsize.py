@@ -3,41 +3,42 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+import tqdm.auto as tqdm
 
-from starccato_jax.data import load_data
-from starccato_jax.sampler import sample_latent_vars_given_data
-from starccato_jax.trainer import Config, train_vae
+from starccato_jax import Config, StarccatoVAE
 
 HERE = os.path.dirname(__file__)
+OUT = os.path.join(HERE, "model_exploration")
 
 z_sizes = [8, 12, 16, 20, 24, 28, 32]
+EPOCHS = 100
 
-## TRAIN
-train_data, val_data = load_data()
-for z_size in z_sizes:
-    config = Config(latent_dim=z_size, epochs=600, cyclical_annealing_cycles=4)
-    train_vae(
-        train_data,
-        val_data,
-        config,
-        save_dir=f"{HERE}/model_exploration/model_z{z_size}",
-    )
-    sample_latent_vars_given_data(
-        val_data[0],
-        model_path=f"{HERE}/model_exploration/model_z{z_size}",
-        outdir=f"{HERE}/model_exploration/model_z{z_size}/mcmc",
+
+def main():
+    ## TRAIN
+    for z_size in tqdm(z_sizes, desc="Training VAEs"):
+        outdir = os.path.join(OUT, f"model_z{z_size}")
+        config = Config(
+            latent_dim=z_size, epochs=EPOCHS, cyclical_annealing_cycles=1
+        )
+        vae = StarccatoVAE.train(model_dir=outdir, config=config)
+
+    ## GATHER LOSS DATA
+    train_losses, val_losses = [], []
+    for z_size in z_sizes:
+        # read the losses
+        loss_fpath = f"{HERE}/model_exploration/model_z{z_size}/losses.txt"
+        data = np.loadtxt(loss_fpath)
+        train_losses.append(data[0, -1])
+        val_losses.append(data[1, -1])
+
+    # cache the losses
+    np.savetxt(
+        f"{HERE}/model_exploration/losses.txt",
+        np.array([train_losses, val_losses]),
     )
 
-#
-# ## GATHER LOSS DATA
-#
-# train_losses, val_losses  = [], []
-# for z_size in z_sizes:
-#     # read the losses
-#     loss_fpath = f"{HERE}/model_exploration/model_z{z_size}/losses.txt"
-#     data = np.loadtxt(loss_fpath)
-#     train_losses.append(data[0,-1])
-#     val_losses.append(data[1,-1])
+
 #
 #
 #
