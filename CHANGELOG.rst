@@ -5,16 +5,77 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.7:
+
+v0.1.7 (2025-02-27)
+===================
+
+Bug Fixes
+---------
+
+* fix: add loss-loader (`f0e3ed8`_)
+
+Unknown
+-------
+
+* change slurm job size (`f82510e`_)
+
+* add mod (`0334abe`_)
+
+* add runners for nnoisy case (`9e99a2c`_)
+
+* fix example if no retraining (`5508811`_)
+
+* reduce mem needed (`62ad609`_)
+
+* add plotter (`255e4d9`_)
+
+* add more rus (`791c61f`_)
+
+* rename (`1018d8c`_)
+
+* simple test (`878c947`_)
+
+* add slurm (`44b14a7`_)
+
+* add coverage check (`b5b65d0`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`bb1cdca`_)
+
+.. _f0e3ed8: https://github.com/starccato/starccato_jax/commit/f0e3ed861e603cb0ff036986085a13b367da1c4c
+.. _f82510e: https://github.com/starccato/starccato_jax/commit/f82510ea997a25661ccf2121b7c1927b3f675346
+.. _0334abe: https://github.com/starccato/starccato_jax/commit/0334abe19e54afcafd29141f35b50e0d08c0acb7
+.. _9e99a2c: https://github.com/starccato/starccato_jax/commit/9e99a2ce77483ee645249ab044de6b4f3d60e2f9
+.. _5508811: https://github.com/starccato/starccato_jax/commit/5508811bd026fcfe5a05028c105cdcfeae9579ad
+.. _62ad609: https://github.com/starccato/starccato_jax/commit/62ad60924232c023bfbff5bba3a498a50ae0483b
+.. _255e4d9: https://github.com/starccato/starccato_jax/commit/255e4d9bddac85428d7972ae3bde6597b5a5bea6
+.. _791c61f: https://github.com/starccato/starccato_jax/commit/791c61fbc23b46ce702e64450408c264204305b3
+.. _1018d8c: https://github.com/starccato/starccato_jax/commit/1018d8cd034761330c670747c73149a78592c1d2
+.. _878c947: https://github.com/starccato/starccato_jax/commit/878c9479431b6871d72b7f52ebaa305868471ba2
+.. _44b14a7: https://github.com/starccato/starccato_jax/commit/44b14a71b3b7d53c0c6cc0f6c5ba1d1a8a80820f
+.. _b5b65d0: https://github.com/starccato/starccato_jax/commit/b5b65d018d321ae92178330cdf47647c76506be4
+.. _bb1cdca: https://github.com/starccato/starccato_jax/commit/bb1cdca7f5c90feab7e518c8437262fd50b7837b
+
+
 .. _changelog-v0.1.6:
 
 v0.1.6 (2025-02-19)
 ===================
 
+Chores
+------
+
+* chore(release): 0.1.6 (`c0ec32c`_)
+
 Unknown
 -------
 
+* add mcmc runner (`b5f6f71`_)
+
 * Merge branch 'main' of github.com:starccato/starccato_jax (`774c50b`_)
 
+.. _c0ec32c: https://github.com/starccato/starccato_jax/commit/c0ec32cf94d6a36984c03c2b11d2f88f054ad628
+.. _b5f6f71: https://github.com/starccato/starccato_jax/commit/b5f6f71fae7cf0d1e403cfd79edf3c4557ec9805
 .. _774c50b: https://github.com/starccato/starccato_jax/commit/774c50b4448a67df0ba46cf05d93aac4f12e939d
 
 
