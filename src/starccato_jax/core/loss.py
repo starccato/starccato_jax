@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 import jax.numpy as jnp
 import numpy as np
@@ -7,10 +7,10 @@ import numpy as np
 
 @dataclass
 class Losses:
-    reconstruction_loss: float
-    kl_divergence: float
-    loss: float
-    beta: float
+    reconstruction_loss: Union[float, List[float]]
+    kl_divergence: Union[float, List[float]]
+    loss: Union[float, List[float]]
+    beta: Union[float, List[float]]
 
 
 @dataclass
