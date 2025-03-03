@@ -6,7 +6,14 @@ from jax.random import PRNGKey
 
 from . import credible_intervals
 from .config import Config
-from .core import ModelData, generate, load_model, reconstruct, train_vae
+from .core import (
+    ModelData,
+    encode,
+    generate,
+    load_model,
+    reconstruct,
+    train_vae,
+)
 from .data import get_default_weights, load_training_data
 from .plotting import add_quantiles
 
@@ -59,6 +66,9 @@ class StarccatoVAE:
         self, x: jnp.ndarray, rng: PRNGKey = None, n_reps: int = 1
     ) -> jnp.ndarray:
         return reconstruct(x, self._data, rng=rng, n_reps=n_reps)
+
+    def encode(self, x: jnp.ndarray, rng: PRNGKey = None) -> jnp.ndarray:
+        return encode(x, self._data, rng=rng)
 
     def plot(
         self,

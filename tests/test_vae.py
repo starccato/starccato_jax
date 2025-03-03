@@ -43,7 +43,10 @@ def test_train_vae(outdir):
 def test_default(outdir):
     get_default_weights(clean=True)
     vae = StarccatoVAE()
-    signal = vae.generate()[0]
+    z = jnp.zeros(vae.latent_dim)
+    signal = vae.generate(z=z)
+    encoded_z = vae.encode(signal)
+    assert encoded_z.shape == (vae.latent_dim,)
     assert signal.shape == (256,)
     reconstructed = vae.reconstruct(signal)
     assert reconstructed.shape == (256,)
@@ -51,7 +54,7 @@ def test_default(outdir):
 
 def test_plotting(outdir):
     vae = StarccatoVAE()
-    signal = vae.generate()[0]
+    signal = vae.generate()
 
     fig, axes = plt.subplots(2, 1, figsize=(4, 6), sharex=True)
     ax = axes[0]
