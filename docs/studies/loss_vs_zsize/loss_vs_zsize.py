@@ -3,7 +3,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-import tqdm.auto as tqdm
+from tqdm.auto import tqdm
 
 from starccato_jax import Config, StarccatoVAE
 
@@ -11,7 +11,7 @@ HERE = os.path.dirname(__file__)
 OUT = os.path.join(HERE, "model_exploration")
 
 z_sizes = [8, 16, 32, 48, 64]
-EPOCHS = 8000
+EPOCHS = 80
 
 
 def main():
