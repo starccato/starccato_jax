@@ -202,18 +202,23 @@ def generate(
 def reconstruct(
     x: jnp.ndarray, model_data: ModelData, rng: PRNGKey = None, n_reps: int = 1
 ) -> jnp.ndarray:
-    recons = call_vae(x, model_data, rng, n_reps)[0]
+    recons = call_vae(x, model_data, rng=rng, n_reps=n_reps)[0]
     # remove channel dimension if it exists (batch, 256, 1) -> (batch, 256)
     return recons[..., 0] if recons.ndim == 3 else recons
 
 
 def call_vae(
-    x: jnp.ndarray, model_data: ModelData, rng: PRNGKey = None, n_reps: int = 1
+    x: jnp.ndarray,
+    model_data: ModelData,
+    model=None,
+    rng: PRNGKey = None,
+    n_reps: int = 1,
 ) -> jnp.ndarray:
     rng = rng if rng is not None else PRNGKey(0)
     # duplicate the same x for n_reps times so we have a batch of size n_reps
     x = x if n_reps == 1 else jnp.repeat(x[None, :], n_reps, axis=0)
-    model = VAE(model_data.latent_dim, train=False)
+    if model is None:
+        model = VAE(model_data.latent_dim, train=False)
     return model.apply(
         {"params": model_data.params, "batch_stats": model_data.batch_stats},
         x,

@@ -95,10 +95,12 @@ def vae_loss(recon_x, x, mean, logvar, beta):
     return Losses(reconstruction_loss, kl_divergence, net_loss, beta)
 
 
-def compute_metrics(model_data, x, rng, validation_x, beta) -> TrainValMetrics:
-    reconstructed_x, mean, logvar = call_vae(x, model_data, rng)
+def compute_metrics(
+    model, model_data, x, rng, validation_x, beta
+) -> TrainValMetrics:
+    reconstructed_x, mean, logvar = call_vae(x, model_data, model, rng)
     reconstructed_xval, mean_val, logvar_val = call_vae(
-        validation_x, model_data, rng
+        validation_x, model_data, model, rng
     )
     return TrainValMetrics(
         vae_loss(reconstructed_x, x, mean, logvar, beta),

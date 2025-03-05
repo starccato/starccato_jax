@@ -116,6 +116,8 @@ def train_vae(
     )
     model_data = None
 
+    val_model = VAE(config.latent_dim, output_shape=(data_len, 1), train=False)
+
     for epoch in range(config.epochs):
         # Shuffle training data indices.
         perm = np.random.permutation(n_train)
@@ -135,7 +137,12 @@ def train_vae(
         )
         metrics.append(
             compute_metrics(
-                model_data, train_data, subkey, val_data, beta[epoch]
+                val_model,
+                model_data,
+                train_data,
+                subkey,
+                val_data,
+                beta[epoch],
             )
         )
 
