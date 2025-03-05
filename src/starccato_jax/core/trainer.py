@@ -12,6 +12,7 @@ from flax.training import train_state
 from ..config import Config
 from ..plotting import (
     generate_gif,
+    plot_distributions,
     plot_reconstructions,
     plot_training_metrics,
 )
@@ -22,7 +23,7 @@ from .loss import (
     cyclical_annealing_beta,
     vae_loss,
 )
-from .model import VAE, ModelData
+from .model import VAE, ModelData, reconstruct
 
 __all__ = ["train_vae"]
 
@@ -111,33 +112,55 @@ def train_vae(
             print(f"Epoch {epoch}: {metrics[epoch]}")
 
         if plot_every != np.inf and epoch % plot_every == 0:
-            plot_training_metrics(metrics, fname=f"{save_dir}/loss.png")
             model_data = ModelData(
                 params=state.params, latent_dim=config.latent_dim
             )
-            plot_reconstructions(
+            _save_training_plots(
                 model_data,
+                metrics,
+                save_dir,
                 val_data,
-                fname=f"{save_dir}/reconstructions/E{epoch}.png",
-                title=f"Epoch {epoch}",
+                rng=rng,
+                epoch=config.epochs,
             )
 
     model_data = ModelData(params=state.params, latent_dim=config.latent_dim)
-    plot_training_metrics(metrics, fname=f"{save_dir}/loss.png")
-    plot_reconstructions(
-        model_data, val_data, fname=f"{save_dir}/reconstructions.png"
+    _save_training_plots(
+        model_data, metrics, save_dir, val_data, rng=rng, epoch=config.epochs
     )
+
     save_model(state, config, metrics, savedir=save_dir)
 
     print(f"Training complete. (time: {time.time() - t0:.2f}s)")
     if plot_every < np.inf:
-        plot_reconstructions(
-            model_data,
-            val_data,
-            fname=f"{save_dir}/reconstructions/E{config.epochs}.png",
-            title=f"Epoch {config.epochs}",
-        )
-        generate_gif(
-            image_pattern=f"{save_dir}/reconstructions/E*.png",
-            output_gif=f"{save_dir}/training_reconstructions.gif",
-        )
+        _save_gifs(save_dir)
+
+
+def _save_training_plots(
+    model_data: ModelData, metrics, save_dir, val_data, rng=None, epoch=None
+):
+    plot_training_metrics(metrics, fname=f"{save_dir}/loss.png")
+    plot_reconstructions(
+        model_data,
+        val_data,
+        fname=f"{save_dir}/plots/reconstruction_E{epoch}.png",
+        title=f"Epoch {epoch}",
+        rng=rng,
+    )
+    plot_distributions(
+        val_data,
+        reconstruct(val_data, model_data, rng),
+        fname=f"{save_dir}/plots/distributions_E{epoch}.png",
+        title=f"Epoch {epoch}",
+    )
+
+
+def _save_gifs(save_dir):
+    generate_gif(
+        image_pattern=f"{save_dir}/plots/reconstruction_E*.png",
+        output_gif=f"{save_dir}/training_reconstructions.gif",
+    )
+    generate_gif(
+        image_pattern=f"{save_dir}/plots/reconstruction_E*.png",
+        output_gif=f"{save_dir}/training_reconstructions.gif",
+    )

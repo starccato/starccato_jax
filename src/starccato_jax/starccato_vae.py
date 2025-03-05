@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 import jax.random
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +17,7 @@ from .core import (
     train_vae,
 )
 from .data import get_default_weights, load_training_data
-from .plotting import add_quantiles
+from .plotting import plot_model
 
 __all__ = ["StarccatoVAE"]
 
@@ -80,7 +82,7 @@ class StarccatoVAE:
         uniform_ci: bool = False,
         rng: PRNGKey = None,
         color: str = "tab:orange",
-    ) -> None:
+    ) -> Tuple[plt.Figure, List[plt.Axes]]:
         """Makes plots with the Starccato VAE model.
 
         If only n is provided, n Z samples will be randomly generated.
@@ -96,37 +98,28 @@ class StarccatoVAE:
         """
         rng = rng if rng is not None else PRNGKey(0)
 
-        if ax is None:
-            fig, ax = plt.subplots()
-        fig = ax.get_figure()
-
         if z is not None and x is not None:
             raise ValueError("Z and X cant be provided at the same time.")
 
         if z is None and x is None:
             z = jax.random.normal(rng, shape=(n, self.latent_dim))
 
+        xstar = None
         if z is not None:
             xstar = self.generate(z)
-        else:
-            xstar = self.reconstruct(x, rng=rng, n_reps=n)
 
         if x is not None:
-            ax.plot(x, lw=1, color="black")
+            xstar = self.reconstruct(x, rng=rng, n_reps=n)
 
-        if ci is not None:
-            if uniform_ci:
-                qtls = credible_intervals.uniform_ci(xstar, ci=ci)
-            else:
-                qtls = credible_intervals.pointwise_ci(xstar, ci=ci)
-            add_quantiles(ax, qtls, color=color)
-        else:
-            lw = 0.05 if n > 50 else 1
-            alpha = 0.25 if n > 50 else 1
-            for i in range(n):
-                ax.plot(xstar[i], lw=lw, alpha=alpha, color=color)
-
-        return fig, ax
+        return plot_model(
+            ax,
+            n=n,
+            x=x,
+            xstar=xstar,
+            ci=ci,
+            uniform_ci=uniform_ci,
+            color=color,
+        )
 
     def reconstruction_coverage(
         self, x: jnp.ndarray, n: int = 100, ci: float = 0.9
