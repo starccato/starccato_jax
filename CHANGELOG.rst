@@ -5,6 +5,19 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.8:
+
+v0.1.8 (2025-03-05)
+===================
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`743a28e`_)
+
+.. _743a28e: https://github.com/starccato/starccato_jax/commit/743a28ef04e0d2f95bdf5d518d8188749c4709e9
+
+
 .. _changelog-v0.1.7:
 
 v0.1.7 (2025-02-27)
@@ -13,10 +26,21 @@ v0.1.7 (2025-02-27)
 Bug Fixes
 ---------
 
+* fix: restructure plotting (`0dfe4e6`_)
+
 * fix: add loss-loader (`f0e3ed8`_)
+
+Chores
+------
+
+* chore(release): 0.1.7 (`b5954b1`_)
 
 Unknown
 -------
+
+* add encoder to VAE (`6925e15`_)
+
+* Add better typing for lists (`8ef68b5`_)
 
 * change slurm job size (`f82510e`_)
 
@@ -42,7 +66,11 @@ Unknown
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`bb1cdca`_)
 
+.. _0dfe4e6: https://github.com/starccato/starccato_jax/commit/0dfe4e64a17fe5944f0f9d93159fbbf7ebd0d6bd
 .. _f0e3ed8: https://github.com/starccato/starccato_jax/commit/f0e3ed861e603cb0ff036986085a13b367da1c4c
+.. _b5954b1: https://github.com/starccato/starccato_jax/commit/b5954b1e11f6531cd037a8272421b3452504f10f
+.. _6925e15: https://github.com/starccato/starccato_jax/commit/6925e15afc7aff9bffe9d79a3a6d6d86ce985a5b
+.. _8ef68b5: https://github.com/starccato/starccato_jax/commit/8ef68b5a13424c29195646259d7ce64ee5d33e5a
 .. _f82510e: https://github.com/starccato/starccato_jax/commit/f82510ea997a25661ccf2121b7c1927b3f675346
 .. _0334abe: https://github.com/starccato/starccato_jax/commit/0334abe19e54afcafd29141f35b50e0d08c0acb7
 .. _9e99a2c: https://github.com/starccato/starccato_jax/commit/9e99a2ce77483ee645249ab044de6b4f3d60e2f9
