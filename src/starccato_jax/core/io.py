@@ -43,7 +43,9 @@ def save_model(
     with h5py.File(filename, "w") as f:
         # Save params
         params_group = f.create_group("model_params")
+        batch_stats_group = f.create_group("batch_stats")
         recursively_save(params_group, model_params)
+        recursively_save(batch_stats_group, state.batch_stats)
 
         # Save config: Convert to JSON and store as a string dataset
         config_json = json.dumps(
@@ -77,10 +79,13 @@ def load_model(savedir: str, model_fname: str = MODEL_FNAME) -> ModelData:
         # Load params
         params = freeze(_recursively_load(f["model_params"]))
 
+        # load batch_stats
+        batch_stats = freeze(_recursively_load(f["batch_stats"]))
+
         # Load config: Read JSON string and convert back to dictionary
         config = Config(**json.loads(f["config"][()].decode("utf-8")))
 
-    return ModelData(params, config.latent_dim)
+    return ModelData(params, config.latent_dim, batch_stats=batch_stats)
 
 
 def load_loss_h5(fname: str) -> TrainValMetrics:

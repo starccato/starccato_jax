@@ -1,7 +1,7 @@
 import os
 import time
 from functools import partial
-from typing import List
+from typing import Any, List
 
 import jax
 import jax.numpy as jnp
@@ -35,28 +35,53 @@ __all__ = ["train_vae"]
 
 @partial(jax.jit, static_argnames=("model",))
 def _train_step(state, x, rng, model, beta):
-    loss, grads = jax.value_and_grad(
-        lambda params: vae_loss(params, x, rng, model, beta).loss
-    )(state.params)
-    state = state.apply_gradients(grads=grads)
-    return state, loss
+    # Define a loss function that accepts the current parameters.
+    def loss_fn(params):
+        # Include the mutable batch statistics.
+        variables = {"params": params, "batch_stats": state.batch_stats}
+        rngs = {"dropout": jax.random.split(rng)[1]}
+
+        # Apply the model with dropout and BatchNorm in training mode.
+        # mutable=["batch_stats"] lets Flax know to update batch stats.
+        (recon_x, mean, logvar), new_model_state = model.apply(
+            variables, x, rng, mutable=["batch_stats"], rngs=rngs
+        )
+        loss = vae_loss(recon_x, x, mean, logvar, beta).loss
+        return loss, new_model_state
+
+    # Calculate loss and gradients, also get updated batch stats.
+    (loss, new_model_state), grads = jax.value_and_grad(loss_fn, has_aux=True)(
+        state.params
+    )
+    # Update the state with the new gradients and batch statistics.
+    new_state = state.apply_gradients(
+        grads=grads, batch_stats=new_model_state["batch_stats"]
+    )
+    return new_state, loss
 
 
-# ------------------------------
-# Create training state with configurable latent_dim.
-# ------------------------------
+class TrainState(train_state.TrainState):
+    batch_stats: Any
+
+
 def _create_train_state(
     rng: jax.random.PRNGKey,
     latent_dim: int,
     data_len: int,
     learning_rate: float,
 ):
-    model = VAE(latent_dim)
-    # Initialize the model with dummy data of shape (1, DATA_LEN)
-    params = model.init(rng, jnp.ones((1, data_len)), rng)["params"]
+    # When initializing, we need to create a dummy input that matches the expected shape.
+    # For our convolutional model with normalization, we assume the input shape is (batch, data_len, channels).
+    dummy_input = jnp.ones((1, data_len, 1))
+    # Initialize the model (set train flag to True for training mode).
+    model = VAE(latent_dim, output_shape=(data_len, 1), train=True)
+    variables = model.init(rng, dummy_input, rng)
+    params = variables["params"]
+    batch_stats = variables.get("batch_stats")
     tx = optax.adam(learning_rate)
-    state = train_state.TrainState.create(
-        apply_fn=model.apply, params=params, tx=tx
+    # Include batch_stats in the train state.
+    state = TrainState.create(
+        apply_fn=model.apply, params=params, tx=tx, batch_stats=batch_stats
     )
     return state, model
 
@@ -89,6 +114,7 @@ def train_vae(
         start=config.beta_start,
         stop=config.beta_end,
     )
+    model_data = None
 
     for epoch in range(config.epochs):
         # Shuffle training data indices.
@@ -102,9 +128,14 @@ def train_vae(
             )
             step += 1
 
+        model_data = ModelData(
+            params=state.params,
+            latent_dim=config.latent_dim,
+            batch_stats=state.batch_stats,
+        )
         metrics.append(
             compute_metrics(
-                state, train_data, subkey, model, val_data, beta[epoch]
+                model_data, train_data, subkey, val_data, beta[epoch]
             )
         )
 
@@ -112,9 +143,6 @@ def train_vae(
             print(f"Epoch {epoch}: {metrics[epoch]}")
 
         if plot_every != np.inf and epoch % plot_every == 0:
-            model_data = ModelData(
-                params=state.params, latent_dim=config.latent_dim
-            )
             _save_training_plots(
                 model_data,
                 metrics,
@@ -124,11 +152,9 @@ def train_vae(
                 epoch=config.epochs,
             )
 
-    model_data = ModelData(params=state.params, latent_dim=config.latent_dim)
     _save_training_plots(
         model_data, metrics, save_dir, val_data, rng=rng, epoch=config.epochs
     )
-
     save_model(state, config, metrics, savedir=save_dir)
 
     print(f"Training complete. (time: {time.time() - t0:.2f}s)")
