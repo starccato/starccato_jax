@@ -11,7 +11,7 @@ HERE = os.path.dirname(__file__)
 OUT = os.path.join(HERE, "model_exploration")
 
 z_sizes = [8, 16, 32, 48, 64]
-EPOCHS = 80
+EPOCHS = 8000
 
 
 def main():
