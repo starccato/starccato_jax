@@ -10,18 +10,19 @@ from starccato_jax import Config, StarccatoVAE
 HERE = os.path.dirname(__file__)
 OUT = os.path.join(HERE, "model_exploration")
 
-z_sizes = [8, 12, 16, 20, 24, 28, 32]
-EPOCHS = 100
+z_sizes = [8, 16, 32, 48, 64]
+EPOCHS = 8000
 
 
 def main():
-    ## TRAIN
     for z_size in tqdm(z_sizes, desc="Training VAEs"):
         outdir = os.path.join(OUT, f"model_z{z_size}")
         config = Config(
-            latent_dim=z_size, epochs=EPOCHS, cyclical_annealing_cycles=1
+            latent_dim=z_size, epochs=EPOCHS, cyclical_annealing_cycles=4
         )
-        vae = StarccatoVAE.train(model_dir=outdir, config=config)
+        vae = StarccatoVAE.train(
+            model_dir=outdir, config=config, plot_every=500
+        )
 
     ## GATHER LOSS DATA
     train_losses, val_losses = [], []
@@ -38,15 +39,15 @@ def main():
         np.array([train_losses, val_losses]),
     )
 
+    # plot losses
+    plt.figure(figsize=(8, 4))
+    plt.plot(z_sizes, train_losses, label="Train Loss")
+    plt.plot(z_sizes, val_losses, label="Val Loss")
+    plt.xlabel("Latent Dimension")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.savefig(f"{HERE}/model_exploration/loss_vs_z.png")
 
-#
-#
-#
-# ## PLOT
-# plt.figure(figsize=(8, 4))
-# plt.plot(z_sizes, train_losses, label="Train Loss")
-# plt.plot(z_sizes, val_losses, label="Val Loss")
-# plt.xlabel('Latent Dimension')
-# plt.ylabel('Loss')
-# plt.legend()
-# plt.savefig(f"{HERE}/model_exploration/loss_vs_z.png")
+
+if __name__ == "__main__":
+    main()
