@@ -45,6 +45,7 @@ def plot_reconstructions(
     if fname is not None:
         os.makedirs(os.path.dirname(fname), exist_ok=True)
         plt.savefig(fname)
+        plt.close(fig)
 
 
 def plot_model(

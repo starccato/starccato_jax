@@ -68,6 +68,7 @@ def plot_training_metrics(
     if fname is not None:
         os.makedirs(os.path.dirname(fname), exist_ok=True)
         plt.savefig(fname, bbox_inches="tight")
+        plt.close(fig)
 
 
 def _plot_loss(

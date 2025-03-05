@@ -112,5 +112,6 @@ def plot_distributions(
     if fname is not None:
         os.makedirs(os.path.dirname(fname), exist_ok=True)
         plt.savefig(fname)
+        plt.close(fig)
 
     return fig, [ax0, ax1, ax2]

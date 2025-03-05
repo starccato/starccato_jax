@@ -8,6 +8,7 @@ import jax.numpy as jnp
 import numpy as np
 import optax
 from flax.training import train_state
+from matplotlib import pyplot as plt
 
 from ..config import Config
 from ..plotting import (
@@ -153,6 +154,7 @@ def _save_training_plots(
         fname=f"{save_dir}/plots/distributions_E{epoch}.png",
         title=f"Epoch {epoch}",
     )
+    plt.close("all")
 
 
 def _save_gifs(save_dir):
