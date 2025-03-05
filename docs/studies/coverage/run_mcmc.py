@@ -22,7 +22,9 @@ def main(
     label: str = None,
     noise: bool = True,
 ):
-    print(f"Running sampler on {label} data {i}/{len(data)}")
+    print(
+        f"Running sampler on {label} data {i}/{len(data)}. True Z given: {z is not None}"
+    )
     outdir = f"out_mcmc/{label}_{i}"
     os.makedirs(outdir, exist_ok=True)
 
