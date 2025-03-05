@@ -410,18 +410,19 @@ document.write(`
 <span class="n">HERE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
 <span class="n">OUT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">HERE</span><span class="p">,</span> <span class="s2">&quot;model_exploration&quot;</span><span class="p">)</span>
 
-<span class="n">z_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">32</span><span class="p">]</span>
-<span class="n">EPOCHS</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">z_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">64</span><span class="p">]</span>
+<span class="n">EPOCHS</span> <span class="o">=</span> <span class="mi">8000</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
-    <span class="c1">## TRAIN</span>
     <span class="k">for</span> <span class="n">z_size</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">z_sizes</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Training VAEs&quot;</span><span class="p">):</span>
         <span class="n">outdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">OUT</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;model_z</span><span class="si">{</span><span class="n">z_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
-            <span class="n">latent_dim</span><span class="o">=</span><span class="n">z_size</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="n">EPOCHS</span><span class="p">,</span> <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">1</span>
+            <span class="n">latent_dim</span><span class="o">=</span><span class="n">z_size</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="n">EPOCHS</span><span class="p">,</span> <span class="n">cyclical_annealing_cycles</span><span class="o">=</span><span class="mi">4</span>
         <span class="p">)</span>
-        <span class="n">vae</span> <span class="o">=</span> <span class="n">StarccatoVAE</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">model_dir</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">vae</span> <span class="o">=</span> <span class="n">StarccatoVAE</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+            <span class="n">model_dir</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">plot_every</span><span class="o">=</span><span class="mi">500</span>
+        <span class="p">)</span>
 
     <span class="c1">## GATHER LOSS DATA</span>
     <span class="n">train_losses</span><span class="p">,</span> <span class="n">val_losses</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -438,18 +439,18 @@ document.write(`
         <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">train_losses</span><span class="p">,</span> <span class="n">val_losses</span><span class="p">]),</span>
     <span class="p">)</span>
 
+    <span class="c1"># plot losses</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z_sizes</span><span class="p">,</span> <span class="n">train_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Train Loss&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z_sizes</span><span class="p">,</span> <span class="n">val_losses</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Val Loss&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Latent Dimension&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Loss&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">HERE</span><span class="si">}</span><span class="s2">/model_exploration/loss_vs_z.png&quot;</span><span class="p">)</span>
 
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1"># ## PLOT</span>
-<span class="c1"># plt.figure(figsize=(8, 4))</span>
-<span class="c1"># plt.plot(z_sizes, train_losses, label=&quot;Train Loss&quot;)</span>
-<span class="c1"># plt.plot(z_sizes, val_losses, label=&quot;Val Loss&quot;)</span>
-<span class="c1"># plt.xlabel(&#39;Latent Dimension&#39;)</span>
-<span class="c1"># plt.ylabel(&#39;Loss&#39;)</span>
-<span class="c1"># plt.legend()</span>
-<span class="c1"># plt.savefig(f&quot;{HERE}/model_exploration/loss_vs_z.png&quot;)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
