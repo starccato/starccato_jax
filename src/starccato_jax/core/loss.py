@@ -124,9 +124,9 @@ def vae_loss(params, x, rng, model, beta: float) -> Losses:
 
 
 def compute_metrics(
-    state, x, rng, model, validation_x, beta
+    model_data, x, rng, model, validation_x, beta
 ) -> TrainValMetrics:
     return TrainValMetrics(
-        vae_loss(state.params, x, rng, model, beta),
-        vae_loss(state.params, validation_x, rng, model, beta),
+        vae_loss(model_data.params, x, rng, model, beta),
+        vae_loss(model_data.params, validation_x, rng, model, beta),
     )

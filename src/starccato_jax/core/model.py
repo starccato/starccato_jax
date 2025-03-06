@@ -85,6 +85,7 @@ def generate(
     z: jnp.ndarray = None,
     rng: PRNGKey = None,
     n: int = 1,
+    model: VAE = None,
 ) -> jnp.ndarray:
     rng = rng if rng is not None else PRNGKey(0)
     z = (
@@ -92,24 +93,17 @@ def generate(
         if z is None
         else z
     )
-    model = VAE(model_data.latent_dim)
+    if model is None:
+        model = VAE(model_data.latent_dim)
+
     return model.apply({"params": model_data.params}, z, method=model.generate)
-
-
-def reconstruct(
-    x: jnp.ndarray, model_data: ModelData, rng: PRNGKey = None, n_reps: int = 1
-) -> jnp.ndarray:
-    rng = rng if rng is not None else PRNGKey(0)
-    # duplicate the same x for n_reps times so we have a batch of size n_reps
-    x = x if n_reps == 1 else jnp.repeat(x[None, :], n_reps, axis=0)
-    model = VAE(model_data.latent_dim)
-    return model.apply({"params": model_data.params}, x, rng)[0]
 
 
 def encode(
     x: jnp.ndarray,
     model_data: ModelData,
     rng: PRNGKey = None,
+    model: VAE = None,
 ) -> jnp.ndarray:
     """
     Encodes the input `x` into the latent vector `z` using the trained encoder.
@@ -122,6 +116,24 @@ def encode(
         jnp.ndarray: Encoded latent vector `z`.
     """
     rng = rng if rng is not None else PRNGKey(0)
-    model = VAE(model_data.latent_dim)
+    if model is None:
+        model = VAE(model_data.latent_dim)
+
     z = model.apply({"params": model_data.params}, x, rng, method=model.encode)
     return z
+
+
+def reconstruct(
+    x: jnp.ndarray,
+    model_data: ModelData,
+    rng: PRNGKey = None,
+    n_reps: int = 1,
+    model: VAE = None,
+) -> jnp.ndarray:
+    rng = rng if rng is not None else PRNGKey(0)
+    # duplicate the same x for n_reps times so we have a batch of size n_reps
+    x = x if n_reps == 1 else jnp.repeat(x[None, :], n_reps, axis=0)
+    if model is None:
+        model = VAE(model_data.latent_dim)
+
+    return model.apply({"params": model_data.params}, x, rng)[0]

@@ -91,6 +91,7 @@ def train_vae(
         stop=config.beta_end,
     )
 
+    model_data = None
     for epoch in range(config.epochs):
         # Shuffle training data indices.
         perm = np.random.permutation(n_train)
@@ -103,6 +104,9 @@ def train_vae(
             )
             step += 1
 
+        model_data = ModelData(
+            params=state.params, latent_dim=config.latent_dim
+        )
         metrics.append(
             compute_metrics(
                 state, train_data, subkey, model, val_data, beta[epoch]
@@ -113,9 +117,6 @@ def train_vae(
             print(f"Epoch {epoch}: {metrics[epoch]}")
 
         if plot_every != np.inf and epoch % plot_every == 0:
-            model_data = ModelData(
-                params=state.params, latent_dim=config.latent_dim
-            )
             _save_training_plots(
                 model_data,
                 metrics,
