@@ -5,16 +5,50 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.9:
+
+v0.1.9 (2025-03-05)
+===================
+
+Bug Fixes
+---------
+
+* fix: expose more plotting funcs (`460d154`_)
+
+Unknown
+-------
+
+* inncrease epochs (`ea3ffdd`_)
+
+* update runner (`9107ed0`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`876cf50`_)
+
+.. _460d154: https://github.com/starccato/starccato_jax/commit/460d1541eda9b07befdd9178dd4a6d7c3e982a10
+.. _ea3ffdd: https://github.com/starccato/starccato_jax/commit/ea3ffddb4131abdcc4baf662276b15fcae741efb
+.. _9107ed0: https://github.com/starccato/starccato_jax/commit/9107ed0845afe2154f6ea4adcf2ddfafc3d9f215
+.. _876cf50: https://github.com/starccato/starccato_jax/commit/876cf50e7e74eca27076446ea52b98d06e042b88
+
+
 .. _changelog-v0.1.8:
 
 v0.1.8 (2025-03-05)
 ===================
 
+Chores
+------
+
+* chore(release): 0.1.8 (`69de7a4`_)
+
 Unknown
 -------
 
+* update lnz loss study (`0040970`_)
+
 * Merge branch 'main' of github.com:starccato/starccato_jax (`743a28e`_)
 
+.. _69de7a4: https://github.com/starccato/starccato_jax/commit/69de7a45360688bb09b8ab29045fda54bf74b7bc
+.. _0040970: https://github.com/starccato/starccato_jax/commit/00409706ebc692c0dad7543862d5c0833f81464a
 .. _743a28e: https://github.com/starccato/starccato_jax/commit/743a28ef04e0d2f95bdf5d518d8188749c4709e9
 
 
