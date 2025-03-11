@@ -82,17 +82,9 @@ class ModelData:
 
 def generate(
     model_data: ModelData,
-    z: jnp.ndarray = None,
-    rng: PRNGKey = None,
-    n: int = 1,
+    z: jnp.ndarray,
     model: VAE = None,
 ) -> jnp.ndarray:
-    rng = rng if rng is not None else PRNGKey(0)
-    z = (
-        jax.random.normal(rng, shape=(n, model_data.latent_dim))
-        if z is None
-        else z
-    )
     if model is None:
         model = VAE(model_data.latent_dim)
 
@@ -132,7 +124,11 @@ def reconstruct(
 ) -> jnp.ndarray:
     rng = rng if rng is not None else PRNGKey(0)
     # duplicate the same x for n_reps times so we have a batch of size n_reps
-    x = x if n_reps == 1 else jnp.repeat(x[None, :], n_reps, axis=0)
+    if n_reps > 1:
+        if x.ndim != 1:
+            x = x[0]
+        x = jnp.repeat(x[None, :], n_reps, axis=0)
+
     if model is None:
         model = VAE(model_data.latent_dim)
 

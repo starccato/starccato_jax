@@ -77,7 +77,11 @@ def _plot_mse(x, ax, dataset, vae_dataset):
 
 
 def plot_distributions(
-    dataset: jnp.ndarray, vae_dataset: jnp.ndarray, fname=None, title=None
+    dataset: jnp.ndarray,
+    vae_dataset: jnp.ndarray,
+    fname=None,
+    title=None,
+    labels=["Raw Data", "VAE Data"],
 ):
     x = TIME.copy()
 
@@ -88,8 +92,8 @@ def plot_distributions(
     ax1 = fig.add_subplot(gs[1], sharex=ax0)
     ax2 = fig.add_subplot(gs[2], sharex=ax0)
 
-    _plot_quantiles(x, dataset, ax0, color="tab:gray", label="Raw Data")
-    _plot_quantiles(x, vae_dataset, ax0, color="tab:orange", label="VAE Data")
+    _plot_quantiles(x, dataset, ax0, color="tab:gray", label=labels[0])
+    _plot_quantiles(x, vae_dataset, ax0, color="tab:orange", label=labels[1])
     _plot_jsd(x, ax1, dataset, vae_dataset)
     _plot_mse(x, ax2, dataset, vae_dataset)
 

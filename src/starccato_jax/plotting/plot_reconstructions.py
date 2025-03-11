@@ -74,7 +74,7 @@ def plot_model(
         fig, ax = plt.subplots()
     fig = ax.get_figure()
     if x is not None:
-        ax.plot(TIME, x, lw=1, color="black")
+        ax.plot(TIME, x.ravel(), lw=1, color="black")
 
     if ci is not None:
         if uniform_ci:

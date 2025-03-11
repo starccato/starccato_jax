@@ -18,11 +18,12 @@ from .core import (
 )
 from .data import get_default_weights, load_training_data
 from .plotting import plot_model
+from .starccato_model import StarccatoModel
 
 __all__ = ["StarccatoVAE"]
 
 
-class StarccatoVAE:
+class StarccatoVAE(StarccatoModel):
     def __init__(self, model_dir: str = None):
         self.model_dir = model_dir
         if model_dir is None or model_dir == "default_model":
@@ -62,12 +63,15 @@ class StarccatoVAE:
     def generate(
         self, z: jnp.ndarray = None, rng: PRNGKey = None, n: int = 1
     ) -> jnp.ndarray:
-        return generate(self._data, z, rng, n)
+        if z is None:
+            z = self.sample_latent(rng, n)
+        return generate(self._data, z)
 
     def reconstruct(
         self, x: jnp.ndarray, rng: PRNGKey = None, n_reps: int = 1
     ) -> jnp.ndarray:
-        return reconstruct(x, self._data, rng=rng, n_reps=n_reps)
+        reconstructed = reconstruct(x, self._data, rng=rng, n_reps=n_reps)
+        return reconstructed
 
     def encode(self, x: jnp.ndarray, rng: PRNGKey = None) -> jnp.ndarray:
         return encode(x, self._data, rng=rng)
