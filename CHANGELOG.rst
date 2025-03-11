@@ -5,6 +5,19 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.10:
+
+v0.1.10 (2025-03-06)
+====================
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`de2445a`_)
+
+.. _de2445a: https://github.com/starccato/starccato_jax/commit/de2445af7aa4ed07ab1185c694921019e0d420a7
+
+
 .. _changelog-v0.1.9:
 
 v0.1.9 (2025-03-05)
@@ -13,10 +26,19 @@ v0.1.9 (2025-03-05)
 Bug Fixes
 ---------
 
+* fix: allow model to be directly passed and added pp-test (`4e7b0f5`_)
+
 * fix: expose more plotting funcs (`460d154`_)
+
+Chores
+------
+
+* chore(release): 0.1.9 (`a75027b`_)
 
 Unknown
 -------
+
+* close plots after creation (`ac22175`_)
 
 * inncrease epochs (`ea3ffdd`_)
 
@@ -24,7 +46,10 @@ Unknown
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`876cf50`_)
 
+.. _4e7b0f5: https://github.com/starccato/starccato_jax/commit/4e7b0f55939f46c678b19c3c2b7cc262b8326b0b
 .. _460d154: https://github.com/starccato/starccato_jax/commit/460d1541eda9b07befdd9178dd4a6d7c3e982a10
+.. _a75027b: https://github.com/starccato/starccato_jax/commit/a75027b85de6a095cf52936457d1461aa7c117c8
+.. _ac22175: https://github.com/starccato/starccato_jax/commit/ac22175750401cba3d68e4eafd7fb71583e9bff2
 .. _ea3ffdd: https://github.com/starccato/starccato_jax/commit/ea3ffddb4131abdcc4baf662276b15fcae741efb
 .. _9107ed0: https://github.com/starccato/starccato_jax/commit/9107ed0845afe2154f6ea4adcf2ddfafc3d9f215
 .. _876cf50: https://github.com/starccato/starccato_jax/commit/876cf50e7e74eca27076446ea52b98d06e042b88
