@@ -7,7 +7,7 @@ import numpy as np
 from jax.random import PRNGKey
 from starccato_sampler.sampler import sample
 
-from starccato_jax.starccato_vae import StarccatoVAE
+from starccato_jax import StarccatoVAE
 
 rng = PRNGKey(0)
 

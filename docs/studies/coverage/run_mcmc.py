@@ -4,12 +4,14 @@ import os
 import arviz as az
 import jax
 import numpy as np
+from docutils.languages.ru import labels
 from generate_injections import load_injections
 from jax.random import PRNGKey
+from starccato_sampler.plotting import plot_pe_comparison
 from starccato_sampler.sampler import sample
 
+from starccato_jax import StarccatoPCA, StarccatoVAE
 from starccato_jax.data import load_training_data
-from starccato_jax.starccato_vae import StarccatoVAE
 
 RNG = PRNGKey(0)
 NOISE_SIGMA = 1
@@ -25,7 +27,8 @@ def main(
     print(
         f"Running sampler on {label} data {i}/{len(data)}. True Z given: {z is not None}"
     )
-    outdir = f"out_mcmc/{label}_{i}"
+    idx_lbl = f"{label}_{i}"
+    outdir = f"out_mcmc/{idx_lbl}"
     os.makedirs(outdir, exist_ok=True)
 
     observation = data[i]
@@ -33,12 +36,11 @@ def main(
     if noise:
         observation += np.random.normal(0, NOISE_SIGMA, size=observation.shape)
 
-    sample(
+    kwgs = dict(
         data=observation,
-        outdir=outdir,
         num_warmup=500,
         num_samples=1000,
-        num_chains=2,
+        num_chains=1,
         verbose=True,
         noise_sigma=NOISE_SIGMA,
         stepping_stone_lnz=False,
@@ -46,6 +48,19 @@ def main(
             signal=true,
             latent=None if z is None else z[i],
         ),
+    )
+
+    lbls = ["vae", "pca"]
+    for lbl, model in zip(lbls, [StarccatoVAE(), StarccatoPCA()]):
+        sample(starccato_model=model, outdir=f"{outdir}/{lbl}", **kwgs)
+
+    plot_pe_comparison(
+        data_1d=observation,
+        true_1d=true,
+        result_fnames=[f"{outdir}/{lbl}/inference.nc" for lbl in lbls],
+        labels=lbls,
+        colors=["tab:blue", "tab:red"],
+        fname=f"{outdir}/comparison_{idx_lbl}.pdf",
     )
 
 

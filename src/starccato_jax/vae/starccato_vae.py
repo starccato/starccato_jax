@@ -6,7 +6,10 @@ import numpy as np
 from jax import numpy as jnp
 from jax.random import PRNGKey
 
-from . import credible_intervals
+from .. import credible_intervals
+from ..data import get_default_weights, load_training_data
+from ..plotting import plot_model
+from ..starccato_model import StarccatoModel
 from .config import Config
 from .core import (
     ModelData,
@@ -16,9 +19,6 @@ from .core import (
     reconstruct,
     train_vae,
 )
-from .data import get_default_weights, load_training_data
-from .plotting import plot_model
-from .starccato_model import StarccatoModel
 
 __all__ = ["StarccatoVAE"]
 

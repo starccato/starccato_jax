@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from starccato_jax import Config, StarccatoVAE
-from starccato_jax.core.io import TrainValMetrics, load_loss_h5
 from starccato_jax.data import get_default_weights, load_training_data
+from starccato_jax.vae.core.io import TrainValMetrics, load_loss_h5
 
 
 def test_version():

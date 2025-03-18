@@ -1,17 +1,53 @@
 import os
+from typing import List, Tuple
 
 import arviz as az
 import jax
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-from starccato_pca import StarccatoPCA
 from starccato_sampler.sampler import sample
 
-from starccato_jax import StarccatoVAE
+from starccato_jax import StarccatoPCA, StarccatoVAE
 from starccato_jax.data import load_training_data
 from starccato_jax.plotting.utils import TIME
 
 RNG = jax.random.PRNGKey(0)
+
+
+def plot_pe_comparison(
+    data_1d: jax.numpy.ndarray,
+    true_1d: jax.numpy.ndarray,
+    result_fnames: List[str],
+    labels: List[str],
+    colors: List[str],
+    fname: str = "comparison.pdf",
+):
+    results = [az.from_netcdf(f) for f in result_fnames]
+    quantiles = [r.sample_stats["quantiles"].values for r in results]
+    err = [q - true_1d for q in quantiles]
+
+    fig = plt.figure(figsize=(4, 3))
+    gs = GridSpec(
+        2,
+        1,
+        height_ratios=[4, 1],
+    )
+    ax0 = plt.subplot(gs[0])
+    ax1 = plt.subplot(gs[1], sharex=ax0)
+    ax0.set_xlim(TIME[0], TIME[-1])
+    ax1.set_xlim(TIME[0], TIME[-1])
+    ax1.set_xlabel("Time")
+    ax1.set_ylabel("Error")
+    plt.subplots_adjust(hspace=0)
+
+    ax0.plot(TIME, data_1d, label="Data", color="gray", lw=2, alpha=0.5)
+    ax0.plot(TIME, true_1d, label="True", color="black", lw=1)
+    for e, q, lbl, c in zip(err, quantiles, labels, colors):
+        _add_qtl(ax0, q, c, lbl)
+        _add_qtl(ax1, e, c, lbl)
+    ax0.legend(frameon=False)
+    plt.savefig(fname, bbox_inches="tight")
+    plt.close(fig)
 
 
 def _add_qtl(ax, qtl, color, lbl):
@@ -30,40 +66,3 @@ if __name__ == "__main__":
     # # run MCMC
     for label, model in zip(["pca", "vae"], [StarccatoVAE(), StarccatoPCA()]):
         sample(starccato_model=model, outdir=f"out_{label}", **kwgs)
-
-    vae_data = az.from_netcdf("out_vae/inference.nc")
-    pca_data = az.from_netcdf("out_pca/inference.nc")
-    vae_qtls = vae_data.sample_stats["quantiles"].values
-    pca_qtls = pca_data.sample_stats["quantiles"].values
-
-    # gredspec of 80 20
-    fig = plt.figure(figsize=(4, 3))
-    gs = GridSpec(
-        2,
-        1,
-        height_ratios=[4, 1],
-    )
-    ax0 = plt.subplot(gs[0])
-    ax1 = plt.subplot(gs[1], sharex=ax0)
-    ax0.set_xlim(TIME[0], TIME[-1])
-    ax1.set_xlim(TIME[0], TIME[-1])
-
-    ax0.plot(TIME, data, label="Data", color="gray", lw=2, alpha=0.5)
-    ax0.plot(TIME, true, label="True", color="black", lw=1)
-    _add_qtl(ax0, vae_qtls, "tab:blue", "VAE (90% CI)")
-    _add_qtl(ax0, pca_qtls, "tab:orange", "PCA (90% CI)")
-    ax0.legend(frameon=False)
-
-    # error qtls
-    vae_err = vae_qtls - true
-    pca_err = pca_qtls - true
-    _add_qtl(ax1, vae_err, "tab:blue", "VAE error")
-    _add_qtl(ax1, pca_err, "tab:orange", "PCA error")
-    ax1.set_xlabel("Time")
-    ax1.set_ylabel("Error")
-
-    # remove space between subplots
-    plt.subplots_adjust(hspace=0)
-
-    # add some padding for the label before saving
-    plt.savefig("comparison.pdf", bbox_inches="tight")

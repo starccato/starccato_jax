@@ -7,8 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from .. import credible_intervals
-from ..core.io import ModelData
-from ..core.model import reconstruct
+from ..vae.core import ModelData, reconstruct
 from .utils import MODEL_COL, TIME, add_quantiles
 
 

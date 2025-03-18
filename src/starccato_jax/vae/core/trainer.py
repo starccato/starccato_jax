@@ -10,13 +10,13 @@ import optax
 from flax.training import train_state
 from matplotlib import pyplot as plt
 
-from ..config import Config
-from ..plotting import (
+from ...plotting import (
     generate_gif,
     plot_distributions,
     plot_reconstructions,
     plot_training_metrics,
 )
+from ..config import Config
 from .io import save_model
 from .loss import (
     TrainValMetrics,

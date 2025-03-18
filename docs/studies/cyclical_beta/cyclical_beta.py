@@ -1,8 +1,9 @@
 import os
 
-from starccato_jax.data import load_data
-from starccato_jax.sampler import sample_latent_vars_given_data
-from starccato_jax.trainer import Config, train_vae
+from starccato_sampler.sampler import sample
+
+from starccato_jax import Config, StarccatoVAE
+from starccato_jax.data import load_training_data
 
 HERE = os.path.dirname(__file__)
 OUT_BETA_RAMP = os.path.join(HERE, "out_models/beta_monotonic")
@@ -16,7 +17,7 @@ config_args = dict(latent_dim=Z_SIZE, epochs=1000)
 
 kwargs = [
     dict(
-        save_dir=OUT_BETA_RAMP,
+        model_dir=OUT_BETA_RAMP,
         config=Config(
             beta_start=0,
             beta_end=1,
@@ -25,11 +26,16 @@ kwargs = [
         ),
     ),
     dict(
-        save_dir=OUT_BETA_0,
-        config=Config(beta_start=0, beta_end=0, cyclical_annealing_cycles=0, **config_args),
+        model_dir=OUT_BETA_0,
+        config=Config(
+            beta_start=0,
+            beta_end=0,
+            cyclical_annealing_cycles=0,
+            **config_args,
+        ),
     ),
     dict(
-        save_dir=OUT_BETA_CYCLICAL,
+        model_dir=OUT_BETA_CYCLICAL,
         config=Config(
             beta_start=0,
             beta_end=1,
@@ -38,19 +44,22 @@ kwargs = [
         ),
     ),
     dict(
-        save_dir=OUT_BETA_1,
-        config=Config(beta_start=1, beta_end=1, cyclical_annealing_cycles=0, **config_args),
+        model_dir=OUT_BETA_1,
+        config=Config(
+            beta_start=1,
+            beta_end=1,
+            cyclical_annealing_cycles=0,
+            **config_args,
+        ),
     ),
 ]
 
 
 def main():
-    train_data, val_data = load_data()
+    train_data, val_data = load_training_data()
     for kw in kwargs:
-        train_vae(train_data, val_data, **kw, plot_every=50)
-        sample_latent_vars_given_data(
-            val_data[0], model_path=kw["save_dir"], outdir=kw["save_dir"]
-        )
+        model = StarccatoVAE.train(**kw)
+        sample(val_data[0], model_path=kw["model_dir"], outdir=kw["model_dir"])
 
 
 if __name__ == "__main__":

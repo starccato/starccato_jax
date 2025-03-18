@@ -103,6 +103,8 @@ def encode(
     Args:
         x (jnp.ndarray): Input data.
         model_data (ModelData): Model parameters and latent dimension.
+        rng (PRNGKey, optional): Random number generator. Defaults to None.
+        model (VAE, optional): VAE model. Defaults to None.
 
     Returns:
         jnp.ndarray: Encoded latent vector `z`.

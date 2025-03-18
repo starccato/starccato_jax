@@ -1,17 +1,9 @@
-import os
 import warnings
-from typing import List
 
-import jax
-import jax.numpy as jnp
-import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ..core.io import ModelData
-from ..core.loss import Losses, TrainValMetrics, aggregate_metrics
-from ..core.model import reconstruct
-from ..credible_intervals import coverage_probability, pointwise_ci, uniform_ci
+from ..credible_intervals import coverage_probability
 
 MODEL_COL = "tab:orange"
 OBS_COL = "tab:gray"

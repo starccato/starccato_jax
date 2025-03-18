@@ -4,7 +4,7 @@ from typing import List
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 
-from ..core.loss import Losses, TrainValMetrics, aggregate_metrics
+from ..vae.core.loss import Losses, TrainValMetrics, aggregate_metrics
 
 
 def plot_training_metrics(

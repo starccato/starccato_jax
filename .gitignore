@@ -8,6 +8,7 @@ __pycache__/
 *.so
 *.npy
 .idea
+docs/studies/coverage/out_mcmc/
 *.png
 tests/data
 MODEL
