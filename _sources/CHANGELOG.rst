@@ -5,16 +5,41 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.11:
+
+v0.1.11 (2025-03-11)
+====================
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`a93d631`_)
+
+.. _a93d631: https://github.com/starccato/starccato_jax/commit/a93d631346f9dc57c4a17dc8ae4f2f357df4941e
+
+
 .. _changelog-v0.1.10:
 
 v0.1.10 (2025-03-06)
 ====================
+
+Bug Fixes
+---------
+
+* fix: minor plotting fixes and make superclass (`45ac525`_)
+
+Chores
+------
+
+* chore(release): 0.1.10 (`fe4bd41`_)
 
 Unknown
 -------
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`de2445a`_)
 
+.. _45ac525: https://github.com/starccato/starccato_jax/commit/45ac5251d12fb443bb2772456f955d49e6153eb7
+.. _fe4bd41: https://github.com/starccato/starccato_jax/commit/fe4bd4130ca46c53c5087927a8cad7d33a01f01b
 .. _de2445a: https://github.com/starccato/starccato_jax/commit/de2445af7aa4ed07ab1185c694921019e0d420a7
 
 
