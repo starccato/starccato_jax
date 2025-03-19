@@ -1,11 +1,14 @@
 import os
+import time
 
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
+from sqlalchemy.sql.coercions import expect
 
 from starccato_jax import Config, StarccatoVAE
 from starccato_jax.data import get_default_weights, load_training_data
+from starccato_jax.plotting import plot_distributions
 from starccato_jax.vae.core.io import TrainValMetrics, load_loss_h5
 
 
@@ -23,11 +26,17 @@ def test_training_data():
 
 def test_train_vae(outdir):
     # Train the VAE model
+    t0 = time.time()
     vae = StarccatoVAE.train(
         model_dir=outdir,
         train_fraction=0.8,
         config=Config(latent_dim=8, epochs=10, cyclical_annealing_cycles=0),
     )
+    runtime = round(time.time() - t0, 2)
+    expected_runtime = 20
+    assert (
+        runtime < expected_runtime
+    ), f"Training took {runtime} > {expected_runtime}s to complete"
     assert os.path.exists(outdir)
 
     # load and use VAE

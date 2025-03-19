@@ -7,6 +7,8 @@ import pandas as pd
 
 from .urls import PARAMETERS_CSV_URL, SIGNALS_CSV_URL
 
+__all__ = ["load_training_data", "load_richers_dataset"]
+
 HERE = os.path.dirname(__file__)
 CACHE = f"{HERE}/data.npz"
 
@@ -14,6 +16,21 @@ CACHE = f"{HERE}/data.npz"
 def load_training_data(
     train_fraction: float = 0.8, clean: bool = False
 ) -> Tuple[jnp.ndarray, jnp.ndarray]:
+    data = load_richers_dataset(clean=clean)
+
+    # Split data into training (80%) and validation (20%) sets.
+    n_total = data.shape[0]
+    n_train = int(train_fraction * n_total)
+    train_data_np = data[:n_train]
+    val_data_np = data[n_train:]
+
+    # Convert preprocessed data to JAX device arrays once.
+    train_data = jnp.array(train_data_np)
+    val_data = jnp.array(val_data_np)
+    return train_data, val_data
+
+
+def load_richers_dataset(clean: bool = False) -> np.ndarray:
     if not os.path.exists(CACHE) or clean:
         _download_and_save_data()
     data = np.load(CACHE)["data"]
@@ -30,17 +47,7 @@ def load_training_data(
     mus = np.mean(data, axis=1, keepdims=True)
     sigmas = np.std(data, axis=1, keepdims=True)
     data = (data - mus) / sigmas
-
-    # Split data into training (80%) and validation (20%) sets.
-    n_total = data.shape[0]
-    n_train = int(train_fraction * n_total)
-    train_data_np = data[:n_train]
-    val_data_np = data[n_train:]
-
-    # Convert preprocessed data to JAX device arrays once.
-    train_data = jnp.array(train_data_np)
-    val_data = jnp.array(val_data_np)
-    return train_data, val_data
+    return data
 
 
 def _download_and_save_data():

@@ -111,11 +111,11 @@ def plot_distributions(
     plt.subplots_adjust(hspace=0)
 
     if title is not None:
-        fig.suptitle(title)
+        ax0.set_title(title, pad=10)
 
     if fname is not None:
         os.makedirs(os.path.dirname(fname), exist_ok=True)
-        plt.savefig(fname)
+        plt.savefig(fname, bbox_inches="tight")
         plt.close(fig)
 
     return fig, [ax0, ax1, ax2]
