@@ -2,42 +2,19 @@ import os
 
 from starccato_jax import Config, StarccatoVAE
 from starccato_jax.data import load_training_data
-from starccato_jax.io import load_model
-from starccato_jax.model import reconstruct
 
 HERE = os.path.dirname(__file__)
-
-Z_SIZE = 20
 
 
 def main():
     train_data, val_data = load_training_data()
-    train_vae(
-        train_data,
-        val_data,
-        config=Config(
-            latent_dim=Z_SIZE,
-            epochs=30,
-            cyclical_annealing_cycles=0,
-        ),
-        save_dir=f"{HERE}/model_exploration/model_z{Z_SIZE}",
-    )
-    model_data = load_model(f"{HERE}/model_exploration/model_z{Z_SIZE}")
-    reconstructed = reconstruct(train_data[0], model_data)
-    sample_latent_vars_given_data(
-        train_data[0],
-        model_path=f"{HERE}/model_exploration/model_z{Z_SIZE}",
-        outdir=f"{HERE}/model_exploration/model_z{Z_SIZE}/mcmc_train",
-    )
-    sample_latent_vars_given_data(
-        val_data[0],
-        model_path=f"{HERE}/model_exploration/model_z{Z_SIZE}",
-        outdir=f"{HERE}/model_exploration/model_z{Z_SIZE}/mcmc_validation",
-    )
-    sample_latent_vars_given_data(
-        reconstructed,
-        model_path=f"{HERE}/model_exploration/model_z{Z_SIZE}",
-        outdir=f"{HERE}/model_exploration/model_z{Z_SIZE}/mcmc_reconstructed",
+    config = Config(latent_dim=16, epochs=1000, cyclical_annealing_cycles=3)
+    starccato_vae = StarccatoVAE.train(
+        model_dir="model_out",
+        config=config,
+        # plot_every=50,
+        # print_every=50,
+        track_gradients=True,
     )
 
 

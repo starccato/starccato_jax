@@ -2,6 +2,7 @@ import jax.numpy as jnp
 from jax.random import PRNGKey
 
 from ..data import load_training_data
+from ..logging import logger
 from ..starccato_model import StarccatoModel
 from . import pca
 
@@ -30,7 +31,7 @@ class StarccatoPCA(StarccatoModel):
         )  # PCA model will be loaded or trained
         self.train_mse = float(self.mse(train_data))
         self.valid_mse = float(self.mse(valid_data))
-        print(
+        logger.info(
             f"[{self}] Train MSE: {self.train_mse:.2e}, Valid MSE: {self.valid_mse:.2e}"
         )
 

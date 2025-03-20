@@ -7,6 +7,8 @@ from flax import linen as nn
 from jax import random
 from jax.random import PRNGKey
 
+from .data_containers import ModelData
+
 __all__ = ["VAE", "ModelData", "generate", "reconstruct", "encode"]
 
 
@@ -72,12 +74,6 @@ def _reparameterize(
     std = jnp.exp(0.5 * logvar)
     eps = random.normal(rng, logvar.shape)
     return mean + eps * std
-
-
-@dataclass
-class ModelData:
-    params: Dict
-    latent_dim: int
 
 
 def generate(

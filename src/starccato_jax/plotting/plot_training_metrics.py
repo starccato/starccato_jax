@@ -3,12 +3,13 @@ from typing import List
 
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
+from uniplot import plot as uplot
 
-from ..vae.core.loss import Losses, TrainValMetrics, aggregate_metrics
+from ..vae.core.data_containers import Losses, TrainValMetrics
 
 
 def plot_training_metrics(
-    training_metrics: List[TrainValMetrics], fname: str = None
+    training_metrics: TrainValMetrics, fname: str = None
 ):
     fig = plt.figure(figsize=(8, 4))
     gs = gridspec.GridSpec(
@@ -19,8 +20,7 @@ def plot_training_metrics(
     ax_bottom = fig.add_subplot(gs[1], sharex=ax_top)
     ax_twin = ax_bottom.twinx()
 
-    n = len(training_metrics)
-    metrics = aggregate_metrics(training_metrics)
+    metrics = training_metrics
 
     # Top plot (Beta values)
     ax_top.plot(
@@ -60,7 +60,7 @@ def plot_training_metrics(
     )
     ax_bottom.legend(frameon=False, loc="upper right")
     ax_bottom.set_ylim(bottom=0)
-    ax_bottom.set_xlim(0, n)
+    ax_bottom.set_xlim(0, metrics.n)
 
     # Remove x ticks from the top plot
     ax_top.tick_params(labelbottom=False)
@@ -77,3 +77,16 @@ def _plot_loss(
     ax.plot(losses.loss, label=label, color=color, lw=2)
     ax2.plot(losses.reconstruction_loss, color=color, ls=":", alpha=0.5)
     ax2.plot(losses.kl_divergence, color=color, ls="--", alpha=0.5)
+
+
+def plot_loss_in_terminal(training_metrics: List[TrainValMetrics]):
+    ys = [
+        training_metrics.train_metrics.kl_divergence,
+        training_metrics.train_metrics.reconstruction_loss,
+    ]
+    uplot(
+        ys,
+        legend_labels=["KL", "MSE"],
+        title="Training Loss vs Epoch",
+        lines=False,
+    )

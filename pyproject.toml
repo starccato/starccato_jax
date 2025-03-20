@@ -32,6 +32,8 @@ dependencies = [
     "pillow",
     "natsort",
     "tqdm",
+    "rich",
+    "uniplot"
 ]
 
 [project.optional-dependencies]

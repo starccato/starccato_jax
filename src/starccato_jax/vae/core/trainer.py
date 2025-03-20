@@ -9,21 +9,21 @@ import numpy as np
 import optax
 from flax.training import train_state
 from matplotlib import pyplot as plt
+from tqdm.auto import tqdm
 
+from ...logging import logger
 from ...plotting import (
     generate_gif,
     plot_distributions,
+    plot_gradients,
+    plot_loss_in_terminal,
     plot_reconstructions,
     plot_training_metrics,
 )
 from ..config import Config
+from .data_containers import Losses, TrainValMetrics
 from .io import save_model
-from .loss import (
-    TrainValMetrics,
-    compute_metrics,
-    cyclical_annealing_beta,
-    vae_loss,
-)
+from .loss import cyclical_annealing_beta, vae_loss
 from .model import VAE, ModelData, reconstruct
 
 __all__ = ["train_vae"]
@@ -40,7 +40,7 @@ def _train_step(state, x, rng, model, beta):
         lambda params: vae_loss(params, x, rng, model, beta).loss
     )(state.params)
     state = state.apply_gradients(grads=grads)
-    return state, loss
+    return state, loss, grads
 
 
 # ------------------------------
@@ -72,6 +72,7 @@ def train_vae(
     save_dir="vae_outdir",
     print_every=100,
     plot_every=np.inf,
+    track_gradients=False,
 ):
     os.makedirs(save_dir, exist_ok=True)
     data_len = train_data.shape[1]
@@ -81,7 +82,7 @@ def train_vae(
     state, model = _create_train_state(
         rng, config.latent_dim, data_len, config.learning_rate
     )
-    metrics: List[TrainValMetrics] = []
+    metrics = TrainValMetrics.for_epochs(config.epochs)
     n_train = train_data.shape[0]
     step = 0
     beta = cyclical_annealing_beta(
@@ -92,31 +93,47 @@ def train_vae(
     )
 
     model_data = None
-    for epoch in range(config.epochs):
+    progress_bar = tqdm(range(config.epochs), desc="Training")
+    for epoch in progress_bar:
         # Shuffle training data indices.
         perm = np.random.permutation(n_train)
         rng, subkey = jax.random.split(rng)
+
+        avg_grad_norm = None
+        epoch_grads = []  # Store the norm of the gradients for each epoch
         for i in range(0, n_train, config.batch_size):
             # beta = compute_beta(step, config.cycle_length)
             batch = train_data[perm[i : i + config.batch_size]]
-            state, batch_loss = _train_step(
+            state, batch_loss, batch_grad = _train_step(
                 state, batch, subkey, model, beta[epoch]
             )
+            if track_gradients:
+                # Compute the norm of the gradients
+                grad_norm = jax.tree_util.tree_map(
+                    lambda x: jnp.linalg.norm(x), batch_grad
+                )
+                epoch_grads.append(grad_norm)
+
             step += 1
 
         model_data = ModelData(
             params=state.params, latent_dim=config.latent_dim
         )
+
         metrics.append(
-            compute_metrics(
-                state, train_data, subkey, model, val_data, beta[epoch]
-            )
+            i=epoch,
+            train_loss=vae_loss(
+                model_data.params, train_data, rng, model, beta[epoch]
+            ),
+            val_loss=vae_loss(
+                model_data.params, val_data, rng, model, beta[epoch]
+            ),
+            gradient_norms=epoch_grads,
         )
+        progress_bar.set_postfix(dict(Metrics=f"{metrics}"))
 
-        if print_every != np.inf and epoch % print_every == 0:
-            print(f"Epoch {epoch}: {metrics[epoch]}")
-
-        if plot_every != np.inf and epoch % plot_every == 0:
+        if plot_every != np.inf and epoch % plot_every == 0 and epoch > 0:
+            progress_bar.set_description("Plotting")
             _save_training_plots(
                 model_data,
                 metrics,
@@ -125,15 +142,21 @@ def train_vae(
                 rng=rng,
                 epoch=config.epochs,
             )
+            progress_bar.set_description("Training")
 
     model_data = ModelData(params=state.params, latent_dim=config.latent_dim)
     _save_training_plots(
         model_data, metrics, save_dir, val_data, rng=rng, epoch=config.epochs
     )
+    plot_loss_in_terminal(metrics)
+    if track_gradients:
+        plot_gradients(
+            metrics.gradient_norms.data, fname=f"{save_dir}/gradients.png"
+        )
 
     save_model(state, config, metrics, savedir=save_dir)
 
-    print(f"Training complete. (time: {time.time() - t0:.2f}s)")
+    logger.info(f"Training complete. (time: {time.time() - t0:.2f}s)")
     if plot_every < np.inf:
         _save_gifs(save_dir)
 

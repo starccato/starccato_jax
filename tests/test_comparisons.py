@@ -1,33 +1,37 @@
 import os
 
 import h5py
+import numpy as np
 from utils import BRANCH
 
 from starccato_jax import StarccatoVAE
 from starccato_jax.plotting import plot_distributions
 
 
-def _save_signals(outdir, signals):
-    with h5py.File(os.path.join(outdir, "vae_signals.h5"), "w") as f:
+def _save_signals(fname, signals):
+    with h5py.File(fname, "w") as f:
         f.create_dataset("signals", data=signals)
 
 
-def test_gan_comparison(
-    outdir, gan_signals, richers_signals, cached_vae_signals
-):
+def standardize(signals):
+    return (signals - signals.mean()) / signals.std()
+
+
+def test_comparisons(outdir, gan_signals, richers_signals, cached_vae_signals):
+    outdir = os.path.join(outdir, "comparisons")
+    os.makedirs(outdir, exist_ok=True)
+
     vae = StarccatoVAE()
     vae_signal = vae.generate(n=len(gan_signals))
-    _save_signals(outdir, vae_signal)
+    _save_signals(f"{outdir}/vae_signals[{BRANCH}].h5", vae_signal)
 
     # rescale all signals to have the same scale
-    gan_signals = (gan_signals - gan_signals.mean()) / gan_signals.std()
-    vae_signal = (vae_signal - vae_signal.mean()) / vae_signal.std()
-    richers_signals = (
-        richers_signals - richers_signals.mean()
-    ) / richers_signals.std()
-    cached_vae_signals = (
-        cached_vae_signals - cached_vae_signals.mean()
-    ) / cached_vae_signals.std()
+    gan_signals = standardize(gan_signals)
+    # roll the GAN signals forward a bit..
+    gan_signals = np.roll(gan_signals, 5, axis=1)
+    vae_signal = standardize(vae_signal)
+    richers_signals = standardize(richers_signals)
+    cached_vae_signals = standardize(cached_vae_signals)
 
     plot_distributions(
         richers_signals,

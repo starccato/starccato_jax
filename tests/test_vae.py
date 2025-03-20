@@ -49,6 +49,15 @@ def test_train_vae(outdir):
     assert losses.val_metrics.loss.shape == (10,)
 
 
+def test_model_structure(outdir):
+    # save the model structure
+    vae = StarccatoVAE()
+    struc = vae.model_structure
+    with open(f"{outdir}/model_structure.txt", "w") as f:
+        f.write(struc)
+    print(struc)
+
+
 def test_default(outdir):
     get_default_weights(clean=True)
     vae = StarccatoVAE()

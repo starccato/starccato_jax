@@ -3,6 +3,8 @@ import glob
 from natsort import natsorted
 from PIL import Image
 
+from ..logging import logger
+
 
 def generate_gif(
     image_pattern: str,
@@ -29,7 +31,7 @@ def generate_gif(
     image_files = natsorted(image_files)
 
     if not image_files:
-        print("No matching images found!")
+        logger.error("No matching images found!")
         return
 
     # Load images
@@ -47,4 +49,4 @@ def generate_gif(
         loop=0,  # Loop forever
     )
 
-    print(f"GIF saved as {output_gif}")
+    logger.info(f"GIF saved as {output_gif}")

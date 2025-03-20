@@ -4,23 +4,7 @@ from typing import List, Union
 import jax.numpy as jnp
 import numpy as np
 
-
-@dataclass
-class Losses:
-    reconstruction_loss: Union[float, List[float]]
-    kl_divergence: Union[float, List[float]]
-    loss: Union[float, List[float]]
-    beta: Union[float, List[float]]
-
-
-@dataclass
-class TrainValMetrics:
-    train_metrics: Losses
-    val_metrics: Losses
-
-    def __str__(self) -> str:
-        tl, vl = self.train_metrics.loss, self.val_metrics.loss
-        return f"Train Loss: {tl:.3e}, Val Loss: {vl:.3e}"
+from .data_containers import Losses
 
 
 def cyclical_annealing_beta(
@@ -56,30 +40,6 @@ def cyclical_annealing_beta(
                 v += step
 
     return beta_schedule
-
-
-def aggregate_metrics(metrics_list: List[TrainValMetrics]) -> TrainValMetrics:
-    """Convert a list of TrainValMetrics (one per epoch) into a single object with lists of values."""
-    return TrainValMetrics(
-        train_metrics=Losses(
-            reconstruction_loss=[
-                m.train_metrics.reconstruction_loss for m in metrics_list
-            ],
-            kl_divergence=[
-                m.train_metrics.kl_divergence for m in metrics_list
-            ],
-            loss=[m.train_metrics.loss for m in metrics_list],
-            beta=[m.train_metrics.beta for m in metrics_list],
-        ),
-        val_metrics=Losses(
-            reconstruction_loss=[
-                m.val_metrics.reconstruction_loss for m in metrics_list
-            ],
-            kl_divergence=[m.val_metrics.kl_divergence for m in metrics_list],
-            loss=[m.val_metrics.loss for m in metrics_list],
-            beta=[m.train_metrics.beta for m in metrics_list],
-        ),
-    )
 
 
 def vae_loss(params, x, rng, model, beta: float) -> Losses:
@@ -121,12 +81,3 @@ def vae_loss(params, x, rng, model, beta: float) -> Losses:
     net_loss = reconstruction_loss + beta * kl_divergence
 
     return Losses(reconstruction_loss, kl_divergence, net_loss, beta)
-
-
-def compute_metrics(
-    model_data, x, rng, model, validation_x, beta
-) -> TrainValMetrics:
-    return TrainValMetrics(
-        vae_loss(model_data.params, x, rng, model, beta),
-        vae_loss(model_data.params, validation_x, rng, model, beta),
-    )

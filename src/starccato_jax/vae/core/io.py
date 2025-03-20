@@ -9,7 +9,7 @@ from flax.core.frozen_dict import freeze
 from flax.training.train_state import TrainState
 
 from ..config import Config
-from .loss import Losses, TrainValMetrics, aggregate_metrics
+from .data_containers import Losses, TrainValMetrics
 from .model import ModelData
 
 MODEL_FNAME = "model.h5"
@@ -19,14 +19,12 @@ LOSS_FNAME = "losses.h5"
 def save_model(
     state: TrainState,
     config: Config,
-    train_metrics: List[TrainValMetrics],
+    train_metrics: TrainValMetrics,
     savedir: str,
 ):
     """Saves model parameters and config using h5py"""
     model_params = state.params
     filename = f"{savedir}/{MODEL_FNAME}"
-
-    metrics = aggregate_metrics(train_metrics)
 
     # iterate through model_params dict and convert to native HDF5 equivalent
     def recursively_save(h5group, data):
@@ -38,7 +36,9 @@ def save_model(
                 subgroup = h5group.create_group(key)
                 recursively_save(subgroup, value)
             else:  # Assume it's a JAX array, convert to NumPy for HDF5 compatibility
-                h5group.create_dataset(key, data=np.array(value))
+                arr = np.array(value)
+                if arr.dtype != np.dtype("O"):
+                    h5group.create_dataset(key, data=arr)
 
     with h5py.File(filename, "w") as f:
         # Save params
@@ -53,9 +53,7 @@ def save_model(
 
     with h5py.File(f"{savedir}/{LOSS_FNAME}", "w") as f:
         loss_group = f.create_group("losses")
-        recursively_save(loss_group, asdict(metrics))
-
-    print(f"Model saved to {filename}")
+        recursively_save(loss_group, train_metrics.__dict__())
 
 
 def _recursively_load(h5group):
@@ -91,4 +89,5 @@ def load_loss_h5(fname: str) -> TrainValMetrics:
         return TrainValMetrics(
             train_metrics=Losses(**data["train_metrics"]),
             val_metrics=Losses(**data["val_metrics"]),
+            gradient_norms=data["gradient_norms"],
         )

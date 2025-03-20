@@ -1,3 +1,4 @@
+import time
 from typing import List, Tuple
 
 import jax.random
@@ -8,10 +9,12 @@ from jax.random import PRNGKey
 
 from .. import credible_intervals
 from ..data import get_default_weights, load_training_data
+from ..logging import logger
 from ..plotting import plot_model
 from ..starccato_model import StarccatoModel
 from .config import Config
 from .core import (
+    VAE,
     ModelData,
     encode,
     generate,
@@ -29,6 +32,7 @@ class StarccatoVAE(StarccatoModel):
         if model_dir is None or model_dir == "default_model":
             self.model_dir = get_default_weights()
         self._data: ModelData = load_model(self.model_dir)
+        self._model: VAE = VAE(latents=self.latent_dim)
 
     def __repr__(self):
         return f"StarccatoVAE(z-dim={self.latent_dim})"
@@ -45,6 +49,7 @@ class StarccatoVAE(StarccatoModel):
         config: Config = None,
         print_every: int = 1000,
         plot_every: int = np.inf,
+        track_gradients: bool = False,
     ):
         train_data, val_data = load_training_data(
             train_fraction=train_fraction
@@ -57,24 +62,29 @@ class StarccatoVAE(StarccatoModel):
             save_dir=model_dir,
             print_every=print_every,
             plot_every=plot_every,
+            track_gradients=track_gradients,
         )
-        return cls(model_dir)
+        model = cls(model_dir)
+        print(model.model_structure)
+        return model
 
     def generate(
         self, z: jnp.ndarray = None, rng: PRNGKey = None, n: int = 1
     ) -> jnp.ndarray:
         if z is None:
             z = self.sample_latent(rng, n)
-        return generate(self._data, z)
+        return generate(self._data, z, model=self._model)
 
     def reconstruct(
         self, x: jnp.ndarray, rng: PRNGKey = None, n_reps: int = 1
     ) -> jnp.ndarray:
-        reconstructed = reconstruct(x, self._data, rng=rng, n_reps=n_reps)
+        reconstructed = reconstruct(
+            x, self._data, rng=rng, n_reps=n_reps, model=self._model
+        )
         return reconstructed
 
     def encode(self, x: jnp.ndarray, rng: PRNGKey = None) -> jnp.ndarray:
-        return encode(x, self._data, rng=rng)
+        return encode(x, self._data, rng=rng, model=self._model)
 
     def plot(
         self,
@@ -137,3 +147,8 @@ class StarccatoVAE(StarccatoModel):
         xstar = self.reconstruct(x, n_reps=n)
         qtls = credible_intervals.pointwise_ci(xstar, ci=ci)
         return credible_intervals.coverage_probability(qtls, x)
+
+    @property
+    def model_structure(self) -> str:
+        rng = jax.random.PRNGKey(0)
+        return self._model.tabulate(rng, jnp.zeros(256), rng)
