@@ -24,7 +24,7 @@ class CachedSignals:
 
     @classmethod
     def load(cls):
-        with h5py.File("cached_signals.h5", "r") as f:
+        with h5py.File("signal_comparisons.h5", "r") as f:
             richers_signals = f["richers_signals"][:]
             gan_signals = f["gan_signals"][:]
             vae_signals = f["vae_signals"][:]
@@ -76,7 +76,7 @@ def make_plots(cache: CachedSignals, new_signals: np.ndarray):
 def main():
     config = Config(latent_dim=8, epochs=10, cyclical_annealing_cycles=0)
     vae = StarccatoVAE.train(
-        model_dir="model_out", config=config, track_gradients=False
+        model_dir="model_out", config=config, track_gradients=True
     )
     cached_sigals = CachedSignals.load()
     vae_signals = vae.generate(n=cached_sigals.n)
