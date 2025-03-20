@@ -5,16 +5,50 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.12:
+
+v0.1.12 (2025-03-20)
+====================
+
+Bug Fixes
+---------
+
+* fix: fix tests for gradient saving (`0b1d9ea`_)
+
+Unknown
+-------
+
+* refactoring to add in gradient data tracking (`f64ee3d`_)
+
+* improvements with testing (`ebe7c20`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`ad4d1ff`_)
+
+.. _0b1d9ea: https://github.com/starccato/starccato_jax/commit/0b1d9eaac3ecf8cda49b4e7e811401985f16b404
+.. _f64ee3d: https://github.com/starccato/starccato_jax/commit/f64ee3d8a211c6a07dfcef28d91ee7aa45842dd4
+.. _ebe7c20: https://github.com/starccato/starccato_jax/commit/ebe7c206339704dac91178921bdc2ef6f6f0cc35
+.. _ad4d1ff: https://github.com/starccato/starccato_jax/commit/ad4d1ff1662e93d3f5ac5776bb4cdcf7184548cc
+
+
 .. _changelog-v0.1.11:
 
 v0.1.11 (2025-03-11)
 ====================
 
+Chores
+------
+
+* chore(release): 0.1.11 (`efdcf24`_)
+
 Unknown
 -------
 
+* add testing (`d5010a9`_)
+
 * Merge branch 'main' of github.com:starccato/starccato_jax (`a93d631`_)
 
+.. _efdcf24: https://github.com/starccato/starccato_jax/commit/efdcf24915a8d01c1f4bab0f6f0acb9f6e883455
+.. _d5010a9: https://github.com/starccato/starccato_jax/commit/d5010a91eda7337f20d569de2d4cac6420f607a5
 .. _a93d631: https://github.com/starccato/starccato_jax/commit/a93d631346f9dc57c4a17dc8ae4f2f357df4941e
 
 
