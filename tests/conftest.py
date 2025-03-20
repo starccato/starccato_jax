@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 
@@ -12,9 +13,13 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 N_RICHERS = 1764
 
 
+logger = logging.getLogger("starccato_jax")
+logger.setLevel(logging.DEBUG)
+
+
 @pytest.fixture
 def outdir() -> str:
-    dir = os.path.join(HERE, f"test_output[{BRANCH}]")
+    dir = os.path.join(HERE, f"test_output-{BRANCH}")
     os.makedirs(dir, exist_ok=True)
     return dir
 

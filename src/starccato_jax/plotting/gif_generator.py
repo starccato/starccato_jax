@@ -27,6 +27,10 @@ def generate_gif(
     # Get all matching image filenames
     image_files = glob.glob(image_pattern)
 
+    logger.debug(
+        f"Generating GIF from {image_pattern}-->{len(image_files)} images: {image_files}"
+    )
+
     # Sort numerically based on numbers in filenames
     image_files = natsorted(image_files)
 

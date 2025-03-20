@@ -88,7 +88,7 @@ class TrainValMetrics:
             )
             getattr(self.val_metrics, metric)[i] = getattr(val_loss, metric)
 
-        if gradient_norms is not None:
+        if len(gradient_norms) > 0:
             self.gradient_norms.append(i, gradient_norms)
 
     @property

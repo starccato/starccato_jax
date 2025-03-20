@@ -33,6 +33,12 @@ def test_comparisons(outdir, gan_signals, richers_signals, cached_vae_signals):
     richers_signals = standardize(richers_signals)
     cached_vae_signals = standardize(cached_vae_signals)
 
+    # save
+    with h5py.File(f"{outdir}/signal_comparisons.h5", "w") as f:
+        f.create_dataset("richers_signals", data=richers_signals)
+        f.create_dataset("gan_signals", data=gan_signals)
+        f.create_dataset("vae_signals", data=vae_signal)
+
     plot_distributions(
         richers_signals,
         gan_signals[: len(richers_signals)],
