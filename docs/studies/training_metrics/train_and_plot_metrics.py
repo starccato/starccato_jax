@@ -52,6 +52,8 @@ def make_comparison_plots(model_dir_1, model_dir_2):
             color=f"C{i}",
             linestyle="--",
         )
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
     plt.legend()
     plt.show()
 
@@ -86,7 +88,7 @@ if __name__ == "__main__":
         batch_size=126,
         cyclical_annealing_cycles=2,
     )
-    train_new_model(config1)
-    train_new_model(config2)
+    # train_new_model(config1)
+    # train_new_model(config2)
     model_dirs = glob.glob(f"{OUTDIR}/*")
     make_comparison_plots(model_dirs[-2], model_dirs[-1])
