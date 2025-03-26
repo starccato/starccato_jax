@@ -79,13 +79,12 @@ def _plot_loss(
     ax2.plot(losses.kl_divergence, color=color, ls="--", alpha=0.5)
 
 
-def plot_loss_in_terminal(training_metrics: List[TrainValMetrics]):
-    ys = [
-        training_metrics.train_metrics.kl_divergence,
-        training_metrics.train_metrics.reconstruction_loss,
-    ]
+def plot_loss_in_terminal(training_metrics: TrainValMetrics):
     uplot(
-        ys,
+        [
+            training_metrics.train_metrics.kl_divergence,
+            training_metrics.train_metrics.reconstruction_loss,
+        ],
         legend_labels=["KL", "MSE"],
         title="Training Loss vs Epoch",
         lines=False,

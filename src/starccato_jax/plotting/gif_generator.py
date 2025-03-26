@@ -9,7 +9,7 @@ from ..logging import logger
 def generate_gif(
     image_pattern: str,
     output_gif: str,
-    duration: float = 100,
+    duration: float = 500,
     final_pause: float = 500,
 ):
     """
@@ -26,6 +26,12 @@ def generate_gif(
     """
     # Get all matching image filenames
     image_files = glob.glob(image_pattern)
+    if len(image_files) < 3:
+        logger.debug(
+            f"Only {len(image_files)} images found for pattern {image_pattern}. "
+            "At least 3 images are required to generate a GIF."
+        )
+        return
 
     logger.debug(
         f"Generating GIF from {image_pattern}-->{len(image_files)} images: {image_files}"
