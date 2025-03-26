@@ -8,7 +8,7 @@ from matplotlib.gridspec import GridSpec
 from starccato_sampler.sampler import sample
 
 from starccato_jax import StarccatoPCA, StarccatoVAE
-from starccato_jax.data import load_training_data
+from starccato_jax.data import TrainValData
 from starccato_jax.plotting.utils import TIME
 
 RNG = jax.random.PRNGKey(0)
@@ -56,7 +56,7 @@ def _add_qtl(ax, qtl, color, lbl):
 
 
 if __name__ == "__main__":
-    train_data, validation_data = load_training_data()
+    train_data, validation_data = TrainValData.load()
     true = validation_data[0].ravel()
     noise_sigma = 0.1
     data = true + jax.random.normal(RNG, true.shape) * noise_sigma

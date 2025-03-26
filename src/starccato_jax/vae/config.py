@@ -6,6 +6,49 @@ from ..data import TrainValData
 from ..logging import logger
 
 
+@dataclass
+class Config:
+    latent_dim: int = 20
+    learning_rate: float = 1e-3
+    epochs: int = 1000
+    batch_size: int = 64
+    cyclical_annealing_cycles: int = 1  # 0 for no annealing
+    beta_start: float = 0.0
+    beta_end: float = 1.0
+    train_fraction: float = 0.8
+
+    def __repr__(self):
+        return (
+            "Config("
+            f"latent_dim={self.latent_dim}, "
+            f"learning_rate={self.learning_rate}, "
+            f"epochs={self.epochs}, "
+            f"batch_size={self.batch_size}, "
+            f"cyclical_annealing_cycles={self.cyclical_annealing_cycles}"
+            ")"
+        )
+
+    def __post_init__(self):
+        self.beta_schedule = cyclical_annealing_beta(
+            n_epoch=self.epochs,
+            start=self.beta_start,
+            stop=self.beta_end,
+            n_cycle=self.cyclical_annealing_cycles,
+        )
+        self.data = TrainValData.load(train_fraction=self.train_fraction)
+        self._batch_size_check()
+
+    def _batch_size_check(self):
+        # check fraction that will be discarded due to batch size
+        n = self.data.train.shape[0]
+        n_batches = self.data.train.shape[0] // self.batch_size
+        n_discarded = self.data.train.shape[0] - n_batches * self.batch_size
+        if n_discarded > 0:
+            logger.warning(
+                f"Every epoch will discard {n_discarded}/{n} training samples due to batch size {self.batch_size}"
+            )
+
+
 def cyclical_annealing_beta(
     n_epoch: int,
     start: float = 0.0,
@@ -43,46 +86,3 @@ def cyclical_annealing_beta(
                 v += step
 
     return beta_schedule
-
-
-@dataclass
-class Config:
-    latent_dim: int = 20
-    learning_rate: float = 1e-3
-    epochs: int = 1000
-    batch_size: int = 126
-    cyclical_annealing_cycles: int = 1  # 0 for no annealing
-    beta_start: float = 0.0
-    beta_end: float = 1.0
-    train_fraction: float = 0.8
-
-    def __repr__(self):
-        return (
-            "Config("
-            f"latent_dim={self.latent_dim}, "
-            f"learning_rate={self.learning_rate}, "
-            f"epochs={self.epochs}, "
-            f"batch_size={self.batch_size}, "
-            f"cyclical_annealing_cycles={self.cyclical_annealing_cycles}"
-            ")"
-        )
-
-    def __post_init__(self):
-        self.beta_schedule = cyclical_annealing_beta(
-            n_epoch=self.epochs,
-            start=self.beta_start,
-            stop=self.beta_end,
-            n_cycle=self.cyclical_annealing_cycles,
-        )
-        self.data = TrainValData.load(train_fraction=self.train_fraction)
-        self._batch_size_check()
-
-    def _batch_size_check(self):
-        # check fraction that will be discarded due to batch size
-        n = self.data.train.shape[0]
-        n_batches = self.data.train.shape[0] // self.batch_size
-        n_discarded = self.data.train.shape[0] - n_batches * self.batch_size
-        if n_discarded > 0:
-            logger.warning(
-                f"Every epoch will discard {n_discarded}/{n} training samples due to batch size {self.batch_size}"
-            )

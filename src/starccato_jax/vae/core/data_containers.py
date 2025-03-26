@@ -40,6 +40,10 @@ class Gradients:
             self.data.setdefault(k, np.zeros(self.n))
             self.data[k][i] = float(v)
 
+    @property
+    def is_empty(self) -> bool:
+        return len(self.data) == 0
+
 
 @dataclass
 class TrainValMetrics:
@@ -90,6 +94,22 @@ class TrainValMetrics:
 
         if len(gradient_norms) > 0:
             self.gradient_norms.append(i, gradient_norms)
+
+    # def compute_metrics(self, model_data, data, rng, beta, i):
+    #     """ Compute metrics for iteration i. """
+    #     raise NotImplementedError()
+    #
+    #     train_loss = vae_loss(
+    #         model_data.params, data.train, rng, model, beta
+    #     )
+    #     val_loss = vae_loss(
+    #         model_data.params, data.val, rng, model, beta
+    #     )
+    #     gradient = jax.value_and_grad(
+    #         lambda params: vae_loss(params, data.train, rng, model, beta).loss
+    #     )(state.params)
+    #     return train_loss, val_loss
+    #
 
     @property
     def n(self):

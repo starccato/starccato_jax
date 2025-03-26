@@ -8,7 +8,7 @@ from jax import numpy as jnp
 from jax.random import PRNGKey
 
 from .. import credible_intervals
-from ..data import get_default_weights, load_training_data
+from ..data import TrainValData, get_default_weights
 from ..logging import logger
 from ..plotting import plot_model
 from ..starccato_model import StarccatoModel
@@ -45,22 +45,16 @@ class StarccatoVAE(StarccatoModel):
     def train(
         cls,
         model_dir: str,
-        train_fraction: float = 0.8,
         config: Config = None,
-        print_every: int = 1000,
         plot_every: int = np.inf,
         track_gradients: bool = False,
     ):
-        train_data, val_data = load_training_data(
-            train_fraction=train_fraction
-        )
         config = config or Config()
+        logger.info(f"Training VAE with config: {config}")
         train_vae(
-            train_data,
-            val_data,
+            config.data,
             config=config,
             save_dir=model_dir,
-            print_every=print_every,
             plot_every=plot_every,
             track_gradients=track_gradients,
         )
