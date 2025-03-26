@@ -164,7 +164,7 @@ def train_vae(
 def _save_training_plots(
     model_data: ModelData, metrics, save_dir, val_data, rng=None, epoch=None
 ):
-    plot_training_metrics(metrics, fname=f"{save_dir}/loss.png")
+    plot_training_metrics(metrics, fname=f"{save_dir}/plots/loss.png")
     plot_reconstructions(
         model_data,
         val_data,
@@ -184,9 +184,9 @@ def _save_training_plots(
 def _save_gifs(save_dir):
     generate_gif(
         image_pattern=f"{save_dir}/plots/reconstruction_E*.png",
-        output_gif=f"{save_dir}/training_reconstructions.gif",
+        output_gif=f"{save_dir}/plots/training_reconstructions.gif",
     )
     generate_gif(
         image_pattern=f"{save_dir}/plots/reconstruction_E*.png",
-        output_gif=f"{save_dir}/training_reconstructions.gif",
+        output_gif=f"{save_dir}/plots/training_reconstructions.gif",
     )
