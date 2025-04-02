@@ -13,7 +13,7 @@ from .utils import MODEL_COL, TIME, add_quantiles
 
 def plot_reconstructions(
     model_data: ModelData,
-    val_data: np.ndarray,
+    data: np.ndarray,
     nrows: int = 3,
     fname: str = None,
     title: str = None,
@@ -26,13 +26,13 @@ def plot_reconstructions(
     fig, axes = plt.subplots(nrows, ncols, figsize=(2.5 * ncols, 2.5 * nrows))
     axes = axes.flatten()
     for i in range(nsamples):
-        recon = reconstruct(val_data[i], model_data, rng, n_reps=100)
+        recon = reconstruct(data[i], model_data, rng, n_reps=100)
         if uniform_ci:
             qtls = credible_intervals.uniform_ci(recon, ci=0.9)
         else:
             qtls = credible_intervals.pointwise_ci(recon, ci=0.9)
         add_quantiles(
-            axes[i], qtls, "Reconstruction", MODEL_COL, y_obs=val_data[i]
+            axes[i], qtls, "Reconstruction", MODEL_COL, y_obs=data[i]
         )
         axes[i].set_axis_off()
     axes[-1].legend(frameon=False, loc="lower right")

@@ -3,7 +3,7 @@ import os
 from starccato_sampler.sampler import sample
 
 from starccato_jax import Config, StarccatoVAE
-from starccato_jax.data import load_training_data
+from starccato_jax.data import TrainValData
 
 HERE = os.path.dirname(__file__)
 OUT_BETA_RAMP = os.path.join(HERE, "out_models/beta_monotonic")
@@ -56,7 +56,7 @@ kwargs = [
 
 
 def main():
-    train_data, val_data = load_training_data()
+    train_data, val_data = TrainValData.load()
     for kw in kwargs:
         model = StarccatoVAE.train(**kw)
         sample(val_data[0], model_path=kw["model_dir"], outdir=kw["model_dir"])

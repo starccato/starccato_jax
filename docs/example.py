@@ -1,13 +1,13 @@
 import os
 
 from starccato_jax import Config, StarccatoVAE
-from starccato_jax.data import load_training_data
+from starccato_jax.data import TrainValData
 
 HERE = os.path.dirname(__file__)
 
 
 def main():
-    train_data, val_data = load_training_data()
+    train_data, val_data = TrainValData.load()
     config = Config(latent_dim=16, epochs=1000, cyclical_annealing_cycles=3)
     starccato_vae = StarccatoVAE.train(
         model_dir="model_out",

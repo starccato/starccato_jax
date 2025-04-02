@@ -1,4 +1,4 @@
 from .default_weights import get_default_weights
-from .training_data import load_training_data
+from .training_data import TrainValData
 
-__all__ = ["load_training_data", "get_default_weights"]
+__all__ = ["TrainValData", "get_default_weights"]

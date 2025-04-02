@@ -1,7 +1,7 @@
 import jax.numpy as jnp
 from jax.random import PRNGKey
 
-from ..data import load_training_data
+from ..data import TrainValData
 from ..logging import logger
 from ..starccato_model import StarccatoModel
 from . import pca
@@ -9,14 +9,10 @@ from . import pca
 
 class StarccatoPCA(StarccatoModel):
     def __init__(self, latent_dim: int = 32):
-        """
-        Initialize StarccatoPCA from a saved model file.
-        If the file does not exist, an empty model is created.
-        """
         self._latent_dim = latent_dim
-        train_data, valid_data = load_training_data()
+        data = TrainValData.load()
 
-        n_training_samples, input_dim = train_data.shape
+        n_training_samples, input_dim = data.train.shape
 
         self.input_dim = input_dim
         assert (
@@ -27,10 +23,10 @@ class StarccatoPCA(StarccatoModel):
         ), f"Number of training samples ({n_training_samples}) must be greater than the number of original dimensions ({n_orig_dim})"
 
         self._pca: pca.PCAState = pca.fit(
-            train_data, n_components=latent_dim
+            data.train, n_components=latent_dim
         )  # PCA model will be loaded or trained
-        self.train_mse = float(self.mse(train_data))
-        self.valid_mse = float(self.mse(valid_data))
+        self.train_mse = float(self.mse(data.train))
+        self.valid_mse = float(self.mse(data.val))
         logger.info(
             f"[{self}] Train MSE: {self.train_mse:.2e}, Valid MSE: {self.valid_mse:.2e}"
         )

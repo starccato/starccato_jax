@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import tsnex
 
 from starccato_jax import StarccatoVAE
-from starccato_jax.data import load_training_data
+from starccato_jax.data import TrainValData
 
-_, val_data = load_training_data(train_fraction=0.8)
+_, val_data = TrainValData.load(train_fraction=0.8)
 
 vae = StarccatoVAE()
 

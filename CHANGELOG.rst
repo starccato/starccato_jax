@@ -5,16 +5,99 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.13:
+
+v0.1.13 (2025-03-26)
+====================
+
+Bug Fixes
+---------
+
+* fix: refactoring VAE trainer (`a0c70bf`_)
+
+Unknown
+-------
+
+* Adjust for new data handler (`5075d09`_)
+
+* Plotting improvements (`1aa9c52`_)
+
+* Add cyclical beta to config (`294e12e`_)
+
+* move trainer.py --> trainer/trainer.py, trainer/__init__.py, trainer/plot_util.py, (`fc57975`_)
+
+* generic plotting for training progress (`3cc01c1`_)
+
+* move load_training_data --> TrainValData class (`5fccd74`_)
+
+* Add plot dir (`753e05b`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`9d40b11`_)
+
+.. _a0c70bf: https://github.com/starccato/starccato_jax/commit/a0c70bf53eb4b78a3bc807fea79bbbc1a7d35fec
+.. _5075d09: https://github.com/starccato/starccato_jax/commit/5075d092b6c084bf55535ede670cdc4b50adad69
+.. _1aa9c52: https://github.com/starccato/starccato_jax/commit/1aa9c52b1255b47aff3648f32eea2b0e0ab044cd
+.. _294e12e: https://github.com/starccato/starccato_jax/commit/294e12ef0550068381a613d3e8ae0dffb0957e39
+.. _fc57975: https://github.com/starccato/starccato_jax/commit/fc57975cfbe1634c47b7d89d96a3c05a8bfd72b5
+.. _3cc01c1: https://github.com/starccato/starccato_jax/commit/3cc01c159148a9898e578c9497c73a62eb9c96e7
+.. _5fccd74: https://github.com/starccato/starccato_jax/commit/5fccd746812336783a83d067b469bb98c569a2ec
+.. _753e05b: https://github.com/starccato/starccato_jax/commit/753e05b63ecc16f5aa82f87c9435511bf22c7320
+.. _9d40b11: https://github.com/starccato/starccato_jax/commit/9d40b11627b7085354054c2bd587b3a787815664
+
+
+.. _changelog-v0.1.12:
+
+v0.1.12 (2025-03-20)
+====================
+
+Bug Fixes
+---------
+
+* fix: fix tests for gradient saving (`0b1d9ea`_)
+
+Chores
+------
+
+* chore(release): 0.1.12 (`d59ba45`_)
+
+Unknown
+-------
+
+* added comparisons (`fad80e4`_)
+
+* refactoring to add in gradient data tracking (`f64ee3d`_)
+
+* improvements with testing (`ebe7c20`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`ad4d1ff`_)
+
+.. _0b1d9ea: https://github.com/starccato/starccato_jax/commit/0b1d9eaac3ecf8cda49b4e7e811401985f16b404
+.. _d59ba45: https://github.com/starccato/starccato_jax/commit/d59ba45566ab91b4e0150912f97d39e8df93b6fe
+.. _fad80e4: https://github.com/starccato/starccato_jax/commit/fad80e42626b30cbd2c8a4435fc885f987f18f29
+.. _f64ee3d: https://github.com/starccato/starccato_jax/commit/f64ee3d8a211c6a07dfcef28d91ee7aa45842dd4
+.. _ebe7c20: https://github.com/starccato/starccato_jax/commit/ebe7c206339704dac91178921bdc2ef6f6f0cc35
+.. _ad4d1ff: https://github.com/starccato/starccato_jax/commit/ad4d1ff1662e93d3f5ac5776bb4cdcf7184548cc
+
+
 .. _changelog-v0.1.11:
 
 v0.1.11 (2025-03-11)
 ====================
 
+Chores
+------
+
+* chore(release): 0.1.11 (`efdcf24`_)
+
 Unknown
 -------
 
+* add testing (`d5010a9`_)
+
 * Merge branch 'main' of github.com:starccato/starccato_jax (`a93d631`_)
 
+.. _efdcf24: https://github.com/starccato/starccato_jax/commit/efdcf24915a8d01c1f4bab0f6f0acb9f6e883455
+.. _d5010a9: https://github.com/starccato/starccato_jax/commit/d5010a91eda7337f20d569de2d4cac6420f607a5
 .. _a93d631: https://github.com/starccato/starccato_jax/commit/a93d631346f9dc57c4a17dc8ae4f2f357df4941e
 
 

@@ -11,7 +11,7 @@ from starccato_sampler.plotting import plot_pe_comparison
 from starccato_sampler.sampler import sample
 
 from starccato_jax import StarccatoPCA, StarccatoVAE
-from starccato_jax.data import load_training_data
+from starccato_jax.data import TrainValData
 
 RNG = PRNGKey(0)
 NOISE_SIGMA = 1
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     RUN_ON_VALIDATION = args.dataset == "val"
     if RUN_ON_VALIDATION:
-        _, data = load_training_data()
+        _, data = TrainValData.load()
         z = None
         label = "val"
     else:
