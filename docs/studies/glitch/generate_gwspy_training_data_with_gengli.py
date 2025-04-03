@@ -160,12 +160,15 @@ def generate_bank(
             raise ValueError("Seed bank must be a numpy array or None!")
 
     empty_count = 0
-    desc_str = (
-        f"Generating glitch bank: min_match = {min_match} - Bank size: {{}}"
-    )
+    desc_str = f"Generating bank: min_match = {min_match} | Bank size: {{}} | Fails until quit"
     pbar = tqdm(
-        total=empty_loops, desc=desc_str.format(bank.shape[0]), leave=True
+        total=empty_loops,
+        desc=desc_str.format(bank.shape[0]),
+        leave=True,
+        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}]",
     )
+
+    highest_empty_count = 0
 
     while empty_count < empty_loops:
         try:
@@ -177,7 +180,9 @@ def generate_bank(
                 pbar.set_description(desc_str.format(bank.shape[0]))
             else:
                 empty_count += 1
-            pbar.update(1)
+                if highest_empty_count < empty_count:
+                    highest_empty_count = empty_count
+                    pbar.update(1)
             # Save checkpoint every 50 iterations (or any interval you prefer).
             if pbar.n % 50 == 0:
                 save_bank(bank, min_match, checkpoint_dir=checkpoint_dir)
