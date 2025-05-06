@@ -19,9 +19,24 @@ class Encoder(nn.Module):
 
     @nn.compact
     def __call__(self, x: jnp.ndarray) -> Tuple[float, float]:
-        x = nn.Dense(1024, name="fc1")(x)
-        x = nn.relu(x)
-        x = nn.Dense(64, name="fc2")(x)
+        x = nn.Dense(256, name="fc1")(x)
+        x = nn.leaky_relu(x, 0.1)
+        x = nn.Dense(256, name="fc2")(x)
+        x = nn.leaky_relu(x, 0.1)
+        #nn.BatchNorm(momentum=0.9, epsilon=1e-5, dtype=jnp.float32)
+        x = nn.Dense(128, name="fc3")(x)
+        x = nn.leaky_relu(x, 0.1)
+        x = nn.Dense(128, name="fc4")(x)
+        x = nn.leaky_relu(x, 0.1)
+        #nn.BatchNorm(momentum=0.9, epsilon=1e-5, dtype=jnp.float32)
+        #x = nn.tanh(x)
+        x = nn.Dense(64, name="fc5")(x)
+        x = nn.leaky_relu(x, 0.1)
+        x = nn.Dense(64, name="fc6")(x)
+        x = nn.leaky_relu(x, 0.1)
+        #nn.BatchNorm(momentum=0.9, epsilon=1e-5, dtype=jnp.float32)
+        #x = nn.tanh(x)
+        #x = nn.Dense(32, name="fc4")(x)
         mean_x = nn.Dense(self.latents, name="fc2_mean")(x)
         logvar_x = nn.Dense(self.latents, name="fc2_logvar")(x)
         return mean_x, logvar_x
@@ -32,16 +47,34 @@ class Decoder(nn.Module):
 
     @nn.compact
     def __call__(self, z: jnp.ndarray) -> jnp.ndarray:
+        #z = nn.Dense(32, name="fc1")(z)
+        #z = nn.leaky_relu(z, 0.1)
+        #z = nn.tanh(z)
         z = nn.Dense(64, name="fc1")(z)
-        z = nn.relu(z)
-        z = nn.Dense(256, name="fc2")(z)
+        z = nn.leaky_relu(z, 0.1)
+        z = nn.Dense(64, name="fc2")(z)
+        z = nn.leaky_relu(z, 0.1)
+        #nn.BatchNorm(momentum=0.9, epsilon=1e-5, dtype=jnp.float32)
+        #z = nn.tanh(z)
+        z = nn.Dense(128, name="fc3")(z)
+        z = nn.leaky_relu(z, 0.1)
+        z = nn.Dense(128, name="fc4")(z)
+        z = nn.leaky_relu(z, 0.1)
+        #nn.BatchNorm(momentum=0.9, epsilon=1e-5, dtype=jnp.float32)
+        #z = nn.tanh(z)
+        z = nn.Dense(256, name="fc5")(z)
+        z = nn.leaky_relu(z, 0.1)
+        z = nn.Dense(256, name="fc6")(z)
+        #nn.BatchNorm(momentum=0.9, epsilon=1e-5, dtype=jnp.float32)
+        #z = nn.leaky_relu(z, 0.1)
+        #z = nn.Dense(256, name="fc5")(z)               
         return z
 
 
 class VAE(nn.Module):
     """Full VAE model."""
 
-    latents: int = 20
+    latents: int
 
     def setup(self):
         self.encoder = Encoder(self.latents)
