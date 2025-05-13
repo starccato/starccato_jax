@@ -8,6 +8,10 @@ def download_with_progress(url: str, output_path: str):
     """
     Download a file from the given URL with a progress bar.
     """
+
+    # ensure that the output directory exists
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
     # Open the URL and get the file size from the headers
     response = urllib.request.urlopen(url)
     total_size = int(response.info().get("Content-Length", -1))

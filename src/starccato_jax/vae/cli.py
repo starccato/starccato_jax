@@ -5,7 +5,7 @@ from .starccato_vae import StarccatoVAE
 
 
 @click.command("train_vae")
-@click.option("--latent-dim", default=16, help="Latent dimension for the VAE")
+@click.option("--latent-dim", default=32, help="Latent dimension for the VAE")
 @click.option("--epochs", default=1000, help="Number of training epochs")
 @click.option("--cycles", default=3, help="Cyclical annealing cycles")
 @click.option(

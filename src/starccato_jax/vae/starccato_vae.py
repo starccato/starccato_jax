@@ -8,7 +8,7 @@ from jax import numpy as jnp
 from jax.random import PRNGKey
 
 from .. import credible_intervals
-from ..data import TrainValData, get_default_weights
+from ..data import get_default_weights_dir
 from ..logging import logger
 from ..plotting import plot_model
 from ..starccato_model import StarccatoModel
@@ -27,10 +27,12 @@ __all__ = ["StarccatoVAE"]
 
 
 class StarccatoVAE(StarccatoModel):
-    def __init__(self, model_dir: str = None):
+    def __init__(self, model_dir: str = "default_ccsne"):
         self.model_dir = model_dir
-        if model_dir is None or model_dir == "default_model":
-            self.model_dir = get_default_weights()
+
+        if model_dir == "default_ccsne" or model_dir == "default_blip":
+            model_dir = model_dir.replace("default_", "")
+            self.model_dir = get_default_weights_dir(model_dir)
         self._data: ModelData = load_model(self.model_dir)
         self._model: VAE = VAE(latents=self.latent_dim)
 

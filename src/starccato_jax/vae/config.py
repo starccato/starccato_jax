@@ -8,7 +8,7 @@ from ..logging import logger
 
 @dataclass
 class Config:
-    latent_dim: int = 20
+    latent_dim: int = 32
     learning_rate: float = 1e-3
     epochs: int = 1000
     batch_size: int = 64

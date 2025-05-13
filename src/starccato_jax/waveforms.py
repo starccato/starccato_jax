@@ -7,8 +7,8 @@ class StarccatoCCSNe(StarccatoVAE):
     This class is used to generate and reconstruct waveforms.
     """
 
-    def __init__(self, model_dir: str = None):
-        super().__init__(model_dir=model_dir)
+    def __init__(self):
+        super().__init__(model_dir="default_ccsne")
 
 
 class StarccatoBlip(StarccatoVAE):
@@ -17,5 +17,5 @@ class StarccatoBlip(StarccatoVAE):
     This class is used to generate and reconstruct waveforms.
     """
 
-    def __init__(self, model_dir: str = None):
-        super().__init__(model_dir=model_dir)
+    def __init__(self):
+        super().__init__(model_dir="default_blip")

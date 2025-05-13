@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+from starccato_jax.data.default_weights import get_default_weights_dir
 from starccato_jax.waveforms import StarccatoBlip, StarccatoCCSNe
 
 
@@ -10,6 +11,10 @@ def test_waveforms(outdir):
     # Initialize the StarccatoBlip and StarccatoCCSNe classes
     blip = StarccatoBlip()
     ccsne = StarccatoCCSNe()
+
+    # ensure that the paths of the model are correct
+    assert blip.model_dir == get_default_weights_dir("blip")
+    assert ccsne.model_dir == get_default_weights_dir("ccsne")
 
     sig = ccsne.generate(n=1)
     glitch = blip.generate(n=1)

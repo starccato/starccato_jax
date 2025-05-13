@@ -5,7 +5,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 
 from starccato_jax import Config, StarccatoVAE
-from starccato_jax.data import get_default_weights
+from starccato_jax.data import get_default_weights_dir
 from starccato_jax.vae.core.io import TrainValMetrics, load_loss_h5
 
 
@@ -43,7 +43,7 @@ def test_model_structure(outdir):
 
 
 def test_default(outdir):
-    get_default_weights(clean=True)
+    get_default_weights_dir(clean=True)
     vae = StarccatoVAE()
     z = jnp.zeros(vae.latent_dim)
     signal = vae.generate(z=z)
