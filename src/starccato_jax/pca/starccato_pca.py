@@ -1,7 +1,7 @@
 import jax.numpy as jnp
 from jax.random import PRNGKey
 
-from ..data import CCSNeDataset
+from ..data import TrainValData
 from ..logging import logger
 from ..starccato_model import StarccatoModel
 from . import pca
@@ -10,7 +10,7 @@ from . import pca
 class StarccatoPCA(StarccatoModel):
     def __init__(self, latent_dim: int = 32):
         self._latent_dim = latent_dim
-        data = CCSNeDataset.load()
+        data = TrainValData.load()
 
         n_training_samples, input_dim = data.train.shape
 

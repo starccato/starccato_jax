@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 from utils import BRANCH
 
-from starccato_jax.data.training_data import CCSNeDataset
+from starccato_jax.data.training_data import TrainValData
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 N_RICHERS = 1764
@@ -26,7 +26,7 @@ def outdir() -> str:
 
 @pytest.fixture
 def gan_signals() -> np.ndarray:
-    """Load GAN generated signals from cache (shape = (1000, 256))"""
+    """Load GAN generated signals from cache (shape = (1000, 512))"""
     cache = os.path.join(HERE, "gan_signals.h5")
     if not os.path.exists(cache):
         data_url = "https://github.com/starccato/data/blob/main/generated_signals/gan_signals.h5?raw=true"
@@ -40,8 +40,8 @@ def gan_signals() -> np.ndarray:
 
 @pytest.fixture
 def richers_signals() -> np.ndarray:
-    data = CCSNeDataset.load()
-    assert data.combined.shape == (N_RICHERS, 256)
+    data = TrainValData.load()
+    assert data.combined.shape == (N_RICHERS, 512)
     return data.combined
 
 

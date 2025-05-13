@@ -145,4 +145,4 @@ class StarccatoVAE(StarccatoModel):
     @property
     def model_structure(self) -> str:
         rng = jax.random.PRNGKey(0)
-        return self._model.tabulate(rng, jnp.zeros(256), rng)
+        return self._model.tabulate(rng, jnp.zeros(512), rng)

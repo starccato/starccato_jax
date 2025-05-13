@@ -25,7 +25,7 @@ def test_train_vae(outdir):
 
     # load and use VAE
     signal = vae.generate()[0]
-    assert signal.shape == (256,)
+    assert signal.shape == (512,)
 
     losses: TrainValMetrics = load_loss_h5(f"{outdir}/losses.h5")
     assert isinstance(losses, TrainValMetrics)
@@ -49,9 +49,9 @@ def test_default(outdir):
     signal = vae.generate(z=z)
     encoded_z = vae.encode(signal)
     assert encoded_z.shape == (vae.latent_dim,)
-    assert signal.shape == (256,)
+    assert signal.shape == (512,)
     reconstructed = vae.reconstruct(signal)
-    assert reconstructed.shape == (256,)
+    assert reconstructed.shape == (512,)
 
 
 def test_plotting(outdir):

@@ -1,24 +1,18 @@
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List
 
 import jax.numpy as jnp
 import numpy as np
-import pandas as pd
 from jax.random import PRNGKey, permutation
 
-from .urls import CCSNE_PARAMETERS_URL, CCSNE_SIGNALS_URL
+from .datasets import load_dataset
 
-__all__ = ["CCSNeDataset", "TrainValData"]
-
-HERE = os.path.dirname(__file__)
-CCSNE_CACHE = f"{HERE}/ccsne_data.npz"
-BLIP_CACHE = f"{HERE}/blip_data.dat"
+__all__ = ["TrainValData"]
 
 
 @dataclass
-class TrainValData(ABC):
+class TrainValData:
     train: jnp.ndarray
     val: jnp.ndarray
 
@@ -38,12 +32,12 @@ class TrainValData(ABC):
         train_fraction: float = 0.8,
         clean: bool = False,
         seed: int = 0,
-        type: str = "richers_ccsne",
+        source: str = "ccsne",
     ):
-        data = cls._load_raw(clean=clean)
+        data = load_dataset(source, clean=clean)
 
         # assert that n-rows (different examples) are greater than the len of 1 signal
-        # TODO
+        assert data.shape[0] > 1, "Data must have more than one example."
 
         # shuffle data
         np.random.seed(seed)
@@ -82,51 +76,3 @@ class TrainValData(ABC):
         if len(batches[-1]) < batch_size:
             batches = batches[:-1]
         return jnp.array(batches)
-
-
-class CCSNeDataset(TrainValData):
-    """
-    Class to load the CCSNe dataset.
-    """
-
-    @staticmethod
-    def _load_raw(clean: bool = False) -> np.ndarray:
-        if not os.path.exists(CCSNE_CACHE) or clean:
-            parameters = pd.read_csv(CCSNE_PARAMETERS_URL)
-            data = pd.read_csv(CCSNE_SIGNALS_URL).astype("float32")[
-                parameters["beta1_IC_b"] > 0
-            ]
-            data = data.values.T[:, 140:]  # cut the first few datapoints
-            np.savez(CCSNE_CACHE, data=data)
-        data = np.load(CCSNE_CACHE)["data"]
-        return data
-
-
-class BlipDataset(TrainValData):
-    """
-    Class to load the Blip dataset.
-    """
-
-    @staticmethod
-    def _load_raw(clean: bool = False) -> np.ndarray:
-        return np.loadtxt(GLITCH_FNAME)
-
-
-#
-#
-# import zipfile
-#
-# # Open a zip file in read mode ("r")
-# with zipfile.ZipFile('your_zip_file.zip', 'r') as zip_ref:
-#     # Get a list of all files in the zip archive
-#     file_list = zip_ref.namelist()
-#     print("Files in the zip archive:", file_list)
-#
-#     # Extract all files to the current directory
-#     # zip_ref.extractall()
-#
-#     # Extract all files to a specific directory
-#     # zip_ref.extractall("destination_folder")
-#
-#     # Extract a single file
-#     # zip_ref.extract('file_to_extract.txt', "destination_folder")
