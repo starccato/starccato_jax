@@ -3,14 +3,14 @@ import jax.numpy as jnp
 import pytest
 
 from starccato_jax import StarccatoPCA
-from starccato_jax.data import TrainValData
+from starccato_jax.data import CCSNeDataset
 from starccato_jax.pca import pca
 from starccato_jax.plotting import plot_distributions
 
 
 def test_pca(outdir):
     starccato_pca = StarccatoPCA()
-    data = TrainValData.load()
+    data = CCSNeDataset.load()
 
     for d, name in zip([data.train, data.val], ["training", "validation"]):
         recon = starccato_pca.reconstruct(d)

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..data import TrainValData
+from ..data import BlipDataset, CCSNeDataset, TrainValData
 from ..logging import logger
 
 
@@ -16,6 +16,7 @@ class Config:
     beta_start: float = 0.0
     beta_end: float = 1.0
     train_fraction: float = 0.8
+    dataset: str = "richers_ccsne"  # or "gan"
 
     def __repr__(self):
         return (
@@ -35,7 +36,11 @@ class Config:
             stop=self.beta_end,
             n_cycle=self.cyclical_annealing_cycles,
         )
-        self.data = TrainValData.load(train_fraction=self.train_fraction)
+
+        if self.dataset == "richers_ccsne":
+            self.data = CCSNeDataset.load(train_fraction=self.train_fraction)
+        elif self.dataset == "blip":
+            self.data = BlipDataset.load(train_fraction=self.train_fraction)
         self._batch_size_check()
 
     def _batch_size_check(self):

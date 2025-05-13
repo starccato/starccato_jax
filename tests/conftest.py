@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 from utils import BRANCH
 
-from starccato_jax.data.training_data import load_richers_dataset
+from starccato_jax.data.training_data import CCSNeDataset
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 N_RICHERS = 1764
@@ -40,9 +40,9 @@ def gan_signals() -> np.ndarray:
 
 @pytest.fixture
 def richers_signals() -> np.ndarray:
-    data = load_richers_dataset()
-    assert data.shape == (N_RICHERS, 256)
-    return data
+    data = CCSNeDataset.load()
+    assert data.combined.shape == (N_RICHERS, 256)
+    return data.combined
 
 
 @pytest.fixture

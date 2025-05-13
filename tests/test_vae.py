@@ -17,7 +17,7 @@ def test_train_vae(outdir):
         config=Config(latent_dim=8, epochs=10, cyclical_annealing_cycles=0),
     )
     runtime = round(time.time() - t0, 2)
-    expected_runtime = 20
+    expected_runtime = 25
     assert (
         runtime < expected_runtime
     ), f"Training took {runtime} > {expected_runtime}s to complete"

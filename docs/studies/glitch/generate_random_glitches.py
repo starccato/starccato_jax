@@ -5,15 +5,15 @@ import pandas as pd
 from scipy.signal.windows import tukey
 
 from starccato_jax.credible_intervals import pointwise_ci
-from starccato_jax.data.urls import PARAMETERS_CSV_URL, SIGNALS_CSV_URL
+from starccato_jax.data.urls import CCSNE_PARAMETERS_URL, CCSNE_SIGNALS_URL
 
 srate = 4096.0  # Hz
 GLITCH_FNAME = "glitches.dat"
 
 
 def load_richers_dataset(seed: int = 0) -> np.ndarray:
-    parameters = pd.read_csv(PARAMETERS_CSV_URL)
-    data = pd.read_csv(SIGNALS_CSV_URL).astype("float32")[
+    parameters = pd.read_csv(CCSNE_PARAMETERS_URL)
+    data = pd.read_csv(CCSNE_SIGNALS_URL).astype("float32")[
         parameters["beta1_IC_b"] > 0
     ]
     data = data.values.T

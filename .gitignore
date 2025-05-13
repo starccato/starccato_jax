@@ -8,6 +8,7 @@ __pycache__/
 *.dat
 *.pdf
 
+*.zip
 *.so
 *.npy
 .idea
