@@ -212,7 +212,7 @@ def bank_scaling(min_match_list, empty_loops=100, checkpoint_dir="banks", savefi
 
     return scaling_dict
 
-
+phases = np.exp(1j * 2 * np.pi * np.random.rand(n//2 - 1))
 def plot_template_bank(bank, num_samples=5):
     """
     Plot a sample of glitch templates from the template bank for diagnostic purposes.
