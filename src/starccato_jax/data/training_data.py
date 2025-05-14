@@ -1,18 +1,14 @@
 import os
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List
 
 import jax.numpy as jnp
 import numpy as np
-import pandas as pd
 from jax.random import PRNGKey, permutation
 
-from .urls import PARAMETERS_CSV_URL, SIGNALS_CSV_URL
+from .datasets import load_dataset
 
-__all__ = ["load_richers_dataset", "TrainValData"]
-
-HERE = os.path.dirname(__file__)
-CACHE = f"{HERE}/data.npz"
+__all__ = ["TrainValData"]
 
 
 @dataclass
@@ -23,11 +19,34 @@ class TrainValData:
     def __repr__(self):
         return f"TrainValData(train={self.train.shape}, val={self.val.shape})"
 
+    @staticmethod
+    @abstractmethod
+    def _load_raw(clean: bool = False) -> np.ndarray:
+        raise ValueError(
+            "The TrainValData class is abstract and cannot be instantiated directly."
+        )
+
     @classmethod
     def load(
-        cls, train_fraction: float = 0.8, clean: bool = False, seed: int = 0
+        cls,
+        train_fraction: float = 0.8,
+        clean: bool = False,
+        seed: int = 0,
+        source: str = "ccsne",
     ):
-        data = load_richers_dataset(clean=clean, seed=seed)
+        data = load_dataset(source, clean=clean)
+
+        # assert that n-rows (different examples) are greater than the len of 1 signal
+        assert data.shape[0] > 1, "Data must have more than one example."
+
+        # shuffle data
+        np.random.seed(seed)
+        np.random.shuffle(data)
+
+        # Standardize each sample (row) to have zero mean and unit variance.
+        mus = np.mean(data, axis=1, keepdims=True)
+        sigmas = np.std(data, axis=1, keepdims=True)
+        data = (data - mus) / sigmas
 
         # Split data into training (80%) and validation (20%) sets.
         n_total = data.shape[0]
@@ -41,7 +60,7 @@ class TrainValData:
         return cls(train=train_data, val=val_data)
 
     @property
-    def combined(self):
+    def combined(self) -> jnp.ndarray:
         return jnp.concatenate((self.train, self.val), axis=0)
 
     def generate_training_batches(
@@ -57,32 +76,3 @@ class TrainValData:
         if len(batches[-1]) < batch_size:
             batches = batches[:-1]
         return jnp.array(batches)
-
-
-def load_richers_dataset(clean: bool = False, seed: int = 0) -> np.ndarray:
-    if not os.path.exists(CACHE) or clean:
-        _download_and_save_data()
-    data = np.load(CACHE)["data"]
-
-    # shuffle data
-    np.random.seed(seed)
-    np.random.shuffle(data)
-
-    # standardise using max value from entire dataset, and zero mean for each row
-    # data = data / np.max(np.abs(data))
-    # data = data - np.mean(data, axis=1, keepdims=True)
-
-    # # Standardize each sample (row) to have zero mean and unit variance.
-    mus = np.mean(data, axis=1, keepdims=True)
-    sigmas = np.std(data, axis=1, keepdims=True)
-    data = (data - mus) / sigmas
-    return data
-
-
-def _download_and_save_data():
-    parameters = pd.read_csv(PARAMETERS_CSV_URL)
-    data = pd.read_csv(SIGNALS_CSV_URL).astype("float32")[
-        parameters["beta1_IC_b"] > 0
-    ]
-    data = data.values.T[:, 140:]  # cut the first few datapoints
-    np.savez(CACHE, data=data)

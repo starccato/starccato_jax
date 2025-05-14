@@ -8,7 +8,7 @@ from ..logging import logger
 
 @dataclass
 class Config:
-    latent_dim: int = 20
+    latent_dim: int = 32
     learning_rate: float = 1e-3
     epochs: int = 1000
     batch_size: int = 64
@@ -16,6 +16,7 @@ class Config:
     beta_start: float = 0.0
     beta_end: float = 1.0
     train_fraction: float = 0.8
+    dataset: str = "ccsne"
 
     def __repr__(self):
         return (
@@ -24,7 +25,8 @@ class Config:
             f"learning_rate={self.learning_rate}, "
             f"epochs={self.epochs}, "
             f"batch_size={self.batch_size}, "
-            f"cyclical_annealing_cycles={self.cyclical_annealing_cycles}"
+            f"cyclical_annealing_cycles={self.cyclical_annealing_cycles}, "
+            f"source={self.dataset} "
             ")"
         )
 
@@ -35,7 +37,11 @@ class Config:
             stop=self.beta_end,
             n_cycle=self.cyclical_annealing_cycles,
         )
-        self.data = TrainValData.load(train_fraction=self.train_fraction)
+
+        self.data = TrainValData.load(
+            train_fraction=self.train_fraction, source=self.dataset
+        )
+
         self._batch_size_check()
 
     def _batch_size_check(self):

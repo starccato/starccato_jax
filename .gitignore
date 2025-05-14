@@ -5,6 +5,10 @@ __pycache__/
 *.h5
 *.npz
 # C extensions
+*.dat
+*.pdf
+
+*.zip
 *.so
 *.npy
 .idea
