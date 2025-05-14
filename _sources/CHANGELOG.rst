@@ -5,6 +5,63 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.14:
+
+v0.1.14 (2025-05-14)
+====================
+
+Bug Fixes
+---------
+
+* fix: update docs (`f5fd3eb`_)
+
+Unknown
+-------
+
+* Merge pull request #3 from starccato/allow_different_datasets
+
+add ability to train with different datasets (`d0a8d43`_)
+
+* add default weights for both models (`1eeff7e`_)
+
+* add different datasets for training (`ebd10b0`_)
+
+* Merge remote-tracking branch 'origin' into allow_different_datasets (`81432f9`_)
+
+* add cli for training (`26038e5`_)
+
+* add paths to data loaders (`76e30fb`_)
+
+* Merge remote-tracking branch 'origin' into allow_different_datasets (`6437572`_)
+
+* add glitch gen (`86ee43d`_)
+
+* add logging to bank generation (`ca17ea7`_)
+
+* add bank generration (`c92a2fa`_)
+
+* add ability to work with new waveforms (`9a4ea46`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax into main (`913f3de`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`0cbb09b`_)
+
+.. _f5fd3eb: https://github.com/starccato/starccato_jax/commit/f5fd3ebba9929f88855af6a6c35cd3ce3f2e3fa9
+.. _d0a8d43: https://github.com/starccato/starccato_jax/commit/d0a8d43d8fba3d4fb03ff5742b339153afebb54a
+.. _1eeff7e: https://github.com/starccato/starccato_jax/commit/1eeff7e325e85c91b10b15d4b56ebc5fb5bbab79
+.. _ebd10b0: https://github.com/starccato/starccato_jax/commit/ebd10b035d113e80cd85add7fbfe84ea7ff45c3f
+.. _81432f9: https://github.com/starccato/starccato_jax/commit/81432f9eb1040a11ed394e223aff648d8eb3fe1b
+.. _26038e5: https://github.com/starccato/starccato_jax/commit/26038e50957293940803a7d941a9da767854497e
+.. _76e30fb: https://github.com/starccato/starccato_jax/commit/76e30fb492d2168297d50bcc4ea71dd125942937
+.. _6437572: https://github.com/starccato/starccato_jax/commit/64375722368198f5a6e6cabb84df06430c3653a2
+.. _86ee43d: https://github.com/starccato/starccato_jax/commit/86ee43d0321c1bc336fc9079e406c74b49a67cf1
+.. _ca17ea7: https://github.com/starccato/starccato_jax/commit/ca17ea745c23d50a5b88852d028c5dbe158788cb
+.. _c92a2fa: https://github.com/starccato/starccato_jax/commit/c92a2fa60065b2b21b83f1983b3197e2f49f2fa9
+.. _9a4ea46: https://github.com/starccato/starccato_jax/commit/9a4ea468ae678e162af5fc16d53481f66139c0f9
+.. _913f3de: https://github.com/starccato/starccato_jax/commit/913f3deb3ea5f08195d5858a8a3211e780bb51ce
+.. _0cbb09b: https://github.com/starccato/starccato_jax/commit/0cbb09b787da696eff89356df777d375c1915460
+
+
 .. _changelog-v0.1.13:
 
 v0.1.13 (2025-03-26)
@@ -15,8 +72,17 @@ Bug Fixes
 
 * fix: refactoring VAE trainer (`a0c70bf`_)
 
+Chores
+------
+
+* chore(release): 0.1.13 (`17f51e6`_)
+
 Unknown
 -------
+
+* add axes label (`1f4c1df`_)
+
+* add axes label (`157d426`_)
 
 * Adjust for new data handler (`5075d09`_)
 
@@ -35,6 +101,9 @@ Unknown
 * Merge branch 'main' of github.com:starccato/starccato_jax (`9d40b11`_)
 
 .. _a0c70bf: https://github.com/starccato/starccato_jax/commit/a0c70bf53eb4b78a3bc807fea79bbbc1a7d35fec
+.. _17f51e6: https://github.com/starccato/starccato_jax/commit/17f51e6e34d4c98c2673cde384fcd3fe0e49891b
+.. _1f4c1df: https://github.com/starccato/starccato_jax/commit/1f4c1dfa6b0c333a66afde5c7efefc4d7e87b5fe
+.. _157d426: https://github.com/starccato/starccato_jax/commit/157d42692a7796a04681a41bd41a14902a2ac76b
 .. _5075d09: https://github.com/starccato/starccato_jax/commit/5075d092b6c084bf55535ede670cdc4b50adad69
 .. _1aa9c52: https://github.com/starccato/starccato_jax/commit/1aa9c52b1255b47aff3648f32eea2b0e0ab044cd
 .. _294e12e: https://github.com/starccato/starccato_jax/commit/294e12ef0550068381a613d3e8ae0dffb0957e39
@@ -65,6 +134,10 @@ Unknown
 
 * added comparisons (`fad80e4`_)
 
+* hacking on glitches (`64be22f`_)
+
+* Add glitch generation code (`a378ea9`_)
+
 * refactoring to add in gradient data tracking (`f64ee3d`_)
 
 * improvements with testing (`ebe7c20`_)
@@ -74,6 +147,8 @@ Unknown
 .. _0b1d9ea: https://github.com/starccato/starccato_jax/commit/0b1d9eaac3ecf8cda49b4e7e811401985f16b404
 .. _d59ba45: https://github.com/starccato/starccato_jax/commit/d59ba45566ab91b4e0150912f97d39e8df93b6fe
 .. _fad80e4: https://github.com/starccato/starccato_jax/commit/fad80e42626b30cbd2c8a4435fc885f987f18f29
+.. _64be22f: https://github.com/starccato/starccato_jax/commit/64be22f7e5295253227f60dbb9343c85b2639e6f
+.. _a378ea9: https://github.com/starccato/starccato_jax/commit/a378ea90e83b4e90d803951cbbb7408db0386dbf
 .. _f64ee3d: https://github.com/starccato/starccato_jax/commit/f64ee3d8a211c6a07dfcef28d91ee7aa45842dd4
 .. _ebe7c20: https://github.com/starccato/starccato_jax/commit/ebe7c206339704dac91178921bdc2ef6f6f0cc35
 .. _ad4d1ff: https://github.com/starccato/starccato_jax/commit/ad4d1ff1662e93d3f5ac5776bb4cdcf7184548cc
