@@ -12,7 +12,7 @@ def get_default_weights_dir(
     fpath = f"{DATA_DIR}/{dataset}/model.h5"
     model_dir = os.path.dirname(fpath)
     if clean or not os.path.exists(fpath):
-        os.makedirs(fpath, exist_ok=True)
+        os.makedirs(model_dir, exist_ok=True)
         if "blip" in dataset:
             download_with_progress(BLIP_WEIGHTS_URL, fpath)
         elif "ccsne" in dataset:
