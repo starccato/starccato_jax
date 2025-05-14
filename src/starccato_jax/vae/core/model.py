@@ -34,7 +34,7 @@ class Decoder(nn.Module):
     def __call__(self, z: jnp.ndarray) -> jnp.ndarray:
         z = nn.Dense(64, name="fc1")(z)
         z = nn.relu(z)
-        z = nn.Dense(256, name="fc2")(z)
+        z = nn.Dense(512, name="fc2")(z)
         return z
 
 

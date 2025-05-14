@@ -10,7 +10,7 @@ OBS_COL = "tab:gray"
 TRUE_COL = "black"
 
 FS = 4096
-ND = 256
+ND = 512
 TIME = np.arange(0, ND) / FS
 TIME = TIME - TIME[58]  # index of the peak
 

@@ -1,19 +1,20 @@
 import gengli
+import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.signal.windows import tukey
 
 from starccato_jax.credible_intervals import pointwise_ci
-from starccato_jax.data.urls import PARAMETERS_CSV_URL, SIGNALS_CSV_URL
+from starccato_jax.data.urls import CCSNE_PARAMETERS_URL, CCSNE_SIGNALS_URL
 
 srate = 4096.0  # Hz
 GLITCH_FNAME = "glitches.dat"
 
 
 def load_richers_dataset(seed: int = 0) -> np.ndarray:
-    parameters = pd.read_csv(PARAMETERS_CSV_URL)
-    data = pd.read_csv(SIGNALS_CSV_URL).astype("float32")[
+    parameters = pd.read_csv(CCSNE_PARAMETERS_URL)
+    data = pd.read_csv(CCSNE_SIGNALS_URL).astype("float32")[
         parameters["beta1_IC_b"] > 0
     ]
     data = data.values.T
@@ -90,8 +91,12 @@ def align_signal(signal, srate):
     shift = center_index - peak_index
     # Use np.roll after padding; the wrapped part will be zeros if padding was applied
     signal_aligned = np.roll(signal, shift, axis=1)
-    t_signal = np.arange(-N // 2, N // 2) / srate
+    t_signal = get_time_vector(N, srate)
     return signal_aligned, t_signal
+
+
+def get_time_vector(N, srate):
+    return np.arange(-N // 2, N // 2) / srate
 
 
 def truncate_signals_and_window(data, time, t_start, t_end, tukey_alpha=0.1):
@@ -99,16 +104,23 @@ def truncate_signals_and_window(data, time, t_start, t_end, tukey_alpha=0.1):
     # 1. Truncate the signals to the given time window
     mask = (time >= t_start) & (time <= t_end)
     truncated_data = data[:, mask]
-    truncated_time = time[mask]
-    print(f"Cutting {data.shape} to {truncated_data.shape}")
+
     # 2. Apply a Tukey window
     window = tukey(truncated_data.shape[1], alpha=tukey_alpha)
     window = window.reshape(1, -1)  # Reshape to match the data shape
     truncated_data = truncated_data * window
+
+    # zero pad the beginning and end of the signal so we have data-len power of 2
+    N = 2 ** int(np.ceil(np.log2(truncated_data.shape[1])))
+    truncated_data = pad_signal(truncated_data, N)
+    truncated_time = get_time_vector(N, srate)
+    print(f"Cutting {data.shape} to {truncated_data.shape}")
+
     return truncated_data, truncated_time
 
 
 def main():
+    generate_glitches(2000)
     glitches, t_glitches = load_glitches()
     ccsne_data, t_ccsne = load_signals()
     print("Glitches shape:", glitches.shape)
@@ -153,6 +165,11 @@ def main():
     plt.tight_layout()
     plt.savefig("glitches_and_ccsne_trunc.png", dpi=300)
     plt.show()
+
+    # Save the processed data
+    with h5py.File("aligned_data.h5", "w") as f:
+        f.create_dataset("blip", data=glitches_trunc)
+        f.create_dataset("ccsne", data=ccsne_trunc)
 
 
 if __name__ == "__main__":
