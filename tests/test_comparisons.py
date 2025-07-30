@@ -1,11 +1,15 @@
 import os
 
 import h5py
+import matplotlib.pyplot as plt
 import numpy as np
-from utils import BRANCH
 
 from starccato_jax import StarccatoVAE
 from starccato_jax.plotting import plot_distributions
+from starccato_jax.plotting.plot_distributions import _plot_quantiles
+from utils import BRANCH
+
+FS = 4096
 
 
 def _save_signals(fname, signals):
@@ -14,7 +18,14 @@ def _save_signals(fname, signals):
 
 
 def standardize(signals):
-    return (signals - signals.mean()) / signals.std()
+    signals = (signals - signals.mean()) / signals.std()
+    # roll all signals so peak is at center
+    peak_idx = np.median(signals, axis=0).argmax()
+    signals = np.roll(signals, -peak_idx + len(signals[0]) // 2, axis=1)
+    n = len(signals[0])
+    t = np.arange(n) / FS
+    t = t - t[n // 2]
+    return t, signals
 
 
 def test_comparisons(outdir, gan_signals, richers_signals, cached_vae_signals):
@@ -22,48 +33,25 @@ def test_comparisons(outdir, gan_signals, richers_signals, cached_vae_signals):
     os.makedirs(outdir, exist_ok=True)
 
     vae = StarccatoVAE()
-    vae_signal = vae.generate(n=len(gan_signals))
-    _save_signals(f"{outdir}/vae_signals[{BRANCH}].h5", vae_signal)
+    vae_signals = vae.generate(n=len(gan_signals))
+    _save_signals(f"{outdir}/vae_signals[{BRANCH}].h5", vae_signals)
 
-    # rescale all signals to have the same scale
-    gan_signals = standardize(gan_signals)
-    # roll the GAN signals forward a bit..
-    gan_signals = np.roll(gan_signals, 5, axis=1)
-    vae_signal = standardize(vae_signal)
-    richers_signals = standardize(richers_signals)
-    cached_vae_signals = standardize(cached_vae_signals)
+    datasets = dict(
+        richers=standardize(richers_signals),
+        gan=standardize(gan_signals),
+        vae=standardize(vae_signals),
+        cached_vae=standardize(cached_vae_signals)
+    )
 
-    # save
     with h5py.File(f"{outdir}/signal_comparisons.h5", "w") as f:
-        f.create_dataset("richers_signals", data=richers_signals)
-        f.create_dataset("gan_signals", data=gan_signals)
-        f.create_dataset("vae_signals", data=vae_signal)
+        f.create_dataset("richers_signals", data=datasets["richers"][1])
+        f.create_dataset("gan_signals", data=datasets["gan"][1])
+        f.create_dataset("vae_signals", data=datasets["vae"][1])
 
-    plot_distributions(
-        richers_signals,
-        gan_signals[: len(richers_signals)],
-        labels=["Richers", "GAN"],
-        fname=os.path.join(outdir, "richers_vs_gan.png"),
-        title="Richers vs GAN",
-    )
-    plot_distributions(
-        richers_signals,
-        vae_signal[: len(richers_signals)],
-        labels=["Richers", "VAE"],
-        fname=os.path.join(outdir, "richers_vs_vae.png"),
-        title="Richers vs VAE",
-    )
-    plot_distributions(
-        gan_signals,
-        vae_signal,
-        labels=["GAN", "VAE"],
-        fname=os.path.join(outdir, "gan_vs_vae.png"),
-        title="GAN vs VAE",
-    )
-    plot_distributions(
-        cached_vae_signals,
-        vae_signal,
-        labels=["cached VAE[main]", f"VAE[{BRANCH}]"],
-        fname=os.path.join(outdir, "vae_vs_cached.png"),
-        title=f"Cached vs {BRANCH}",
-    )
+    fig, axes = plt.subplots(4, 1, figsize=(5, 6), sharex=True)
+    for i, (name, (t, signals)) in enumerate(datasets.items()):
+        _plot_quantiles(t, signals, axes[i], color=f"C{i}")
+        axes[i].set_ylabel(name)
+        axes[i].set_yticks([])
+    plt.subplots_adjust(hspace=0.)
+    plt.savefig(f"{outdir}/signal_comparisons.png", dpi=300, bbox_inches='tight')
