@@ -29,3 +29,30 @@ def test_waveforms(outdir):
     plt.title("Blip Signal")
     plt.savefig(f"{outdir}/waveforms.png")
     plt.close()
+
+
+def test_waveform_default(outdir):
+    """
+    Test the default waveforms.
+    """
+    ccsne = StarccatoCCSNe()
+    blip = StarccatoBlip()
+
+    # Generate default waveforms
+    ccsne_signal = ccsne.generate(n=1)[0]
+    blip_signal = blip.generate(n=1)[0]
+
+    # Check the shapes of the generated signals
+    assert ccsne_signal.shape == (512,)
+    assert blip_signal.shape == (512,)
+
+    # Save the generated signals
+    plt.figure(figsize=(10, 5))
+    plt.subplot(1, 2, 1)
+    plt.plot(ccsne_signal)
+    plt.title("Default CCSNe Signal")
+    plt.subplot(1, 2, 2)
+    plt.plot(blip_signal)
+    plt.title("Default Blip Signal")
+    plt.savefig(f"{outdir}/default_waveforms.png")
+    plt.close()

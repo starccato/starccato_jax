@@ -49,10 +49,7 @@ class Config:
         n = self.data.train.shape[0]
         n_batches = self.data.train.shape[0] // self.batch_size
         n_discarded = self.data.train.shape[0] - n_batches * self.batch_size
-        if n_discarded > 0:
-            logger.warning(
-                f"Every epoch will discard {n_discarded}/{n} training samples due to batch size {self.batch_size}"
-            )
+
 
 
 def cyclical_annealing_beta(

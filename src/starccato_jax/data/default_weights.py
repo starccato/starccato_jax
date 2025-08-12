@@ -7,12 +7,11 @@ DATA_DIR = f"{os.path.dirname(__file__)}/default_weights/"
 
 
 def get_default_weights_dir(
-    dataset: str = "ccsne", clean: bool = False
+        dataset: str = "ccsne", clean: bool = False
 ) -> str:
-    fpath = f"{DATA_DIR}/{dataset}/model.h5"
-    model_dir = os.path.dirname(fpath)
+    model_dir = os.path.join(DATA_DIR, dataset)
+    fpath = os.path.join(model_dir, "model.h5")
     if clean or not os.path.exists(fpath):
-        os.makedirs(model_dir, exist_ok=True)
         if "blip" in dataset:
             download_with_progress(BLIP_WEIGHTS_URL, fpath)
         elif "ccsne" in dataset:

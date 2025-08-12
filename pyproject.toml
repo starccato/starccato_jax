@@ -34,7 +34,8 @@ dependencies = [
     "tqdm",
     "rich",
     "uniplot",
-    "click"
+    "click",
+    "arviz",
 ]
 
 [project.optional-dependencies]
