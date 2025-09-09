@@ -5,6 +5,19 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.16:
+
+v0.1.16 (2025-09-09)
+====================
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`049ca47`_)
+
+.. _049ca47: https://github.com/starccato/starccato_jax/commit/049ca478506207f5c962ce4fbcf06c85e4bd49ca
+
+
 .. _changelog-v0.1.15:
 
 v0.1.15 (2025-08-12)
@@ -13,7 +26,14 @@ v0.1.15 (2025-08-12)
 Bug Fixes
 ---------
 
+* fix: model name (`83e5afd`_)
+
 * fix: test downloader (`c1b7f15`_)
+
+Chores
+------
+
+* chore(release): 0.1.15 (`eeee8a6`_)
 
 Unknown
 -------
@@ -24,7 +44,9 @@ Unknown
 
 * Merge branch 'main' of github.com:starccato/starccato_jax into main (`673f8dc`_)
 
+.. _83e5afd: https://github.com/starccato/starccato_jax/commit/83e5afd35fe96d6150878bae125a4aeee26b6b5d
 .. _c1b7f15: https://github.com/starccato/starccato_jax/commit/c1b7f15296a9a32cf84c6cc50d3e055d3df00344
+.. _eeee8a6: https://github.com/starccato/starccato_jax/commit/eeee8a61be9a0c31cdbd9e70e98e8916bcd1846c
 .. _ae02c44: https://github.com/starccato/starccato_jax/commit/ae02c448bf995d4a40f9af825ee161fce8c5b564
 .. _680b56e: https://github.com/starccato/starccato_jax/commit/680b56e7870a54eaf50d03d4aeedf670a93b2168
 .. _673f8dc: https://github.com/starccato/starccato_jax/commit/673f8dca60fb8dc68500be4e09591b0c4dedc850
