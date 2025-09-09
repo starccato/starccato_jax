@@ -6,6 +6,9 @@ from jax.random import PRNGKey
 
 
 class StarccatoModel(ABC):
+    def __init__(self):
+        self.model_name = None
+
     @property
     @abstractmethod
     def latent_dim(self) -> int:
