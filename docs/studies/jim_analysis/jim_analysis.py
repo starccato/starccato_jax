@@ -19,6 +19,7 @@ with JIM's NumPyro/JAX-native tooling.
 from __future__ import annotations
 
 import os
+import time
 from dataclasses import dataclass
 from types import SimpleNamespace
 
@@ -29,6 +30,8 @@ import numpyro
 import numpyro.distributions as dist
 from numpyro.infer import MCMC, NUTS
 import matplotlib.pyplot as plt
+from numpyro.contrib.nested_sampling import NestedSampler
+from jax.scipy.special import logsumexp
 
 jax.config.update("jax_enable_x64", True)
 numpyro.enable_x64()
@@ -275,6 +278,89 @@ def run_numpyro_sampling(
     return mcmc
 
 
+def run_nested_sampling(
+    likelihood: TransientLikelihoodFD,
+    latent_names: list[str],
+    fixed_params: dict[str, float],
+    rng_key: jax.Array,
+    *,
+    latent_sigma: float | jnp.ndarray = 1.0,
+    log_amp_sigma: float = 1.0,
+    num_live_points: int = 500,
+    max_samples: int = 20000,
+    num_posterior_samples: int = 2000,
+    verbose: bool = False,
+):
+    latent_sigma = np.asarray(latent_sigma, dtype=np.float64)
+    if latent_sigma.ndim == 0:
+        latent_sigma = np.full((len(latent_names),), float(latent_sigma))
+    elif latent_sigma.shape != (len(latent_names),):
+        raise ValueError("latent_sigma must be a scalar or have length equal to latent_names")
+
+    log_amp_sigma = float(log_amp_sigma)
+
+    def model():
+        params = {}
+        for idx, name in enumerate(latent_names):
+            params[name] = numpyro.sample(name, dist.Normal(0.0, latent_sigma[idx]))
+        params["log_amp"] = numpyro.sample("log_amp", dist.Normal(0.0, log_amp_sigma))
+        params.update(fixed_params)
+        log_like = likelihood.evaluate(params, None)
+        numpyro.factor("log_likelihood", log_like)
+
+    ns = NestedSampler(
+        model,
+        constructor_kwargs=dict(
+            num_live_points=num_live_points,
+            gradient_guided=True,
+            verbose=verbose,
+        ),
+        termination_kwargs=dict(dlogZ=0.001, ess=500, max_samples=max_samples),
+    )
+
+    run_key, sample_key = jax.random.split(rng_key)
+
+    t0 = time.process_time()
+    ns.run(run_key)
+    runtime = time.process_time() - t0
+    print(f"Nested sampling completed in {runtime:.2f} seconds.")
+    ns.print_summary()
+
+    weighted_samples, log_weights = ns.get_weighted_samples()
+    log_weights = np.asarray(log_weights)
+    weights = np.exp(log_weights - logsumexp(log_weights))
+
+    mean_params = {}
+    for name in weighted_samples:
+        values = np.asarray(weighted_samples[name])
+        mean_params[name] = float(np.sum(values * weights))
+
+    try:
+        logZ = float(ns.evidence)
+        logZ_err = float(ns.evidence_error)
+    except AttributeError:
+        logZ = None
+        logZ_err = None
+
+    posterior_samples = ns.get_samples(
+        sample_key,
+        num_posterior_samples,
+        group_by_chain=False,
+    )
+    samples = {name: np.asarray(posterior_samples[name]) for name in posterior_samples}
+
+    return {
+        "samples": samples,
+        "weighted_samples": {name: np.asarray(vals) for name, vals in weighted_samples.items()},
+        "log_weights": log_weights,
+        "weights": weights,
+        "mean_params": mean_params,
+        "logZ": logZ,
+        "logZ_err": logZ_err,
+        "runtime": runtime,
+    }
+
+
 # ---------------------------------------------------------------------------
 # Main demonstration
 # ---------------------------------------------------------------------------
@@ -366,6 +452,35 @@ def main():
     log_post = log_like + log_prior
     print(f"Posterior at injected parameters: {float(log_post):.3f}")
 
+    nested_results = run_nested_sampling(
+        likelihood,
+        latent_names=latent_names,
+        fixed_params=fixed_params,
+        rng_key=jax.random.PRNGKey(1337),
+        latent_sigma=latent_sigma,
+        log_amp_sigma=log_amp_sigma,
+        num_live_points=500,
+        max_samples=20000,
+        verbose=False,
+    )
+    np.savez(
+        os.path.join("jim_outdir", "nested_samples.npz"),
+        **{name: np.asarray(val) for name, val in nested_results["samples"].items()},
+        log_weights=nested_results["log_weights"],
+        weights=nested_results["weights"],
+    )
+    nested_params_full = {**fixed_params, **nested_results["mean_params"]}
+    nested_waveform_td = _to_numpy64(waveform._time_domain_waveform(nested_params_full))
+    plot_waveform_and_psd_comparison(
+        detectors,
+        time_axis,
+        nested_waveform_td,
+        waveform.sample_rate,
+        outpath=os.path.join("jim_outdir", "posterior_nested_psd_comparison.png"),
+        title_prefix="Posterior (nested mean)",
+        include_data=True,
+    )
+
     mcmc = run_numpyro_sampling(
         likelihood,
         latent_names=latent_names,
@@ -395,8 +510,8 @@ def main():
         time_axis,
         posterior_waveform_td,
         waveform.sample_rate,
-        outpath=os.path.join("jim_outdir", "posterior_mean_psd_comparison.png"),
-        title_prefix="Posterior (mean)",
+        outpath=os.path.join("jim_outdir", "posterior_nuts_psd_comparison.png"),
+        title_prefix="Posterior (NUTS mean)",
         include_data=True,
     )
 
