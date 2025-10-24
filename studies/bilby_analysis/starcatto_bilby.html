@@ -704,6 +704,7 @@ document.write(`
     <span class="n">sampler</span><span class="o">=</span><span class="s2">&quot;emcee&quot;</span><span class="p">,</span>
     <span class="n">outdir</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span>
     <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+    <span class="n">npoints</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># ----------------------------</span>
@@ -724,169 +725,192 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "37f903feca4744f59237b00c4307868b"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "4d4108ff436340f193752321a87e287c"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>23:14 bilby INFO    : Waveform generator instantiated: WaveformGenerator(duration=0.125, sampling_frequency=4096.0, start_time=0, frequency_domain_source_model=None, time_domain_source_model=__main__.starccato_supernova, parameter_conversion=__main__.&lt;lambda&gt;, waveform_arguments={&#39;model&#39;: StarccatoVAE(z-dim=32), &#39;latent_parameter_names&#39;: [&#39;z_0&#39;, &#39;z_1&#39;, &#39;z_2&#39;, &#39;z_3&#39;, &#39;z_4&#39;, &#39;z_5&#39;, &#39;z_6&#39;, &#39;z_7&#39;, &#39;z_8&#39;, &#39;z_9&#39;, &#39;z_10&#39;, &#39;z_11&#39;, &#39;z_12&#39;, &#39;z_13&#39;, &#39;z_14&#39;, &#39;z_15&#39;, &#39;z_16&#39;, &#39;z_17&#39;, &#39;z_18&#39;, &#39;z_19&#39;, &#39;z_20&#39;, &#39;z_21&#39;, &#39;z_22&#39;, &#39;z_23&#39;, &#39;z_24&#39;, &#39;z_25&#39;, &#39;z_26&#39;, &#39;z_27&#39;, &#39;z_28&#39;, &#39;z_29&#39;, &#39;z_30&#39;, &#39;z_31&#39;], &#39;reference_distance&#39;: 10.0, &#39;strain_scale&#39;: 1e-21})
-23:14 bilby INFO    : Generation of mass parameters failed with message &#39;mass_1&#39;
-23:14 bilby INFO    : Generation of spin parameters failed with message &#39;spin_1z&#39;
-23:14 bilby INFO    : Injected signal in H1:
-23:14 bilby INFO    :   optimal SNR = 140.84
-23:14 bilby INFO    :   matched filter SNR = 143.30-0.64j
-23:14 bilby INFO    :   luminosity_distance = 7.0
-23:14 bilby INFO    :   ra = 4.6499
-23:14 bilby INFO    :   dec = -0.5063
-23:14 bilby INFO    :   geocent_time = 1126259642.413
-23:14 bilby INFO    :   psi = 2.659
-23:14 bilby INFO    :   intrinsic_amplitude = 1.0
-23:14 bilby INFO    :   z_0 = 0.0
-23:14 bilby INFO    :   z_1 = 0.0
-23:14 bilby INFO    :   z_2 = 0.0
-23:14 bilby INFO    :   z_3 = 0.0
-23:14 bilby INFO    :   z_4 = 0.0
-23:14 bilby INFO    :   z_5 = 0.0
-23:14 bilby INFO    :   z_6 = 0.0
-23:14 bilby INFO    :   z_7 = 0.0
-23:14 bilby INFO    :   z_8 = 0.0
-23:14 bilby INFO    :   z_9 = 0.0
-23:14 bilby INFO    :   z_10 = 0.0
-23:14 bilby INFO    :   z_11 = 0.0
-23:14 bilby INFO    :   z_12 = 0.0
-23:14 bilby INFO    :   z_13 = 0.0
-23:14 bilby INFO    :   z_14 = 0.0
-23:14 bilby INFO    :   z_15 = 0.0
-23:14 bilby INFO    :   z_16 = 0.0
-23:14 bilby INFO    :   z_17 = 0.0
-23:14 bilby INFO    :   z_18 = 0.0
-23:14 bilby INFO    :   z_19 = 0.0
-23:14 bilby INFO    :   z_20 = 0.0
-23:14 bilby INFO    :   z_21 = 0.0
-23:14 bilby INFO    :   z_22 = 0.0
-23:14 bilby INFO    :   z_23 = 0.0
-23:14 bilby INFO    :   z_24 = 0.0
-23:14 bilby INFO    :   z_25 = 0.0
-23:14 bilby INFO    :   z_26 = 0.0
-23:14 bilby INFO    :   z_27 = 0.0
-23:14 bilby INFO    :   z_28 = 0.0
-23:14 bilby INFO    :   z_29 = 0.0
-23:14 bilby INFO    :   z_30 = 0.0
-23:14 bilby INFO    :   z_31 = 0.0
-23:14 bilby INFO    : Generation of mass parameters failed with message &#39;mass_1&#39;
-23:14 bilby INFO    : Generation of spin parameters failed with message &#39;spin_1z&#39;
-23:14 bilby INFO    : Injected signal in L1:
-23:14 bilby INFO    :   optimal SNR = 192.78
-23:14 bilby INFO    :   matched filter SNR = 193.30+1.50j
-23:14 bilby INFO    :   luminosity_distance = 7.0
-23:14 bilby INFO    :   ra = 4.6499
-23:14 bilby INFO    :   dec = -0.5063
-23:14 bilby INFO    :   geocent_time = 1126259642.413
-23:14 bilby INFO    :   psi = 2.659
-23:14 bilby INFO    :   intrinsic_amplitude = 1.0
-23:14 bilby INFO    :   z_0 = 0.0
-23:14 bilby INFO    :   z_1 = 0.0
-23:14 bilby INFO    :   z_2 = 0.0
-23:14 bilby INFO    :   z_3 = 0.0
-23:14 bilby INFO    :   z_4 = 0.0
-23:14 bilby INFO    :   z_5 = 0.0
-23:14 bilby INFO    :   z_6 = 0.0
-23:14 bilby INFO    :   z_7 = 0.0
-23:14 bilby INFO    :   z_8 = 0.0
-23:14 bilby INFO    :   z_9 = 0.0
-23:14 bilby INFO    :   z_10 = 0.0
-23:14 bilby INFO    :   z_11 = 0.0
-23:14 bilby INFO    :   z_12 = 0.0
-23:14 bilby INFO    :   z_13 = 0.0
-23:14 bilby INFO    :   z_14 = 0.0
-23:14 bilby INFO    :   z_15 = 0.0
-23:14 bilby INFO    :   z_16 = 0.0
-23:14 bilby INFO    :   z_17 = 0.0
-23:14 bilby INFO    :   z_18 = 0.0
-23:14 bilby INFO    :   z_19 = 0.0
-23:14 bilby INFO    :   z_20 = 0.0
-23:14 bilby INFO    :   z_21 = 0.0
-23:14 bilby INFO    :   z_22 = 0.0
-23:14 bilby INFO    :   z_23 = 0.0
-23:14 bilby INFO    :   z_24 = 0.0
-23:14 bilby INFO    :   z_25 = 0.0
-23:14 bilby INFO    :   z_26 = 0.0
-23:14 bilby INFO    :   z_27 = 0.0
-23:14 bilby INFO    :   z_28 = 0.0
-23:14 bilby INFO    :   z_29 = 0.0
-23:14 bilby INFO    :   z_30 = 0.0
-23:14 bilby INFO    :   z_31 = 0.0
-23:14 bilby INFO    : Waveform generator instantiated: WaveformGenerator(duration=0.125, sampling_frequency=4096.0, start_time=0, frequency_domain_source_model=None, time_domain_source_model=__main__.starccato_supernova, parameter_conversion=__main__.&lt;lambda&gt;, waveform_arguments={&#39;model&#39;: StarccatoVAE(z-dim=32), &#39;latent_parameter_names&#39;: [&#39;z_0&#39;, &#39;z_1&#39;, &#39;z_2&#39;, &#39;z_3&#39;, &#39;z_4&#39;, &#39;z_5&#39;, &#39;z_6&#39;, &#39;z_7&#39;, &#39;z_8&#39;, &#39;z_9&#39;, &#39;z_10&#39;, &#39;z_11&#39;, &#39;z_12&#39;, &#39;z_13&#39;, &#39;z_14&#39;, &#39;z_15&#39;, &#39;z_16&#39;, &#39;z_17&#39;, &#39;z_18&#39;, &#39;z_19&#39;, &#39;z_20&#39;, &#39;z_21&#39;, &#39;z_22&#39;, &#39;z_23&#39;, &#39;z_24&#39;, &#39;z_25&#39;, &#39;z_26&#39;, &#39;z_27&#39;, &#39;z_28&#39;, &#39;z_29&#39;, &#39;z_30&#39;, &#39;z_31&#39;], &#39;reference_distance&#39;: 10.0, &#39;strain_scale&#39;: 1e-21})
-23:14 bilby INFO    : Running for label &#39;supernova&#39;, output will be saved to &#39;outdir&#39;
-/usr/local/lib/python3.12/dist-packages/bilby/gw/likelihood/base.py:1143: UserWarning: Wswiglal-redir-stdio:
-
-SWIGLAL standard output/error redirection is enabled in IPython.
-This may lead to performance penalties. To disable locally, use:
-
-with lal.no_swig_redirect_standard_output_error():
-    ...
-
-To disable globally, use:
-
-lal.swig_redirect_standard_output_error(False)
-
-Note however that this will likely lead to error messages from
-LAL functions being either misdirected or lost when called from
-Jupyter notebooks.
-
-To suppress this warning, use:
-
-import warnings
-warnings.filterwarnings(&quot;ignore&quot;, &quot;Wswiglal-redir-stdio&quot;)
-import lal
-
-  from lal import git_version, __version__
-23:14 bilby INFO    : Using lal version 7.7.0
-23:14 bilby INFO    : Using lal git version Branch: None;Tag: lalsuite-v7.26.1;Id: c90e1175f5e238741185744a4e516e58d42a9aec;;Builder: Unknown User &lt;&gt;;Repository status: UNCLEAN: Modified working tree
-23:14 bilby INFO    : Using lalsimulation version 6.2.0
-23:14 bilby INFO    : Using lalsimulation git version Branch: None;Tag: lalsuite-v7.26.1;Id: c90e1175f5e238741185744a4e516e58d42a9aec;;Builder: Unknown User &lt;&gt;;Repository status: UNCLEAN: Modified working tree
-23:14 bilby INFO    : Analysis priors:
-23:14 bilby INFO    : luminosity_distance=Uniform(minimum=2, maximum=20, name=&#39;luminosity_distance&#39;, latex_label=&#39;$d_L$&#39;, unit=&#39;$kpc$&#39;, boundary=None)
-23:14 bilby INFO    : intrinsic_amplitude=Uniform(minimum=0.5, maximum=1.5, name=&#39;intrinsic_amplitude&#39;, latex_label=&#39;intrinsic_amplitude&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_0=Normal(mu=0.0, sigma=1.0, name=&#39;z_0&#39;, latex_label=&#39;z_0&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_1=Normal(mu=0.0, sigma=1.0, name=&#39;z_1&#39;, latex_label=&#39;z_1&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_2=Normal(mu=0.0, sigma=1.0, name=&#39;z_2&#39;, latex_label=&#39;z_2&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_3=Normal(mu=0.0, sigma=1.0, name=&#39;z_3&#39;, latex_label=&#39;z_3&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_4=Normal(mu=0.0, sigma=1.0, name=&#39;z_4&#39;, latex_label=&#39;z_4&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_5=Normal(mu=0.0, sigma=1.0, name=&#39;z_5&#39;, latex_label=&#39;z_5&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_6=Normal(mu=0.0, sigma=1.0, name=&#39;z_6&#39;, latex_label=&#39;z_6&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_7=Normal(mu=0.0, sigma=1.0, name=&#39;z_7&#39;, latex_label=&#39;z_7&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_8=Normal(mu=0.0, sigma=1.0, name=&#39;z_8&#39;, latex_label=&#39;z_8&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_9=Normal(mu=0.0, sigma=1.0, name=&#39;z_9&#39;, latex_label=&#39;z_9&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_10=Normal(mu=0.0, sigma=1.0, name=&#39;z_10&#39;, latex_label=&#39;z_10&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_11=Normal(mu=0.0, sigma=1.0, name=&#39;z_11&#39;, latex_label=&#39;z_11&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_12=Normal(mu=0.0, sigma=1.0, name=&#39;z_12&#39;, latex_label=&#39;z_12&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_13=Normal(mu=0.0, sigma=1.0, name=&#39;z_13&#39;, latex_label=&#39;z_13&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_14=Normal(mu=0.0, sigma=1.0, name=&#39;z_14&#39;, latex_label=&#39;z_14&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_15=Normal(mu=0.0, sigma=1.0, name=&#39;z_15&#39;, latex_label=&#39;z_15&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_16=Normal(mu=0.0, sigma=1.0, name=&#39;z_16&#39;, latex_label=&#39;z_16&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_17=Normal(mu=0.0, sigma=1.0, name=&#39;z_17&#39;, latex_label=&#39;z_17&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_18=Normal(mu=0.0, sigma=1.0, name=&#39;z_18&#39;, latex_label=&#39;z_18&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_19=Normal(mu=0.0, sigma=1.0, name=&#39;z_19&#39;, latex_label=&#39;z_19&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_20=Normal(mu=0.0, sigma=1.0, name=&#39;z_20&#39;, latex_label=&#39;z_20&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_21=Normal(mu=0.0, sigma=1.0, name=&#39;z_21&#39;, latex_label=&#39;z_21&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_22=Normal(mu=0.0, sigma=1.0, name=&#39;z_22&#39;, latex_label=&#39;z_22&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_23=Normal(mu=0.0, sigma=1.0, name=&#39;z_23&#39;, latex_label=&#39;z_23&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_24=Normal(mu=0.0, sigma=1.0, name=&#39;z_24&#39;, latex_label=&#39;z_24&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_25=Normal(mu=0.0, sigma=1.0, name=&#39;z_25&#39;, latex_label=&#39;z_25&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_26=Normal(mu=0.0, sigma=1.0, name=&#39;z_26&#39;, latex_label=&#39;z_26&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_27=Normal(mu=0.0, sigma=1.0, name=&#39;z_27&#39;, latex_label=&#39;z_27&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_28=Normal(mu=0.0, sigma=1.0, name=&#39;z_28&#39;, latex_label=&#39;z_28&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_29=Normal(mu=0.0, sigma=1.0, name=&#39;z_29&#39;, latex_label=&#39;z_29&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_30=Normal(mu=0.0, sigma=1.0, name=&#39;z_30&#39;, latex_label=&#39;z_30&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : z_31=Normal(mu=0.0, sigma=1.0, name=&#39;z_31&#39;, latex_label=&#39;z_31&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : ra=Uniform(minimum=0, maximum=6.283185307179586, name=&#39;ra&#39;, latex_label=&#39;$\\mathrm{RA}$&#39;, unit=None, boundary=&#39;periodic&#39;)
-23:14 bilby INFO    : dec=Sine(minimum=0, maximum=3.141592653589793, name=&#39;dec&#39;, latex_label=&#39;$\\mathrm{DEC}$&#39;, unit=None, boundary=None)
-23:14 bilby INFO    : geocent_time=Uniform(minimum=1126259641.413, maximum=1126259643.413, name=&#39;geocent_time&#39;, latex_label=&#39;$t_c$&#39;, unit=&#39;$s$&#39;, boundary=None)
-23:14 bilby INFO    : psi=2.659
-23:14 bilby INFO    : Analysis likelihood class: &lt;class &#39;bilby.gw.likelihood.base.GravitationalWaveTransient&#39;&gt;
-23:14 bilby INFO    : Analysis likelihood noise evidence: -29459.87853725689
-23:15 bilby INFO    : Single likelihood evaluation took 1.375e-02 s
-23:15 bilby INFO    : Using sampler Emcee with kwargs {&#39;nwalkers&#39;: 500, &#39;a&#39;: 2, &#39;args&#39;: [], &#39;kwargs&#39;: {}, &#39;postargs&#39;: None, &#39;pool&#39;: None, &#39;live_dangerously&#39;: False, &#39;runtime_sortingfn&#39;: None, &#39;lnprob0&#39;: None, &#39;rstate0&#39;: None, &#39;blobs0&#39;: None, &#39;iterations&#39;: 100, &#39;thin&#39;: 1, &#39;storechain&#39;: True, &#39;mh_proposal&#39;: None}
-23:15 bilby INFO    : Global meta data was removed from the result object for compatibility. Use the `BILBY_INCLUDE_GLOBAL_METADATA` environment variable to include it. This behaviour will be removed in a future release. For more details see: https://bilby-dev.github.io/bilby/faq.html#global-meta-data
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>23:33 bilby INFO    : Waveform generator instantiated: WaveformGenerator(duration=0.125, sampling_frequency=4096.0, start_time=0, frequency_domain_source_model=None, time_domain_source_model=__main__.starccato_supernova, parameter_conversion=__main__.&lt;lambda&gt;, waveform_arguments={&#39;model&#39;: StarccatoVAE(z-dim=32), &#39;latent_parameter_names&#39;: [&#39;z_0&#39;, &#39;z_1&#39;, &#39;z_2&#39;, &#39;z_3&#39;, &#39;z_4&#39;, &#39;z_5&#39;, &#39;z_6&#39;, &#39;z_7&#39;, &#39;z_8&#39;, &#39;z_9&#39;, &#39;z_10&#39;, &#39;z_11&#39;, &#39;z_12&#39;, &#39;z_13&#39;, &#39;z_14&#39;, &#39;z_15&#39;, &#39;z_16&#39;, &#39;z_17&#39;, &#39;z_18&#39;, &#39;z_19&#39;, &#39;z_20&#39;, &#39;z_21&#39;, &#39;z_22&#39;, &#39;z_23&#39;, &#39;z_24&#39;, &#39;z_25&#39;, &#39;z_26&#39;, &#39;z_27&#39;, &#39;z_28&#39;, &#39;z_29&#39;, &#39;z_30&#39;, &#39;z_31&#39;], &#39;reference_distance&#39;: 10.0, &#39;strain_scale&#39;: 1e-21})
+23:33 bilby INFO    : Generation of mass parameters failed with message &#39;mass_1&#39;
+23:33 bilby INFO    : Generation of spin parameters failed with message &#39;spin_1z&#39;
+23:33 bilby INFO    : Injected signal in H1:
+23:33 bilby INFO    :   optimal SNR = 140.84
+23:33 bilby INFO    :   matched filter SNR = 143.30-0.64j
+23:33 bilby INFO    :   luminosity_distance = 7.0
+23:33 bilby INFO    :   ra = 4.6499
+23:33 bilby INFO    :   dec = -0.5063
+23:33 bilby INFO    :   geocent_time = 1126259642.413
+23:33 bilby INFO    :   psi = 2.659
+23:33 bilby INFO    :   intrinsic_amplitude = 1.0
+23:33 bilby INFO    :   z_0 = 0.0
+23:33 bilby INFO    :   z_1 = 0.0
+23:33 bilby INFO    :   z_2 = 0.0
+23:33 bilby INFO    :   z_3 = 0.0
+23:33 bilby INFO    :   z_4 = 0.0
+23:33 bilby INFO    :   z_5 = 0.0
+23:33 bilby INFO    :   z_6 = 0.0
+23:33 bilby INFO    :   z_7 = 0.0
+23:33 bilby INFO    :   z_8 = 0.0
+23:33 bilby INFO    :   z_9 = 0.0
+23:33 bilby INFO    :   z_10 = 0.0
+23:33 bilby INFO    :   z_11 = 0.0
+23:33 bilby INFO    :   z_12 = 0.0
+23:33 bilby INFO    :   z_13 = 0.0
+23:33 bilby INFO    :   z_14 = 0.0
+23:33 bilby INFO    :   z_15 = 0.0
+23:33 bilby INFO    :   z_16 = 0.0
+23:33 bilby INFO    :   z_17 = 0.0
+23:33 bilby INFO    :   z_18 = 0.0
+23:33 bilby INFO    :   z_19 = 0.0
+23:33 bilby INFO    :   z_20 = 0.0
+23:33 bilby INFO    :   z_21 = 0.0
+23:33 bilby INFO    :   z_22 = 0.0
+23:33 bilby INFO    :   z_23 = 0.0
+23:33 bilby INFO    :   z_24 = 0.0
+23:33 bilby INFO    :   z_25 = 0.0
+23:33 bilby INFO    :   z_26 = 0.0
+23:33 bilby INFO    :   z_27 = 0.0
+23:33 bilby INFO    :   z_28 = 0.0
+23:33 bilby INFO    :   z_29 = 0.0
+23:33 bilby INFO    :   z_30 = 0.0
+23:33 bilby INFO    :   z_31 = 0.0
+23:33 bilby INFO    : Generation of mass parameters failed with message &#39;mass_1&#39;
+23:33 bilby INFO    : Generation of spin parameters failed with message &#39;spin_1z&#39;
+23:33 bilby INFO    : Injected signal in L1:
+23:33 bilby INFO    :   optimal SNR = 192.78
+23:33 bilby INFO    :   matched filter SNR = 193.30+1.50j
+23:33 bilby INFO    :   luminosity_distance = 7.0
+23:33 bilby INFO    :   ra = 4.6499
+23:33 bilby INFO    :   dec = -0.5063
+23:33 bilby INFO    :   geocent_time = 1126259642.413
+23:33 bilby INFO    :   psi = 2.659
+23:33 bilby INFO    :   intrinsic_amplitude = 1.0
+23:33 bilby INFO    :   z_0 = 0.0
+23:33 bilby INFO    :   z_1 = 0.0
+23:33 bilby INFO    :   z_2 = 0.0
+23:33 bilby INFO    :   z_3 = 0.0
+23:33 bilby INFO    :   z_4 = 0.0
+23:33 bilby INFO    :   z_5 = 0.0
+23:33 bilby INFO    :   z_6 = 0.0
+23:33 bilby INFO    :   z_7 = 0.0
+23:33 bilby INFO    :   z_8 = 0.0
+23:33 bilby INFO    :   z_9 = 0.0
+23:33 bilby INFO    :   z_10 = 0.0
+23:33 bilby INFO    :   z_11 = 0.0
+23:33 bilby INFO    :   z_12 = 0.0
+23:33 bilby INFO    :   z_13 = 0.0
+23:33 bilby INFO    :   z_14 = 0.0
+23:33 bilby INFO    :   z_15 = 0.0
+23:33 bilby INFO    :   z_16 = 0.0
+23:33 bilby INFO    :   z_17 = 0.0
+23:33 bilby INFO    :   z_18 = 0.0
+23:33 bilby INFO    :   z_19 = 0.0
+23:33 bilby INFO    :   z_20 = 0.0
+23:33 bilby INFO    :   z_21 = 0.0
+23:33 bilby INFO    :   z_22 = 0.0
+23:33 bilby INFO    :   z_23 = 0.0
+23:33 bilby INFO    :   z_24 = 0.0
+23:33 bilby INFO    :   z_25 = 0.0
+23:33 bilby INFO    :   z_26 = 0.0
+23:33 bilby INFO    :   z_27 = 0.0
+23:33 bilby INFO    :   z_28 = 0.0
+23:33 bilby INFO    :   z_29 = 0.0
+23:33 bilby INFO    :   z_30 = 0.0
+23:33 bilby INFO    :   z_31 = 0.0
+23:33 bilby INFO    : Waveform generator instantiated: WaveformGenerator(duration=0.125, sampling_frequency=4096.0, start_time=0, frequency_domain_source_model=None, time_domain_source_model=__main__.starccato_supernova, parameter_conversion=__main__.&lt;lambda&gt;, waveform_arguments={&#39;model&#39;: StarccatoVAE(z-dim=32), &#39;latent_parameter_names&#39;: [&#39;z_0&#39;, &#39;z_1&#39;, &#39;z_2&#39;, &#39;z_3&#39;, &#39;z_4&#39;, &#39;z_5&#39;, &#39;z_6&#39;, &#39;z_7&#39;, &#39;z_8&#39;, &#39;z_9&#39;, &#39;z_10&#39;, &#39;z_11&#39;, &#39;z_12&#39;, &#39;z_13&#39;, &#39;z_14&#39;, &#39;z_15&#39;, &#39;z_16&#39;, &#39;z_17&#39;, &#39;z_18&#39;, &#39;z_19&#39;, &#39;z_20&#39;, &#39;z_21&#39;, &#39;z_22&#39;, &#39;z_23&#39;, &#39;z_24&#39;, &#39;z_25&#39;, &#39;z_26&#39;, &#39;z_27&#39;, &#39;z_28&#39;, &#39;z_29&#39;, &#39;z_30&#39;, &#39;z_31&#39;], &#39;reference_distance&#39;: 10.0, &#39;strain_scale&#39;: 1e-21})
+23:33 bilby INFO    : Running for label &#39;supernova&#39;, output will be saved to &#39;outdir&#39;
+23:33 bilby INFO    : Using lal version 7.7.0
+23:33 bilby INFO    : Using lal git version Branch: None;Tag: lalsuite-v7.26.1;Id: c90e1175f5e238741185744a4e516e58d42a9aec;;Builder: Unknown User &lt;&gt;;Repository status: UNCLEAN: Modified working tree
+23:33 bilby INFO    : Using lalsimulation version 6.2.0
+23:33 bilby INFO    : Using lalsimulation git version Branch: None;Tag: lalsuite-v7.26.1;Id: c90e1175f5e238741185744a4e516e58d42a9aec;;Builder: Unknown User &lt;&gt;;Repository status: UNCLEAN: Modified working tree
+23:33 bilby INFO    : Analysis priors:
+23:33 bilby INFO    : luminosity_distance=Uniform(minimum=2, maximum=20, name=&#39;luminosity_distance&#39;, latex_label=&#39;$d_L$&#39;, unit=&#39;$kpc$&#39;, boundary=None)
+23:33 bilby INFO    : intrinsic_amplitude=Uniform(minimum=0.5, maximum=1.5, name=&#39;intrinsic_amplitude&#39;, latex_label=&#39;intrinsic_amplitude&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_0=Normal(mu=0.0, sigma=1.0, name=&#39;z_0&#39;, latex_label=&#39;z_0&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_1=Normal(mu=0.0, sigma=1.0, name=&#39;z_1&#39;, latex_label=&#39;z_1&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_2=Normal(mu=0.0, sigma=1.0, name=&#39;z_2&#39;, latex_label=&#39;z_2&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_3=Normal(mu=0.0, sigma=1.0, name=&#39;z_3&#39;, latex_label=&#39;z_3&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_4=Normal(mu=0.0, sigma=1.0, name=&#39;z_4&#39;, latex_label=&#39;z_4&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_5=Normal(mu=0.0, sigma=1.0, name=&#39;z_5&#39;, latex_label=&#39;z_5&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_6=Normal(mu=0.0, sigma=1.0, name=&#39;z_6&#39;, latex_label=&#39;z_6&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_7=Normal(mu=0.0, sigma=1.0, name=&#39;z_7&#39;, latex_label=&#39;z_7&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_8=Normal(mu=0.0, sigma=1.0, name=&#39;z_8&#39;, latex_label=&#39;z_8&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_9=Normal(mu=0.0, sigma=1.0, name=&#39;z_9&#39;, latex_label=&#39;z_9&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_10=Normal(mu=0.0, sigma=1.0, name=&#39;z_10&#39;, latex_label=&#39;z_10&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_11=Normal(mu=0.0, sigma=1.0, name=&#39;z_11&#39;, latex_label=&#39;z_11&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_12=Normal(mu=0.0, sigma=1.0, name=&#39;z_12&#39;, latex_label=&#39;z_12&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_13=Normal(mu=0.0, sigma=1.0, name=&#39;z_13&#39;, latex_label=&#39;z_13&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_14=Normal(mu=0.0, sigma=1.0, name=&#39;z_14&#39;, latex_label=&#39;z_14&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_15=Normal(mu=0.0, sigma=1.0, name=&#39;z_15&#39;, latex_label=&#39;z_15&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_16=Normal(mu=0.0, sigma=1.0, name=&#39;z_16&#39;, latex_label=&#39;z_16&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_17=Normal(mu=0.0, sigma=1.0, name=&#39;z_17&#39;, latex_label=&#39;z_17&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_18=Normal(mu=0.0, sigma=1.0, name=&#39;z_18&#39;, latex_label=&#39;z_18&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_19=Normal(mu=0.0, sigma=1.0, name=&#39;z_19&#39;, latex_label=&#39;z_19&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_20=Normal(mu=0.0, sigma=1.0, name=&#39;z_20&#39;, latex_label=&#39;z_20&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_21=Normal(mu=0.0, sigma=1.0, name=&#39;z_21&#39;, latex_label=&#39;z_21&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_22=Normal(mu=0.0, sigma=1.0, name=&#39;z_22&#39;, latex_label=&#39;z_22&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_23=Normal(mu=0.0, sigma=1.0, name=&#39;z_23&#39;, latex_label=&#39;z_23&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_24=Normal(mu=0.0, sigma=1.0, name=&#39;z_24&#39;, latex_label=&#39;z_24&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_25=Normal(mu=0.0, sigma=1.0, name=&#39;z_25&#39;, latex_label=&#39;z_25&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_26=Normal(mu=0.0, sigma=1.0, name=&#39;z_26&#39;, latex_label=&#39;z_26&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_27=Normal(mu=0.0, sigma=1.0, name=&#39;z_27&#39;, latex_label=&#39;z_27&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_28=Normal(mu=0.0, sigma=1.0, name=&#39;z_28&#39;, latex_label=&#39;z_28&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_29=Normal(mu=0.0, sigma=1.0, name=&#39;z_29&#39;, latex_label=&#39;z_29&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_30=Normal(mu=0.0, sigma=1.0, name=&#39;z_30&#39;, latex_label=&#39;z_30&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : z_31=Normal(mu=0.0, sigma=1.0, name=&#39;z_31&#39;, latex_label=&#39;z_31&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : ra=Uniform(minimum=0, maximum=6.283185307179586, name=&#39;ra&#39;, latex_label=&#39;$\\mathrm{RA}$&#39;, unit=None, boundary=&#39;periodic&#39;)
+23:33 bilby INFO    : dec=Sine(minimum=0, maximum=3.141592653589793, name=&#39;dec&#39;, latex_label=&#39;$\\mathrm{DEC}$&#39;, unit=None, boundary=None)
+23:33 bilby INFO    : geocent_time=Uniform(minimum=1126259641.413, maximum=1126259643.413, name=&#39;geocent_time&#39;, latex_label=&#39;$t_c$&#39;, unit=&#39;$s$&#39;, boundary=None)
+23:33 bilby INFO    : psi=2.659
+23:33 bilby INFO    : Analysis likelihood class: &lt;class &#39;bilby.gw.likelihood.base.GravitationalWaveTransient&#39;&gt;
+23:33 bilby INFO    : Analysis likelihood noise evidence: -29459.87853725689
+23:33 bilby INFO    : Single likelihood evaluation took 1.537e-02 s
+23:33 bilby WARNING : Supplied argument &#39;npoints&#39; not an argument of &#39;Emcee&#39;, removing.
+23:33 bilby INFO    : Using sampler Emcee with kwargs {&#39;nwalkers&#39;: 500, &#39;a&#39;: 2, &#39;args&#39;: [], &#39;kwargs&#39;: {}, &#39;postargs&#39;: None, &#39;pool&#39;: None, &#39;live_dangerously&#39;: False, &#39;runtime_sortingfn&#39;: None, &#39;lnprob0&#39;: None, &#39;rstate0&#39;: None, &#39;blobs0&#39;: None, &#39;iterations&#39;: 100, &#39;thin&#39;: 1, &#39;storechain&#39;: True, &#39;mh_proposal&#39;: None}
+23:33 bilby INFO    : Global meta data was removed from the result object for compatibility. Use the `BILBY_INCLUDE_GLOBAL_METADATA` environment variable to include it. This behaviour will be removed in a future release. For more details see: https://bilby-dev.github.io/bilby/faq.html#global-meta-data
 </pre></div>
 </div>
-<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "fdfcf6fc0b9d4a1ba9153822e54d9957"}</script></div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "3f373794d5cc49c691aa15a59c5a46f5"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>23:41 bilby INFO    : Checkpointing sampler to file outdir/emcee_supernova/sampler.pickle
+23:41 bilby INFO    : Max autocorr time = 86
+23:41 bilby INFO    : Discarding 258 steps for burn-in
+</pre></div>
+</div>
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">SamplerError</span><span class="g g-Whitespace">                              </span>Traceback (most recent call last)
+<span class="nn">/tmp/ipython-input-2160771827.py</span> in <span class="ni">&lt;cell line: 0&gt;</span><span class="nt">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">275</span> <span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">276</span> 
+<span class="ne">--&gt; </span><span class="mi">277</span> <span class="n">result</span> <span class="o">=</span> <span class="n">bilby</span><span class="o">.</span><span class="n">run_sampler</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">278</span>     <span class="n">likelihood</span><span class="o">=</span><span class="n">likelihood</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">279</span>     <span class="n">priors</span><span class="o">=</span><span class="n">priors</span><span class="p">,</span>
+
+<span class="nn">/usr/local/lib/python3.12/dist-packages/bilby/core/sampler/__init__.py</span> in <span class="ni">run_sampler</span><span class="nt">(likelihood, priors, label, outdir, sampler, use_ratio, injection_parameters, conversion_function, plot, default_priors_file, clean, meta_data, save, gzip, result_class, npool, **kwargs)</span>
+<span class="g g-Whitespace">    </span><span class="mi">312</span>             <span class="n">result</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">_run_test</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">313</span>         <span class="k">else</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">314</span>             <span class="n">result</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">run_sampler</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">315</span>         <span class="n">end_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">316</span> 
+
+<span class="nn">/usr/local/lib/python3.12/dist-packages/bilby/core/sampler/base_sampler.py</span> in <span class="ni">wrapped</span><span class="nt">(self, *args, **kwargs)</span>
+<span class="g g-Whitespace">     </span><span class="mi">99</span>                 <span class="s2">&quot;and can be safely ignored.&quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">100</span>             <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">101</span>         <span class="n">output</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">102</span>         <span class="k">if</span> <span class="n">_set</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">103</span>             <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="n">old_term</span><span class="p">)</span>
+
+<span class="nn">/usr/local/lib/python3.12/dist-packages/bilby/core/sampler/emcee.py</span> in <span class="ni">run_sampler</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">417</span>         <span class="bp">self</span><span class="o">.</span><span class="n">print_nburn_logging_info</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">418</span> 
+<span class="ne">--&gt; </span><span class="mi">419</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_generate_result</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">420</span> 
+<span class="g g-Whitespace">    </span><span class="mi">421</span>         <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampler</span><span class="o">.</span><span class="n">chain</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nburn</span> <span class="p">:,</span> <span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+
+<span class="nn">/usr/local/lib/python3.12/dist-packages/bilby/core/sampler/emcee.py</span> in <span class="ni">_generate_result</span><span class="nt">(self)</span>
+<span class="g g-Whitespace">    </span><span class="mi">429</span>         <span class="bp">self</span><span class="o">.</span><span class="n">calc_likelihood_count</span><span class="p">()</span>
+<span class="g g-Whitespace">    </span><span class="mi">430</span>         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nburn</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsteps</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">431</span>             <span class="k">raise</span> <span class="n">SamplerError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">432</span>                 <span class="s2">&quot;The run has finished, but the chain is not burned in: &quot;</span>
+<span class="g g-Whitespace">    </span><span class="mi">433</span>                 <span class="sa">f</span><span class="s2">&quot;`nburn &lt; nsteps` (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">nburn</span><span class="si">}</span><span class="s2"> &lt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nsteps</span><span class="si">}</span><span class="s2">).&quot;</span>
+
+<span class="ne">SamplerError</span>: The run has finished, but the chain is not burned in: `nburn &lt; nsteps` (258 &lt; 100). Try increasing the number of steps.
+</pre></div>
+</div>
+</div>
 </div>
 
     <script type="text/x-thebe-config">
