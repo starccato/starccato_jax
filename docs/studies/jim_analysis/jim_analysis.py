@@ -9,8 +9,6 @@ This example:
   * Generates a synthetic injection seen by the H1 and L1 detectors
   * Configures a simple uniform prior over the VAE latent space and nuisance
     parameters
-  * Evaluates the JIM log-posterior at the injected parameters and shows how
-    to launch a short FlowMC sampling run
 
 The goal is to provide a compact reference for integrating Starccato models
 with JIM's NumPyro/JAX-native tooling.
@@ -65,7 +63,7 @@ class StarccatoJimWaveform(Waveform):
     Turn the Starccato CCSNe VAE into a JIM-compatible frequency-domain source.
 
     The class keeps all computations in JAX so that gradients and automatic
-    batching continue to work seamlessly inside JIM/FlowMC.
+    batching continue to work seamlessly inside JIM/NumPyro.
     """
 
     model: StarccatoCCSNe
@@ -160,6 +158,12 @@ def plot_waveform_and_psd_comparison(
     title_prefix="",
     log_f=True,
     include_data=True,
+    posterior_samples=None,   
+    waveform_fn=None,
+    fixed_params=None,
+    ci=(5, 95),
+    n_draws=200,
+
 ):
     waveform = _to_numpy64(waveform)
     time_array = _to_numpy64(time_array)
@@ -172,6 +176,25 @@ def plot_waveform_and_psd_comparison(
     ax0.set_xlabel("Time [s]")
     ax0.set_ylabel("Strain")
     ax0.grid(True, alpha=0.3)
+
+    # --- Posterior credible interval (optional) ---
+    if posterior_samples is not None and waveform_fn is not None:
+        param_names = [k for k in posterior_samples.keys() if k not in (fixed_params or {})]
+        n_total = len(posterior_samples[param_names[0]])
+        draw_idx = np.random.choice(n_total, size=min(n_draws, n_total), replace=False)
+        waveforms = []
+        for i in draw_idx:
+            params = {k: float(posterior_samples[k][i]) for k in param_names}
+            params.update(fixed_params or {})
+            waveforms.append(np.asarray(waveform_fn._time_domain_waveform(params)))
+        waveforms = np.stack(waveforms, axis=0)
+        lower = np.percentile(waveforms, ci[0], axis=0)
+        upper = np.percentile(waveforms, ci[1], axis=0)
+        ax0.fill_between(time_array, lower, upper, color="tab:orange", alpha=0.3,
+                         label=f"{ci[0]}–{ci[1]}% CI")
+        ax0.legend()
+
+
 
     signal_fft = np.fft.rfft(waveform)
     freq_sig = np.fft.rfftfreq(len(time_array), d=1.0 / sample_rate)
@@ -208,6 +231,26 @@ def plot_waveform_and_psd_comparison(
                 ax.loglog(freqs, data_psd, color="tab:blue", alpha=0.7, label="Data PSD")
             else:
                 ax.plot(freqs, data_psd, color="tab:blue", alpha=0.7, label="Data PSD")
+
+        # --- Posterior PSD CI (optional) ---
+        if posterior_samples is not None and waveform_fn is not None:
+            psd_samples = []
+            for i in draw_idx[: min(50, len(draw_idx))]:  # fewer draws for speed
+                params = {k: float(posterior_samples[k][i]) for k in param_names}
+                params.update(fixed_params or {})
+                wf = np.asarray(waveform_fn._time_domain_waveform(params))
+                wf_fft = np.fft.rfft(wf)
+                psd_samples.append((np.abs(wf_fft) ** 2) / len(time_array))
+            psd_samples = np.stack(psd_samples, axis=0)
+            lower_psd = np.percentile(psd_samples, ci[0], axis=0)
+            upper_psd = np.percentile(psd_samples, ci[1], axis=0)
+            if log_f:
+                ax.fill_between(freq_sig, lower_psd, upper_psd,
+                                color="tab:orange", alpha=0.2)
+            else:
+                ax.fill_between(freq_sig, lower_psd, upper_psd,
+                                color="tab:orange", alpha=0.2)
+
 
         ax.set_title(f"{getattr(ifo, 'name', f'IFO {idx}') } PSD comparison")
         ax.set_xlabel("Frequency [Hz]")
@@ -452,34 +495,37 @@ def main():
     log_post = log_like + log_prior
     print(f"Posterior at injected parameters: {float(log_post):.3f}")
 
-    nested_results = run_nested_sampling(
-        likelihood,
-        latent_names=latent_names,
-        fixed_params=fixed_params,
-        rng_key=jax.random.PRNGKey(1337),
-        latent_sigma=latent_sigma,
-        log_amp_sigma=log_amp_sigma,
-        num_live_points=500,
-        max_samples=20000,
-        verbose=False,
-    )
-    np.savez(
-        os.path.join("jim_outdir", "nested_samples.npz"),
-        **{name: np.asarray(val) for name, val in nested_results["samples"].items()},
-        log_weights=nested_results["log_weights"],
-        weights=nested_results["weights"],
-    )
-    nested_params_full = {**fixed_params, **nested_results["mean_params"]}
-    nested_waveform_td = _to_numpy64(waveform._time_domain_waveform(nested_params_full))
-    plot_waveform_and_psd_comparison(
-        detectors,
-        time_axis,
-        nested_waveform_td,
-        waveform.sample_rate,
-        outpath=os.path.join("jim_outdir", "posterior_nested_psd_comparison.png"),
-        title_prefix="Posterior (nested mean)",
-        include_data=True,
-    )
+    NS = False
+
+    if NS:
+        nested_results = run_nested_sampling(
+            likelihood,
+            latent_names=latent_names,
+            fixed_params=fixed_params,
+            rng_key=jax.random.PRNGKey(1337),
+            latent_sigma=latent_sigma,
+            log_amp_sigma=log_amp_sigma,
+            num_live_points=500,
+            max_samples=20000,
+            verbose=False,
+        )
+        np.savez(
+            os.path.join("jim_outdir", "nested_samples.npz"),
+            **{name: np.asarray(val) for name, val in nested_results["samples"].items()},
+            log_weights=nested_results["log_weights"],
+            weights=nested_results["weights"],
+        )
+        nested_params_full = {**fixed_params, **nested_results["mean_params"]}
+        nested_waveform_td = _to_numpy64(waveform._time_domain_waveform(nested_params_full))
+        plot_waveform_and_psd_comparison(
+            detectors,
+            time_axis,
+            nested_waveform_td,
+            waveform.sample_rate,
+            outpath=os.path.join("jim_outdir", "posterior_nested_psd_comparison.png"),
+            title_prefix="Posterior (nested mean)",
+            include_data=True,
+        )
 
     mcmc = run_numpyro_sampling(
         likelihood,
@@ -513,6 +559,11 @@ def main():
         outpath=os.path.join("jim_outdir", "posterior_nuts_psd_comparison.png"),
         title_prefix="Posterior (NUTS mean)",
         include_data=True,
+        posterior_samples=samples,
+        waveform_fn=waveform,
+        fixed_params=fixed_params,
+        ci=(5, 95),
+        n_draws=200,
     )
 
 
