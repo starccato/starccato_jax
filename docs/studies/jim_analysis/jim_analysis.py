@@ -149,6 +149,16 @@ def build_synthetic_data(
     return freqs
 
 
+def _whiten_frequency_series(data_fd: np.ndarray, psd: np.ndarray, df: float) -> np.ndarray:
+    """Return the whitened time-series given a complex FFT and PSD."""
+    eps = 1e-24
+    denom = np.sqrt(np.maximum(psd, eps))
+    whitened_fd = data_fd / denom
+    ts = np.fft.irfft(whitened_fd)
+    # Normalise so the time-domain variance ~ 1 for unit-variance noise.
+    return ts * np.sqrt(2.0 * df * len(psd))
+
+
 def plot_waveform_and_psd_comparison(
     ifos,
     time_array,
@@ -163,19 +173,21 @@ def plot_waveform_and_psd_comparison(
     fixed_params=None,
     ci=(5, 95),
     n_draws=200,
-
+    whiten_time_domain=True,
 ):
     waveform = _to_numpy64(waveform)
     time_array = _to_numpy64(time_array)
 
-    fig, axes = plt.subplots(1, len(ifos) + 1, figsize=(6 * (len(ifos) + 1), 4))
+    rows = 2 if whiten_time_domain else 1
+    fig, axes = plt.subplots(rows, len(ifos) + 1, figsize=(6 * (len(ifos) + 1), 4 * rows), sharex="col")
+    if rows == 1:
+        axes = np.expand_dims(axes, axis=0)
 
-    ax0 = axes[0]
-    ax0.plot(time_array, waveform, color="tab:orange")
-    ax0.set_title(f"{title_prefix} waveform (time domain)")
-    ax0.set_xlabel("Time [s]")
-    ax0.set_ylabel("Strain")
-    ax0.grid(True, alpha=0.3)
+    ax_td = axes[0, 0]
+    ax_td.plot(time_array, waveform, color="tab:orange", label="Median waveform")
+    ax_td.set_title(f"{title_prefix} waveform (time domain)")
+    ax_td.set_ylabel("Strain")
+    ax_td.grid(True, alpha=0.3)
 
     # --- Posterior credible interval (optional) ---
     if posterior_samples is not None and waveform_fn is not None:
@@ -190,15 +202,32 @@ def plot_waveform_and_psd_comparison(
         waveforms = np.stack(waveforms, axis=0)
         lower = np.percentile(waveforms, ci[0], axis=0)
         upper = np.percentile(waveforms, ci[1], axis=0)
-        ax0.fill_between(time_array, lower, upper, color="tab:orange", alpha=0.3,
-                         label=f"{ci[0]}–{ci[1]}% CI")
-        ax0.legend()
-
-
+        ax_td.fill_between(time_array, lower, upper, color="tab:orange", alpha=0.3,
+                           label=f"{ci[0]}–{ci[1]}% CI")
+    ax_td.legend(frameon=False)
+    if rows == 1:
+        ax_td.set_xlabel("Time [s]")
 
     signal_fft = np.fft.rfft(waveform)
     freq_sig = np.fft.rfftfreq(len(time_array), d=1.0 / sample_rate)
     sig_psd = (np.abs(signal_fft) ** 2) / len(time_array)
+
+    if whiten_time_domain:
+        if len(ifos) > 0 and hasattr(ifos[0], "psd") and hasattr(ifos[0], "frequencies"):
+            ref_psd = _to_numpy64(ifos[0].psd)
+            ref_freqs = _to_numpy64(ifos[0].frequencies)
+            df = ref_freqs[1] - ref_freqs[0]
+        else:
+            ref_psd = sig_psd
+            df = freq_sig[1] - freq_sig[0]
+        whitened_waveform = _whiten_frequency_series(signal_fft, ref_psd, df)
+        ax_whiten = axes[1, 0]
+        ax_whiten.plot(time_array, whitened_waveform, color="tab:green", label="Whitened waveform")
+        ax_whiten.set_title("Whitened waveform")
+        ax_whiten.set_xlabel("Time [s]")
+        ax_whiten.set_ylabel("Whitened strain")
+        ax_whiten.grid(True, alpha=0.3)
+        ax_whiten.legend(frameon=False)
 
     for idx, ifo in enumerate(ifos, start=1):
         if hasattr(ifo, "frequencies"):
@@ -215,22 +244,22 @@ def plot_waveform_and_psd_comparison(
         else:
             raise AttributeError("Detector object must have 'psd' or 'power_spectral_density_array'.")
 
-        ax = axes[idx]
+        ax_psd = axes[0, idx]
         if log_f:
-            ax.loglog(freqs, noise_psd, color="black", label="Noise PSD")
-            ax.loglog(freq_sig, sig_psd, color="tab:orange", label="Signal PSD")
+            ax_psd.loglog(freqs, noise_psd, color="black", label="Noise PSD")
+            ax_psd.loglog(freq_sig, sig_psd, color="tab:orange", label="Signal PSD")
         else:
-            ax.plot(freqs, noise_psd, color="black", label="Noise PSD")
-            ax.plot(freq_sig, sig_psd, color="tab:orange", label="Signal PSD")
+            ax_psd.plot(freqs, noise_psd, color="black", label="Noise PSD")
+            ax_psd.plot(freq_sig, sig_psd, color="tab:orange", label="Signal PSD")
 
         data_psd = None
         if include_data and hasattr(ifo, "data") and getattr(ifo, "data") is not None:
             data_fd = _to_numpy64(ifo.data)
             data_psd = (np.abs(data_fd) ** 2)
             if log_f:
-                ax.loglog(freqs, data_psd, color="tab:blue", alpha=0.7, label="Data PSD")
+                ax_psd.loglog(freqs, data_psd, color="tab:blue", alpha=0.7, label="Data PSD")
             else:
-                ax.plot(freqs, data_psd, color="tab:blue", alpha=0.7, label="Data PSD")
+                ax_psd.plot(freqs, data_psd, color="tab:blue", alpha=0.7, label="Data PSD")
 
         # --- Posterior PSD CI (optional) ---
         if posterior_samples is not None and waveform_fn is not None:
@@ -245,18 +274,42 @@ def plot_waveform_and_psd_comparison(
             lower_psd = np.percentile(psd_samples, ci[0], axis=0)
             upper_psd = np.percentile(psd_samples, ci[1], axis=0)
             if log_f:
-                ax.fill_between(freq_sig, lower_psd, upper_psd,
-                                color="tab:orange", alpha=0.2)
+                ax_psd.fill_between(freq_sig, lower_psd, upper_psd,
+                                    color="tab:orange", alpha=0.2)
             else:
-                ax.fill_between(freq_sig, lower_psd, upper_psd,
-                                color="tab:orange", alpha=0.2)
+                ax_psd.fill_between(freq_sig, lower_psd, upper_psd,
+                                    color="tab:orange", alpha=0.2)
 
+        ax_psd.set_title(f"{getattr(ifo, 'name', f'IFO {idx}') } PSD comparison")
+        ax_psd.set_xlabel("Frequency [Hz]")
+        ax_psd.set_ylabel("Power spectral density [arb]")
+        ax_psd.grid(True, alpha=0.3)
+        ax_psd.legend()
 
-        ax.set_title(f"{getattr(ifo, 'name', f'IFO {idx}') } PSD comparison")
-        ax.set_xlabel("Frequency [Hz]")
-        ax.set_ylabel("Power spectral density [arb]")
-        ax.grid(True, alpha=0.3)
-        ax.legend()
+        if whiten_time_domain:
+            df = freqs[1] - freqs[0] if freqs.size > 1 else 1.0
+            ax_td_ifo = axes[1, idx]
+            if data_psd is not None:
+                whitened_data = _whiten_frequency_series(data_fd, noise_psd, df)
+                ax_td_ifo.plot(time_array, whitened_data, color="tab:blue", alpha=0.6, label="Whitened data")
+            if posterior_samples is not None and waveform_fn is not None:
+                whitened_draws = []
+                for i in draw_idx[: min(50, len(draw_idx))]:
+                    params = {k: float(posterior_samples[k][i]) for k in param_names}
+                    params.update(fixed_params or {})
+                    wf = np.asarray(waveform_fn._time_domain_waveform(params))
+                    wf_fft = np.fft.rfft(wf)
+                    whitened_draws.append(_whiten_frequency_series(wf_fft, noise_psd, df))
+                whitened_draws = np.stack(whitened_draws, axis=0)
+                lower_w = np.percentile(whitened_draws, ci[0], axis=0)
+                upper_w = np.percentile(whitened_draws, ci[1], axis=0)
+                ax_td_ifo.fill_between(time_array, lower_w, upper_w,
+                                       color="tab:orange", alpha=0.2, label=f"{ci[0]}–{ci[1]}% CI")
+            ax_td_ifo.set_title(f"{getattr(ifo, 'name', f'IFO {idx}') } whitened data")
+            ax_td_ifo.set_xlabel("Time [s]")
+            ax_td_ifo.set_ylabel("Whitened strain")
+            ax_td_ifo.grid(True, alpha=0.3)
+            ax_td_ifo.legend(frameon=False)
 
     fig.tight_layout()
     fig.savefig(outpath, dpi=150)
