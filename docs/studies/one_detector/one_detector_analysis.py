@@ -41,6 +41,7 @@ DURATION = 4.0
 N_LATENTS = 32
 REFERENCE_DIST = 10.0
 REFERENCE_SCALE = 1e-21
+BASE_WF_LEN = len(StarccatoCCSNe().generate(z=np.zeros((1, N_LATENTS)))[0])
 
 STARCCATO_SIGNAL = StarccatoCCSNe()
 STARCCATO_GLITCH = StarccatoBlip()
@@ -81,8 +82,13 @@ def gen_waveform(latents: np.ndarray, amp: float = 1.0, distance: float = 7.0, m
     return wf * amp * REFERENCE_SCALE * (REFERENCE_DIST / distance)
 
 
-def inject_signal_into_data(raw_data: np.ndarray, kind: str, snr: float, fs: float, sos):
-    """Inject Starccato signal/glitch with a target optimal SNR in analysis band."""
+def inject_signal_into_data(raw_data: np.ndarray, kind: str, target_snr: float, fs: float, sos):
+    """
+    Inject Starccato signal/glitch with a target optimal SNR in the analysis band.
+
+    We compute a reference optimal SNR for the base waveform using the Welch PSD
+    of the local segment, then scale to the desired target SNR.
+    """
     z = np.zeros(N_LATENTS)
     model = STARCCATO_SIGNAL if kind == "signal" else STARCCATO_GLITCH
     wf0 = gen_waveform(z, model=model)
@@ -112,12 +118,30 @@ def inject_signal_into_data(raw_data: np.ndarray, kind: str, snr: float, fs: flo
         right=psd_full_local[-1],
     )
     rho2 = np.sum(np.abs(Hk_scaled[mask_local]) ** 2 / S_k_local)
-    rho = np.sqrt(max(rho2, 1e-30))
+    rho_ref = np.sqrt(max(rho2, 1e-30))
 
-    scale = snr / rho
+    scale = target_snr / rho_ref
     wf_scaled = sosfilt(sos, wf0) * scale
     injected = data_crop + wf_scaled
-    return injected, wf_scaled
+    # Report achieved SNR with the same PSD/mask
+    Hk_scaled_target = np.fft.rfft(wf_scaled * win_local) / C_local
+    rho2_target = np.sum(np.abs(Hk_scaled_target[mask_local]) ** 2 / S_k_local)
+    rho_target = np.sqrt(max(rho2_target, 1e-30))
+    return injected, wf_scaled, rho_target
+
+
+def _center_crop_or_pad(x: np.ndarray, length: int) -> np.ndarray:
+    """Center-crop or zero-pad 1D array to the desired length."""
+    n = len(x)
+    if n == length:
+        return x
+    if n > length:
+        start = (n - length) // 2
+        return x[start : start + length]
+    pad = np.zeros(length, dtype=x.dtype)
+    start = (length - n) // 2
+    pad[start : start + n] = x
+    return pad
 
 
 def initial_plot(time, data_vis, fs, detector, outdir):
@@ -145,10 +169,13 @@ def initial_plot(time, data_vis, fs, detector, outdir):
 # ----------------------------------------------------------------------
 # Whittle helpers
 # ----------------------------------------------------------------------
-def build_whittle_context(data_win, injected_wf, fs):
-    N = len(data_win)
+def build_whittle_context(data_ts, injected_wf, fs, analysis_len):
+    data_ts = _center_crop_or_pad(np.asarray(data_ts), analysis_len)
+    injected_wf = _center_crop_or_pad(np.asarray(injected_wf), analysis_len)
+
+    N = analysis_len
     win = tukey(N, 0.1)
-    data_win = data_win * win
+    data_win = data_ts * win
 
     freqs_full, psd_full = welch(data_win, fs=fs, nperseg=256)
     mask_welch = band_mask(freqs_full, BAND)
@@ -194,6 +221,7 @@ def build_whittle_context(data_win, injected_wf, fs):
         "time_used": np.arange(N) / fs,
         "data_win": data_win,
         "injected_wf": injected_wf,
+        "data_ts": data_ts,
     }
 
 
@@ -201,6 +229,18 @@ def rfft_model_waveform_scaled(z, amp, which, ctx):
     model = STARCCATO_SIGNAL if which == "signal" else STARCCATO_GLITCH
     wf = model.generate(z=z[None, :])[0]
     wf = wf * amp * REFERENCE_SCALE * (REFERENCE_DIST / 7.0)
+
+    # Center-pad/crop waveform to the data length used in the likelihood.
+    N = ctx["N"]
+    L = wf.shape[0]
+    if L >= N:
+        wf = wf[:N]
+    else:
+        pad = jnp.zeros(N, dtype=wf.dtype)
+        start = (N - L) // 2
+        pad = pad.at[start : start + L].set(wf)
+        wf = pad
+
     wf = wf * jnp.array(ctx["win"])
     Hf = jnp.fft.rfft(wf) / ctx["C"]
     return Hf[ctx["mask_r"]]
@@ -425,7 +465,7 @@ def plot_summary(time, data_ts, injected_ts, freqs, psd, posterior_sig_ts, poste
 # ----------------------------------------------------------------------
 # Main flow
 # ----------------------------------------------------------------------
-def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_kind=INJECT_KIND, seed=0):
+def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_kind=INJECT_KIND, seed=0, snr=100.0, snr_min=None, snr_max=None):
     outdir = OUTROOT / f"{int(trigger_time)}_{inject_kind}"
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -440,13 +480,22 @@ def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_ki
     data_vis = sosfilt(sos, data)
     initial_plot(time, data_vis, fs, detector, outdir)
 
+    snr_target = None
     if inject_kind == "noise":
         data_used = data_vis.copy()
         injected_wf = np.zeros_like(data_used)
+        snr_injected = None
     else:
-        data_used, injected_wf = inject_signal_into_data(data_vis, inject_kind, SNR_INJECTION, fs, sos)
+        if snr_min is not None and snr_max is not None and snr_max > snr_min:
+            snr_target = float(jax.random.uniform(rng_master, (), minval=snr_min, maxval=snr_max))
+        else:
+            snr_target = snr
+        data_used, injected_wf, snr_injected = inject_signal_into_data(data_vis, inject_kind, snr_target, fs, sos)
 
-    ctx = build_whittle_context(data_used, injected_wf, fs)
+    analysis_len = min(len(data_used), len(injected_wf)) if inject_kind != "noise" else min(len(data_used), BASE_WF_LEN)
+    if analysis_len <= 0:
+        analysis_len = BASE_WF_LEN
+    ctx = build_whittle_context(data_used, injected_wf, fs, analysis_len)
 
     rng_sig, rng_gli = jax.random.split(rng_master)
     model_sig = make_whittle_model("signal", ctx)
@@ -476,13 +525,15 @@ def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_ki
 
     snr_mf = matched_filter_snr(res_sig, ll_sig, ctx)
     print(f"Matched-filter SNR (data|MAP signal) ≈ {snr_mf:.2f}")
+    if snr_injected is not None and snr_target is not None:
+        print(f"Target injection SNR ≈ {snr_target:.2f}; achieved ≈ {snr_injected:.2f}")
 
     ts_sig = posterior_draw_time_series(res_sig, ctx, "signal", n_draws=20)
     ts_gli = posterior_draw_time_series(res_gli, ctx, "glitch", n_draws=20)
 
     fig_pre = plot_summary(
         ctx["time_used"],
-        ctx["data_win"],
+        ctx["data_ts"],
         ctx["injected_wf"],
         ctx["freqs_plot"],
         ctx["psd_plot"],
@@ -501,7 +552,7 @@ def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_ki
 
     fig_post = plot_summary(
         ctx["time_used"],
-        ctx["data_win"],
+        ctx["data_ts"],
         ctx["injected_wf"],
         ctx["freqs_plot"],
         ctx["psd_plot"],
@@ -533,9 +584,11 @@ def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_ki
     # Save metrics
     metrics_path = outdir / "metrics.csv"
     with open(metrics_path, "w", encoding="utf-8") as f:
-        f.write("detector,gps,inject,seed,lnz_noise,lnz_signal,lnz_signal_err,lnz_glitch,lnz_glitch_err,logBF_sig_alt,snr_mf\n")
+        f.write("detector,gps,inject,seed,target_snr,achieved_snr,lnz_noise,lnz_signal,lnz_signal_err,lnz_glitch,lnz_glitch_err,logBF_sig_alt,snr_mf\n")
         f.write(
             f"{detector},{trigger_time},{inject_kind},{seed},"
+            f"{snr_target if inject_kind!='noise' else ''},"
+            f"{snr_injected if snr_injected is not None else ''},"
             f"{lnz_noise:.6f},{lnz_sig_morph:.6f},{lnz_sig_err:.6f},"
             f"{lnz_gli_morph:.6f},{lnz_gli_err:.6f},"
             f"{float(logBF_sig_alt):.6f},{snr_mf:.6f}\n"
@@ -550,6 +603,9 @@ if __name__ == "__main__":
     parser.add_argument("--gps", type=float, default=DEFAULT_TRIGGER_TIME, help="GPS start time")
     parser.add_argument("--inject", choices=["signal", "glitch", "noise"], default=INJECT_KIND, help="Injection kind")
     parser.add_argument("--seed", type=int, default=0, help="Random seed")
+    parser.add_argument("--snr", type=float, default=SNR_INJECTION, help="Target injection SNR (used if no range)")
+    parser.add_argument("--snr-min", type=float, default=None, help="Min SNR (if set with --snr-max, sample uniform)")
+    parser.add_argument("--snr-max", type=float, default=None, help="Max SNR (if set with --snr-min, sample uniform)")
     args = parser.parse_args()
 
     main(
@@ -557,4 +613,7 @@ if __name__ == "__main__":
         trigger_time=args.gps,
         inject_kind=args.inject,
         seed=args.seed,
+        snr=args.snr,
+        snr_min=args.snr_min,
+        snr_max=args.snr_max,
     )

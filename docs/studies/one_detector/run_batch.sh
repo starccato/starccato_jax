@@ -8,7 +8,7 @@ GPS_LIST=(
 )
 # To run 100 sequential GPS offsets, replace GPS_LIST above with e.g.:
 # GPS_LIST=($(seq 1186741733 4 $((1186741733 + 4*99))))
-INJECT_LIST=(signal glitch noise)
+INJECT_LIST=(noise signal glitch)
 DETECTOR="H1"
 
 # Optional: set seeds per run. If empty, uses loop index.
