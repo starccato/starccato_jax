@@ -8,6 +8,9 @@ __pycache__/
 *.dat
 *.pdf
 *.json
+cache/
+out/
+outdir/
 datasets
 
 *.zip
