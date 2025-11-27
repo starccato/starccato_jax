@@ -2,12 +2,13 @@
 set -euo pipefail
 
 # Configure runs here.
-GPS_LIST=(
-  1186741733
-  1186741737
-)
+# GPS_LIST=(
+#   1368350730
+#   1186741733
+#   1186741737
+# )
 # To run 100 sequential GPS offsets, replace GPS_LIST above with e.g.:
-# GPS_LIST=($(seq 1186741733 4 $((1186741733 + 4*99))))
+GPS_LIST=($(seq 1186741733 4 $((1186741733 + 4*5000))))
 INJECT_LIST=(noise signal glitch)
 DETECTOR="H1"
 
@@ -21,8 +22,11 @@ run_idx=0
 for gps in "${GPS_LIST[@]}"; do
   for inject in "${INJECT_LIST[@]}"; do
     seed="${SEEDS[$run_idx]:-$run_idx}"
+    echo ""
     echo ">>> Running detector=${DETECTOR} gps=${gps} inject=${inject} seed=${seed}"
-    python "${ANALYSIS_PY}" --detector "${DETECTOR}" --gps "${gps}" --inject "${inject}" --seed "${seed}"
+    python "${ANALYSIS_PY}" --detector "${DETECTOR}" --gps "${gps}" --inject "${inject}" --seed "${seed}" 
+    echo ">>> DONE <<<"
+    echo ""
     ((run_idx++))
   done
 done

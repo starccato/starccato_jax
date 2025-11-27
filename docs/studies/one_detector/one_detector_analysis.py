@@ -57,7 +57,27 @@ def band_mask(f: np.ndarray, band: tuple[float, float]) -> np.ndarray:
     return (f >= band[0]) & (f <= band[1])
 
 
-def fetch_strain(detector, trigger_time, duration, sample_rate):
+def fetch_strain(detector, trigger_time, duration, sample_rate, bulk_file=None):
+    if bulk_file is not None:
+        bulk_path = Path(bulk_file).expanduser().resolve()
+        if bulk_path.exists():
+            print(f"Loading bulk data from {bulk_path} (will crop to requested segment)...")
+            # Try common GWOSC HDF5 paths
+            path_options = ["strain/Strain", "Strain", None]
+            last_err = None
+            for path_opt in path_options:
+                try:
+                    if path_opt is None:
+                        strain_bulk = TimeSeries.read(bulk_path)
+                    else:
+                        strain_bulk = TimeSeries.read(bulk_path, path=path_opt)
+                    return strain_bulk.crop(trigger_time, trigger_time + duration)
+                except Exception as e:  # pragma: no cover
+                    last_err = e
+            print(f"Bulk read failed for known paths; falling back to cached fetch. Last error: {last_err}")
+        else:
+            print(f"Bulk file {bulk_path} not found. Falling back to cached fetch.")
+
     cache_file = CACHE_DIR / f"{detector}_{trigger_time}_{duration}s_{int(sample_rate)}Hz.hdf5"
     if cache_file.exists():
         print(f"Loading cached data from {cache_file}...")
@@ -328,6 +348,23 @@ def matched_filter_snr(samples, ll_total, ctx):
     return snr
 
 
+def matched_filter_snr_glitch(samples, ll_total, ctx):
+    log_post_vals = log_prior_samples(samples) + np.array(ll_total)
+    idx = int(np.argmax(log_post_vals))
+    amp = float(samples["amp"][idx])
+    z = np.array(samples["z"][idx])
+    Hk = np.array(rfft_model_waveform_scaled(z, amp, "glitch", ctx))
+    num = np.sum(np.conj(Hk) * ctx["D_k"] / ctx["S_k"])
+    den = np.sum(np.abs(Hk) ** 2 / ctx["S_k"])
+    snr = float(np.real(num) / np.sqrt(max(den, 1e-30)))
+    return snr
+
+
+def excess_power_snr(ctx):
+    """cWB-like excess power SNR using the Whittle band."""
+    return float(np.sqrt(np.sum(np.abs(ctx["D_k"]) ** 2 / ctx["S_k"])))
+
+
 def run_model(model_fn, y, name, rng_key):
     nuts = NUTS(model_fn)
     mcmc = MCMC(nuts, num_warmup=2000, num_samples=2000)
@@ -465,13 +502,13 @@ def plot_summary(time, data_ts, injected_ts, freqs, psd, posterior_sig_ts, poste
 # ----------------------------------------------------------------------
 # Main flow
 # ----------------------------------------------------------------------
-def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_kind=INJECT_KIND, seed=0, snr=100.0, snr_min=None, snr_max=None):
+def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_kind=INJECT_KIND, seed=0, snr=100.0, snr_min=None, snr_max=None, bulk_file=None):
     outdir = OUTROOT / f"{int(trigger_time)}_{inject_kind}"
     outdir.mkdir(parents=True, exist_ok=True)
 
     rng_master = jax.random.PRNGKey(seed)
 
-    strain = fetch_strain(detector, trigger_time, DURATION, SAMPLE_RATE)
+    strain = fetch_strain(detector, trigger_time, DURATION, SAMPLE_RATE, bulk_file=bulk_file)
     data = strain.value
     time = strain.times.value
     fs = strain.sample_rate.value
@@ -523,8 +560,12 @@ def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_ki
     print(f"log BF(signal | glitch/noise) ≈ {float(logBF_sig_alt):.2f}")
     print(f"Posterior probs (equal model priors): P(sig)={p_sig:.3f}, P(gli)={p_gli:.3f}, P(noise)={p_noise:.3f}")
 
-    snr_mf = matched_filter_snr(res_sig, ll_sig, ctx)
-    print(f"Matched-filter SNR (data|MAP signal) ≈ {snr_mf:.2f}")
+    snr_mf_sig = matched_filter_snr(res_sig, ll_sig, ctx)
+    snr_mf_gli = matched_filter_snr_glitch(res_gli, ll_gli, ctx)
+    snr_excess = excess_power_snr(ctx)
+    print(f"Matched-filter SNR (data|MAP signal) ≈ {snr_mf_sig:.2f}")
+    print(f"Matched-filter SNR (data|MAP glitch) ≈ {snr_mf_gli:.2f}")
+    print(f"Excess-power SNR (Whittle band) ≈ {snr_excess:.2f}")
     if snr_injected is not None and snr_target is not None:
         print(f"Target injection SNR ≈ {snr_target:.2f}; achieved ≈ {snr_injected:.2f}")
 
@@ -584,14 +625,14 @@ def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_ki
     # Save metrics
     metrics_path = outdir / "metrics.csv"
     with open(metrics_path, "w", encoding="utf-8") as f:
-        f.write("detector,gps,inject,seed,target_snr,achieved_snr,lnz_noise,lnz_signal,lnz_signal_err,lnz_glitch,lnz_glitch_err,logBF_sig_alt,snr_mf\n")
+        f.write("detector,gps,inject,seed,target_snr,achieved_snr,lnz_noise,lnz_signal,lnz_signal_err,lnz_glitch,lnz_glitch_err,logBF_sig_alt,snr_mf_sig,snr_mf_glitch,snr_excess\n")
         f.write(
             f"{detector},{trigger_time},{inject_kind},{seed},"
             f"{snr_target if inject_kind!='noise' else ''},"
             f"{snr_injected if snr_injected is not None else ''},"
             f"{lnz_noise:.6f},{lnz_sig_morph:.6f},{lnz_sig_err:.6f},"
             f"{lnz_gli_morph:.6f},{lnz_gli_err:.6f},"
-            f"{float(logBF_sig_alt):.6f},{snr_mf:.6f}\n"
+            f"{float(logBF_sig_alt):.6f},{snr_mf_sig:.6f},{snr_mf_gli:.6f},{snr_excess:.6f}\n"
         )
 
 
@@ -606,6 +647,7 @@ if __name__ == "__main__":
     parser.add_argument("--snr", type=float, default=SNR_INJECTION, help="Target injection SNR (used if no range)")
     parser.add_argument("--snr-min", type=float, default=None, help="Min SNR (if set with --snr-max, sample uniform)")
     parser.add_argument("--snr-max", type=float, default=None, help="Max SNR (if set with --snr-min, sample uniform)")
+    parser.add_argument("--bulk-file", type=str, default=None, help="Optional pre-downloaded bulk HDF5 to crop from")
     args = parser.parse_args()
 
     main(
@@ -616,4 +658,5 @@ if __name__ == "__main__":
         snr=args.snr,
         snr_min=args.snr_min,
         snr_max=args.snr_max,
+        bulk_file=args.bulk_file,
     )
