@@ -7,6 +7,7 @@ __pycache__/
 # C extensions
 *.dat
 *.pdf
+out_known_psd/
 *.json
 cache/
 out/

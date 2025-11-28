@@ -17,6 +17,7 @@ class Config:
     beta_end: float = 1.0
     train_fraction: float = 0.8
     dataset: str = "ccsne"
+    data_dim: int | None = None
 
     def __repr__(self):
         return (
@@ -26,7 +27,8 @@ class Config:
             f"epochs={self.epochs}, "
             f"batch_size={self.batch_size}, "
             f"cyclical_annealing_cycles={self.cyclical_annealing_cycles}, "
-            f"source={self.dataset} "
+            f"source={self.dataset}, "
+            f"data_dim={self.data_dim}"
             ")"
         )
 
@@ -41,6 +43,15 @@ class Config:
         self.data = TrainValData.load(
             train_fraction=self.train_fraction, source=self.dataset
         )
+
+        # capture the input/output dimensionality for downstream use
+        inferred_dim = self.data.train.shape[-1]
+        if self.data_dim is not None and self.data_dim != inferred_dim:
+            raise ValueError(
+                f"Provided data_dim={self.data_dim} does not match dataset "
+                f"dimension {inferred_dim}."
+            )
+        self.data_dim = inferred_dim
 
         self._batch_size_check()
 

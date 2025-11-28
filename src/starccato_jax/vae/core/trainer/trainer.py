@@ -49,7 +49,7 @@ def _create_train_state(
     data_len: int,
     learning_rate: float,
 ) -> Tuple[train_state.TrainState, VAE]:
-    model = VAE(latent_dim)
+    model = VAE(latent_dim, data_dim=data_len)
     # Initialize the model with dummy data of shape (1, DATA_LEN)
     params = model.init(rng, jnp.ones((1, data_len)), rng)["params"]
     tx = optax.adam(learning_rate)
@@ -92,7 +92,9 @@ def train_vae(
                 epoch_grads.append(_compute_norms_for_tree(batch_grad))
 
         model_data = ModelData(
-            params=state.params, latent_dim=config.latent_dim
+            params=state.params,
+            latent_dim=config.latent_dim,
+            data_dim=data_len,
         )
 
         metrics.append(
@@ -127,7 +129,9 @@ def train_vae(
             )
             progress_bar.set_description("Training")
 
-    model_data = ModelData(params=state.params, latent_dim=config.latent_dim)
+    model_data = ModelData(
+        params=state.params, latent_dim=config.latent_dim, data_dim=data_len
+    )
     save_training_plots(
         model_data, metrics, save_dir, data, rng=rng, epoch=config.epochs
     )

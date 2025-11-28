@@ -78,7 +78,7 @@ def load_model(savedir: str, model_fname: str = MODEL_FNAME) -> ModelData:
         # Load config: Read JSON string and convert back to dictionary
         config = Config(**json.loads(f["config"][()].decode("utf-8")))
 
-    return ModelData(params, config.latent_dim)
+    return ModelData(params, config.latent_dim, config.data_dim)
 
 
 def load_loss_h5(fname: str) -> TrainValMetrics:

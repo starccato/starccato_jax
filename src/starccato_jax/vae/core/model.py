@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from typing import Dict, Tuple
+from typing import Tuple
 
 import jax
 import jax.numpy as jnp
@@ -30,11 +29,13 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     """VAE Decoder."""
 
+    output_dim: int
+
     @nn.compact
     def __call__(self, z: jnp.ndarray) -> jnp.ndarray:
         z = nn.Dense(64, name="fc1")(z)
         z = nn.relu(z)
-        z = nn.Dense(512, name="fc2")(z)
+        z = nn.Dense(self.output_dim, name="fc2")(z)
         return z
 
 
@@ -42,12 +43,20 @@ class VAE(nn.Module):
     """Full VAE model."""
 
     latents: int = 20
+    data_dim: int | None = None
 
     def setup(self):
+        if self.data_dim is None:
+            raise ValueError("VAE requires data_dim to be set.")
         self.encoder = Encoder(self.latents)
-        self.decoder = Decoder()
+        self.decoder = Decoder(self.data_dim)
 
     def __call__(self, x: jnp.ndarray, rng: PRNGKey):
+        if x.shape[-1] != self.data_dim:
+            raise ValueError(
+                f"Input dimension {x.shape[-1]} does not match configured "
+                f"data_dim={self.data_dim}."
+            )
         mean, logvar = self.encoder(x)
         z = _reparameterize(rng, mean, logvar)
         recon_x = self.decoder(z)
@@ -82,7 +91,7 @@ def generate(
     model: VAE = None,
 ) -> jnp.ndarray:
     if model is None:
-        model = VAE(model_data.latent_dim)
+        model = VAE(model_data.latent_dim, data_dim=model_data.data_dim)
 
     return model.apply({"params": model_data.params}, z, method=model.generate)
 
@@ -107,7 +116,7 @@ def encode(
     """
     rng = rng if rng is not None else PRNGKey(0)
     if model is None:
-        model = VAE(model_data.latent_dim)
+        model = VAE(model_data.latent_dim, data_dim=model_data.data_dim)
 
     z = model.apply({"params": model_data.params}, x, rng, method=model.encode)
     return z
@@ -128,6 +137,6 @@ def reconstruct(
         x = jnp.repeat(x[None, :], n_reps, axis=0)
 
     if model is None:
-        model = VAE(model_data.latent_dim)
+        model = VAE(model_data.latent_dim, data_dim=model_data.data_dim)
 
     return model.apply({"params": model_data.params}, x, rng)[0]

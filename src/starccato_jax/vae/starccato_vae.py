@@ -34,7 +34,9 @@ class StarccatoVAE(StarccatoModel):
             model_dir = model_dir.replace("default_", "")
             self.model_dir = get_default_weights_dir(model_dir)
         self._data: ModelData = load_model(self.model_dir)
-        self._model: VAE = VAE(latents=self.latent_dim)
+        self._model: VAE = VAE(
+            latents=self.latent_dim, data_dim=self.data_dim
+        )
 
     def __repr__(self):
         return f"StarccatoVAE(z-dim={self.latent_dim})"
@@ -42,6 +44,10 @@ class StarccatoVAE(StarccatoModel):
     @property
     def latent_dim(self) -> int:
         return self._data.latent_dim
+
+    @property
+    def data_dim(self) -> int:
+        return self._data.data_dim
 
     @classmethod
     def train(
@@ -147,4 +153,4 @@ class StarccatoVAE(StarccatoModel):
     @property
     def model_structure(self) -> str:
         rng = jax.random.PRNGKey(0)
-        return self._model.tabulate(rng, jnp.zeros(512), rng)
+        return self._model.tabulate(rng, jnp.zeros(self.data_dim), rng)

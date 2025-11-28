@@ -11,6 +11,7 @@ from jax import Array
 class ModelData:
     params: Dict
     latent_dim: int
+    data_dim: int
 
 
 @dataclass

@@ -381,9 +381,9 @@ def excess_power_snr(ctx):
     return float(np.sqrt(np.sum(np.abs(ctx["D_k"]) ** 2 / ctx["S_k"])))
 
 
-def run_model(model_fn, y, name, rng_key):
+def run_model(model_fn, y, name, rng_key, num_warmup=500, num_samples=500):
     nuts = NUTS(model_fn)
-    mcmc = MCMC(nuts, num_warmup=2000, num_samples=2000)
+    mcmc = MCMC(nuts, num_warmup=num_warmup, num_samples=num_samples)
     mcmc.run(rng_key, y=y)
     samples = mcmc.get_samples()
     ll = log_likelihood(model_fn, samples, y=y)["y"]

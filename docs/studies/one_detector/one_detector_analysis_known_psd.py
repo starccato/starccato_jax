@@ -85,19 +85,6 @@ def simulate_noise(psd_f, psd_vals, n, fs, rng):
     return noise
 
 
-def _center_crop_or_pad(x: np.ndarray, length: int) -> np.ndarray:
-    n = len(x)
-    if n == length:
-        return x
-    if n > length:
-        start = (n - length) // 2
-        return x[start : start + length]
-    pad = np.zeros(length, dtype=x.dtype)
-    start = (length - n) // 2
-    pad[start : start + n] = x
-    return pad
-
-
 def rfft_model_waveform_scaled(z, amp, which, ctx):
     model = STARCCATO_SIGNAL if which == "signal" else STARCCATO_GLITCH
     wf = model.generate(z=z[None, :])[0]
@@ -194,7 +181,7 @@ def inject_signal(psd_f, psd_vals, kind, target_snr, fs, rng):
     z = np.zeros(N_LATENTS)
     model = STARCCATO_SIGNAL if kind == "signal" else STARCCATO_GLITCH
     wf0 = np.array(model.generate(z=z[None, :])[0], dtype=np.float64)
-    wf0 = _center_crop_or_pad(wf0, BASE_WF_LEN)
+    wf0 = wf0[:BASE_WF_LEN]
     win = tukey(len(wf0), 0.1)
     wf_win = wf0 * win
     hf = np.fft.rfft(wf_win) * (1.0 / fs)
@@ -209,8 +196,8 @@ def inject_signal(psd_f, psd_vals, kind, target_snr, fs, rng):
 
 
 def build_context(data_ts, injected_wf, psd_f, psd_vals, fs, analysis_len):
-    data_seg = _center_crop_or_pad(data_ts[-analysis_len:], analysis_len)
-    inj_seg = _center_crop_or_pad(injected_wf[-analysis_len:], analysis_len)
+    data_seg = data_ts[-analysis_len:]
+    inj_seg = injected_wf[-analysis_len:]
     win = tukey(analysis_len, 0.1)
     data_win = data_seg * win
 
@@ -261,9 +248,9 @@ def build_context(data_ts, injected_wf, psd_f, psd_vals, fs, analysis_len):
     }
 
 
-def run_model(model_fn, y, rng_key):
+def run_model(model_fn, y, rng_key, num_warmup=500, num_samples=500):
     nuts = NUTS(model_fn)
-    mcmc = MCMC(nuts, num_warmup=2000, num_samples=2000)
+    mcmc = MCMC(nuts, num_warmup=num_warmup, num_samples=num_samples)
     mcmc.run(rng_key, y=y)
     samples = mcmc.get_samples()
     ll = log_likelihood(model_fn, samples, y=y)["y"]
