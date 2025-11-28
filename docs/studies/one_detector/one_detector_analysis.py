@@ -20,7 +20,6 @@ from numpyro.infer import MCMC, NUTS, log_likelihood
 from starccato_jax.waveforms import StarccatoCCSNe, StarccatoBlip
 from morphZ import evidence as morph_evidence
 from pathlib import Path
-
 jax.config.update("jax_enable_x64", True)
 
 # ----------------------------------------------------------------------
@@ -42,6 +41,8 @@ N_LATENTS = 32
 REFERENCE_DIST = 10.0
 REFERENCE_SCALE = 1e-21
 BASE_WF_LEN = len(StarccatoCCSNe().generate(z=np.zeros((1, N_LATENTS)))[0])
+AMP_LOGMEAN = -30.756  # calibrated to map base SNR q5->3, q95->100
+AMP_LOGSIGMA = 0.932
 
 STARCCATO_SIGNAL = StarccatoCCSNe()
 STARCCATO_GLITCH = StarccatoBlip()
@@ -107,7 +108,8 @@ def inject_signal_into_data(raw_data: np.ndarray, kind: str, target_snr: float, 
     Inject Starccato signal/glitch with a target optimal SNR in the analysis band.
 
     We compute a reference optimal SNR for the base waveform using the Welch PSD
-    of the local segment, then scale to the desired target SNR.
+    of the *off-source* portion (excluding the tail where we inject), then scale to
+    the desired target SNR. Injection is placed at the end of the segment.
     """
     z = np.zeros(N_LATENTS)
     model = STARCCATO_SIGNAL if kind == "signal" else STARCCATO_GLITCH
@@ -115,12 +117,16 @@ def inject_signal_into_data(raw_data: np.ndarray, kind: str, target_snr: float, 
 
     N_wf = min(len(wf0), len(raw_data))
     wf0 = wf0[:N_wf]
-    start = (len(raw_data) - N_wf) // 2
+    start = len(raw_data) - N_wf  # inject at the end
     data_crop = raw_data[start : start + N_wf]
 
+    # Off-source portion excludes the injection tail
+    data_off = raw_data[: start] if start > 0 else raw_data
+
     win_local = tukey(N_wf, 0.1)
-    data_crop_win = data_crop * win_local
-    freqs_full_local, psd_full_local = welch(data_crop_win, fs=fs, nperseg=256)
+    data_off_win = data_off * tukey(len(data_off), 0.1) if len(data_off) > 0 else data_off
+    nper = 512 if len(data_off) >= 512 else max(len(data_off), 256)
+    freqs_full_local, psd_full_local = welch(data_off_win, fs=fs, nperseg=nper)
 
     U_local = np.mean(win_local**2)
     C_local = np.sqrt(fs * (N_wf * U_local) / 2.0)
@@ -190,21 +196,31 @@ def initial_plot(time, data_vis, fs, detector, outdir):
 # Whittle helpers
 # ----------------------------------------------------------------------
 def build_whittle_context(data_ts, injected_wf, fs, analysis_len):
-    data_ts = _center_crop_or_pad(np.asarray(data_ts), analysis_len)
-    injected_wf = _center_crop_or_pad(np.asarray(injected_wf), analysis_len)
+    data_ts = np.asarray(data_ts)
+    injected_wf = np.asarray(injected_wf)
+    # Analysis window: tail (to include injected signal)
+    data_seg = _center_crop_or_pad(data_ts[-analysis_len:], analysis_len)
+    inj_seg = _center_crop_or_pad(injected_wf[-analysis_len:], analysis_len)
 
     N = analysis_len
     win = tukey(N, 0.1)
-    data_win = data_ts * win
+    data_win = data_seg * win
 
-    freqs_full, psd_full = welch(data_win, fs=fs, nperseg=256)
+    # Off-source PSD using all but the tail segment, 50% overlap
+    data_off = data_ts[:-analysis_len] if len(data_ts) > analysis_len else data_ts
+    data_off_win = data_off * tukey(len(data_off), 0.1) if len(data_off) > 0 else data_off
+    nper = min(512, len(data_off)) if len(data_off) > 0 else 256
+    nper = max(nper, 8)
+    nover = int(0.5 * nper)
+    freqs_full, psd_full = welch(data_off_win, fs=fs, nperseg=nper, noverlap=nover)
+
     mask_welch = band_mask(freqs_full, BAND)
     freqs_plot, psd_plot = freqs_full[mask_welch], psd_full[mask_welch]
 
     f_data, Pxx_data = periodogram(data_win, fs=fs)
     mask_data = band_mask(f_data, BAND)
 
-    f_sig, Pxx_sig = periodogram(injected_wf, fs=fs)
+    f_sig, Pxx_sig = periodogram(inj_seg, fs=fs)
     mask_sig = band_mask(f_sig, BAND)
 
     U = np.mean(win**2)
@@ -268,7 +284,7 @@ def rfft_model_waveform_scaled(z, amp, which, ctx):
 
 def make_whittle_model(which, ctx):
     def model(y=None):
-        amp = numpyro.sample("amp", dist.LogNormal(0.0, 0.5))
+        amp = numpyro.sample("amp", dist.LogNormal(AMP_LOGMEAN, AMP_LOGSIGMA))
         z = numpyro.sample("z", dist.Normal(0, 1).expand([N_LATENTS]))
         Hk = rfft_model_waveform_scaled(z, amp, which, ctx)
         mu = jnp.stack([jnp.real(Hk), jnp.imag(Hk)], axis=-1)
@@ -282,7 +298,7 @@ def make_whittle_model(which, ctx):
 
 
 def _log_prior(amp, z):
-    lp_amp = dist.LogNormal(0.0, 0.5).log_prob(amp)
+    lp_amp = dist.LogNormal(AMP_LOGMEAN, AMP_LOGSIGMA).log_prob(amp)
     lp_z = jnp.sum(dist.Normal(0, 1).log_prob(z))
     return lp_amp + lp_z
 
@@ -306,7 +322,7 @@ def log_posterior_whittle(theta_vec, which, ctx):
 def log_prior_samples(samples):
     amp = jnp.asarray(samples["amp"])
     z = jnp.asarray(samples["z"])
-    lp_amp = dist.LogNormal(0.0, 0.5).log_prob(amp)
+    lp_amp = dist.LogNormal(AMP_LOGMEAN, AMP_LOGSIGMA).log_prob(amp)
     lp_z = jnp.sum(dist.Normal(0, 1).log_prob(z), axis=1)
     return np.array(lp_amp + lp_z)
 
