@@ -18,11 +18,14 @@ class Encoder(nn.Module):
 
     @nn.compact
     def __call__(self, x: jnp.ndarray) -> Tuple[float, float]:
-        x = nn.Dense(1024, name="fc1")(x)
-        x = nn.relu(x)
-        x = nn.Dense(64, name="fc2")(x)
-        mean_x = nn.Dense(self.latents, name="fc2_mean")(x)
-        logvar_x = nn.Dense(self.latents, name="fc2_logvar")(x)
+        x = nn.Dense(256, name="fc1")(x)
+        x = nn.leaky_relu(x, negative_slope=0.01)
+        x = nn.Dense(128, name="fc2")(x)
+        x = nn.leaky_relu(x, negative_slope=0.01)
+        x = nn.Dense(64, name="fc3")(x)
+        x = nn.leaky_relu(x, negative_slope=0.01)
+        mean_x = nn.Dense(self.latents, name="fc3_mean")(x)
+        logvar_x = nn.Dense(self.latents, name="fc3_logvar")(x)
         return mean_x, logvar_x
 
 
@@ -30,19 +33,23 @@ class Decoder(nn.Module):
     """VAE Decoder."""
 
     output_dim: int
-
+    
     @nn.compact
     def __call__(self, z: jnp.ndarray) -> jnp.ndarray:
         z = nn.Dense(64, name="fc1")(z)
-        z = nn.relu(z)
-        z = nn.Dense(self.output_dim, name="fc2")(z)
+        z = nn.leaky_relu(z, negative_slope=0.01)
+        z = nn.Dense(128, name="fc2")(z)
+        z = nn.leaky_relu(z, negative_slope=0.01)
+        z = nn.Dense(256, name="fc3")(z)
+        z = nn.leaky_relu(z, negative_slope=0.01)
+        z = nn.Dense(self.output_dim, name="fc4")(z)
         return z
 
 
 class VAE(nn.Module):
     """Full VAE model."""
 
-    latents: int = 20
+    latents: int = 32
     data_dim: int | None = None
 
     def setup(self):
