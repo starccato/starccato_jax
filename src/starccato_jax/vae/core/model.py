@@ -33,6 +33,8 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     """VAE Decoder."""
 
+    output_dim: int
+    
     @nn.compact
     def __call__(self, z: jnp.ndarray) -> jnp.ndarray:
         z = nn.Dense(64, name="fc1")(z)
@@ -49,10 +51,11 @@ class VAE(nn.Module):
     """Full VAE model."""
 
     latents: int = 32
+    output_dim: int = 512
 
     def setup(self):
         self.encoder = Encoder(self.latents)
-        self.decoder = Decoder()
+        self.decoder = Decoder(self.output_dim)
 
     def __call__(self, x: jnp.ndarray, rng: PRNGKey):
         mean, logvar = self.encoder(x)
