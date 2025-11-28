@@ -24,6 +24,7 @@ class Encoder(nn.Module):
         x = nn.Dense(128, name="fc2")(x)
         x = nn.leaky_relu(x, negative_slope=0.01)
         x = nn.Dense(64, name="fc3")(x)
+        x = nn.leaky_relu(x, negative_slope=0.01)
         mean_x = nn.Dense(self.latents, name="fc3_mean")(x)
         logvar_x = nn.Dense(self.latents, name="fc3_logvar")(x)
         return mean_x, logvar_x
@@ -39,6 +40,8 @@ class Decoder(nn.Module):
         z = nn.Dense(128, name="fc2")(z)
         z = nn.leaky_relu(z, negative_slope=0.01)
         z = nn.Dense(256, name="fc3")(z)
+        z = nn.leaky_relu(z, negative_slope=0.01)
+        z = nn.Dense(self.output_dim)(z)
         return z
 
 
