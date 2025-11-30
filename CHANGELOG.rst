@@ -5,16 +5,89 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.17:
+
+v0.1.17 (2025-11-30)
+====================
+
+Bug Fixes
+---------
+
+* fix: update weights, add helper scripts to update defaults, log version of code in weights file (`5552adc`_)
+
+Unknown
+-------
+
+* add plotting slides for matt (`1bf22c1`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`cab7d0c`_)
+
+* Update model.py (`49f5ada`_)
+
+* Update model.py (`a4653c4`_)
+
+* Update model.py (`212d6d3`_)
+
+* hacking on simple detector analysis and VAE configs (`eab8446`_)
+
+* Merge branches 'main' and 'main' of github.com:starccato/starccato_jax (`d746971`_)
+
+* add data extractor (`07a1d59`_)
+
+* add simple test runner (`a00973d`_)
+
+* add bash jobs (`2b82d29`_)
+
+* add len fix (`83fceba`_)
+
+* add runner for one-detector-analysis (`d4350f7`_)
+
+* add one-detector test (`cf46f69`_)
+
+* add CI (`171a966`_)
+
+* add nuts + ns checks (`68e9068`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`924cb11`_)
+
+.. _5552adc: https://github.com/starccato/starccato_jax/commit/5552adc24323e700106ab5326e932c984b7cc68f
+.. _1bf22c1: https://github.com/starccato/starccato_jax/commit/1bf22c17b9704d221ac71f7222edc7cb7fdeb048
+.. _cab7d0c: https://github.com/starccato/starccato_jax/commit/cab7d0cc7daa8d267f41fb9e986f41b80311e9b4
+.. _49f5ada: https://github.com/starccato/starccato_jax/commit/49f5ada2949da8fec0bf64eb1f13df95a0f1a030
+.. _a4653c4: https://github.com/starccato/starccato_jax/commit/a4653c4e5563209f8f8618d50b734d76a9d3d296
+.. _212d6d3: https://github.com/starccato/starccato_jax/commit/212d6d3a646f896126626129b0593f9f7d8f9796
+.. _eab8446: https://github.com/starccato/starccato_jax/commit/eab844635e4a9d45828cde6e1263fe11c6576b1d
+.. _d746971: https://github.com/starccato/starccato_jax/commit/d746971fd4166be513a12b8a01103260d3da1e1b
+.. _07a1d59: https://github.com/starccato/starccato_jax/commit/07a1d59af3497656033d3472f74857da816d9770
+.. _a00973d: https://github.com/starccato/starccato_jax/commit/a00973dd7975f44a573e41a6dea6a26bc196198c
+.. _2b82d29: https://github.com/starccato/starccato_jax/commit/2b82d296500489108f87995c45b88abcaf3aa5bf
+.. _83fceba: https://github.com/starccato/starccato_jax/commit/83fceba70483906f28d30b723c514245de242cde
+.. _d4350f7: https://github.com/starccato/starccato_jax/commit/d4350f71fe7c00de58a80dd6b9a6302c992df5bf
+.. _cf46f69: https://github.com/starccato/starccato_jax/commit/cf46f6950627d934a67f1852dabe2806c3d2cc0e
+.. _171a966: https://github.com/starccato/starccato_jax/commit/171a96630eeb4efed41d4f6293f2291af514b3c5
+.. _68e9068: https://github.com/starccato/starccato_jax/commit/68e906889a7baf9a3bb3925109e6d205c0979af3
+.. _924cb11: https://github.com/starccato/starccato_jax/commit/924cb1129aee84fd6faee82258eb3988a0c57d2e
+
+
 .. _changelog-v0.1.16:
 
 v0.1.16 (2025-09-09)
 ====================
 
+Chores
+------
+
+* chore(release): 0.1.16 (`c1cbb34`_)
+
 Unknown
 -------
 
+* add bilby and jim testing (`5ab4955`_)
+
 * Merge branch 'main' of github.com:starccato/starccato_jax (`049ca47`_)
 
+.. _c1cbb34: https://github.com/starccato/starccato_jax/commit/c1cbb346be694de9d0a277ec00b9db9c4ae88e73
+.. _5ab4955: https://github.com/starccato/starccato_jax/commit/5ab4955bbcdd68598f4d98154154a6622f3a03b9
 .. _049ca47: https://github.com/starccato/starccato_jax/commit/049ca478506207f5c962ce4fbcf06c85e4bd49ca
 
 
