@@ -1,6 +1,6 @@
 import json
 from dataclasses import asdict
-from typing import List
+from typing import List, Optional
 
 import h5py
 import jax.numpy as jnp
@@ -11,6 +11,7 @@ from flax.training.train_state import TrainState
 from ..config import Config
 from .data_containers import Losses, TrainValMetrics
 from .model import ModelData
+from starccato_jax import __version__ as CURRENT_VERSION
 
 MODEL_FNAME = "model.h5"
 LOSS_FNAME = "losses.h5"
@@ -22,7 +23,13 @@ def save_model(
     train_metrics: TrainValMetrics,
     savedir: str,
 ):
-    """Saves model parameters and config using h5py"""
+    """Saves model parameters, config and library version using h5py.
+
+    Adds an HDF5 file attribute ``library_version`` so that downstream loads can
+    detect mismatches between the saved artifact and the currently running
+    code version, producing clearer guidance instead of opaque shape/field
+    errors.
+    """
     model_params = state.params
     filename = f"{savedir}/{MODEL_FNAME}"
 
@@ -50,6 +57,22 @@ def save_model(
             asdict(config)
         )  # Convert dictionary to JSON string
         f.create_dataset("config", data=config_json)
+        # Store version metadata as a file attribute (scalar string)
+        f.attrs["library_version"] = CURRENT_VERSION
+        # Store architecture (shapes per parameter path) for forward compatibility
+        def _flatten_shapes(d, prefix=""):
+            out = {}
+            for k, v in d.items():
+                if isinstance(v, dict):
+                    out.update(_flatten_shapes(v, f"{prefix}{k}/"))
+                else:
+                    try:
+                        out[f"{prefix}{k}"] = list(np.array(v).shape)
+                    except Exception:
+                        out[f"{prefix}{k}"] = []
+            return out
+        arch = _flatten_shapes(model_params)
+        f.create_dataset("architecture", data=json.dumps(arch))
 
     with h5py.File(f"{savedir}/{LOSS_FNAME}", "w") as f:
         loss_group = f.create_group("losses")
@@ -67,16 +90,60 @@ def _recursively_load(h5group):
     return data
 
 
+def get_model_version(savedir: str, model_fname: str = MODEL_FNAME) -> Optional[str]:
+    """Return the stored library version for a saved model if present."""
+    filename = f"{savedir}/{model_fname}"
+    try:
+        with h5py.File(filename, "r") as f:
+            return f.attrs.get("library_version", None)
+    except FileNotFoundError:
+        return None
+
+
 def load_model(savedir: str, model_fname: str = MODEL_FNAME) -> ModelData:
-    """Loads model parameters and configs"""
+    """Loads model parameters and config, augmenting errors with version guidance.
+
+    If a failure occurs while reconstructing the config/parameters (e.g. due to
+    architectural or field changes), and version metadata is available, the
+    raised error message will include a suggestion referencing the saved
+    version vs the current version.
+    """
     filename = f"{savedir}/{model_fname}"
 
     with h5py.File(filename, "r") as f:
-        # Load params
-        params = freeze(_recursively_load(f["model_params"]))
+        saved_version = f.attrs.get("library_version")
+        try:
+            params = freeze(_recursively_load(f["model_params"]))
+            config_dict = json.loads(f["config"][()].decode("utf-8"))
+            config = Config(**config_dict)
+            saved_arch_json = None
+            if "architecture" in f:
+                saved_arch_json = f["architecture"][()].decode("utf-8")
+        except Exception as e:  # noqa: BLE001 broad to augment message
+            msg = f"Failed to load model from '{filename}': {e}"
+            if saved_version is not None and saved_version != CURRENT_VERSION:
+                msg += (
+                    f" (weights saved with starccato_jax {saved_version}, "
+                    f"current code {CURRENT_VERSION}. Consider installing the "
+                    f"older version: 'pip install starccato_jax=={saved_version}' "
+                    f"or retraining the model under the current version.)"
+                )
+            raise RuntimeError(msg) from e
 
-        # Load config: Read JSON string and convert back to dictionary
-        config = Config(**json.loads(f["config"][()].decode("utf-8")))
+    # Non-failing but version mismatch: optionally emit a warning for visibility
+    if saved_version is not None and saved_version != CURRENT_VERSION:
+        # Lazy import to avoid circular logging dependency during early startup
+        try:
+            from starccato_jax.logging import logger  # type: ignore
+
+            logger.warning(
+                "Model artifact version %s differs from current %s. If you encounter "
+                "shape or field errors later, retrain or pin the earlier version.",
+                saved_version,
+                CURRENT_VERSION,
+            )
+        except Exception:
+            pass
 
     return ModelData(params, config.latent_dim, config.data_dim)
 
