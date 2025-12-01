@@ -20,6 +20,7 @@ from numpyro.infer import MCMC, NUTS, log_likelihood
 from starccato_jax.waveforms import StarccatoCCSNe, StarccatoBlip
 from morphZ import evidence as morph_evidence
 from pathlib import Path
+from typing import Optional
 jax.config.update("jax_enable_x64", True)
 
 # ----------------------------------------------------------------------
@@ -28,21 +29,27 @@ jax.config.update("jax_enable_x64", True)
 HERE = Path(__file__).parent.resolve()
 OUTROOT = HERE / "out"
 OUTROOT.mkdir(parents=True, exist_ok=True)
-CACHE_DIR = HERE / "cache"
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
+DEFAULT_CACHE_DIR = HERE / "cache"
+DEFAULT_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 DEFAULT_TRIGGER_TIME = 1186741733  # quiet segment
 DEFAULT_DETECTOR = "H1"
 SAMPLE_RATE = 4096.0
 BAND = (100.0, 1024.0)
 DURATION = 4.0
+ANALYSIS_LEN = 512
 
 N_LATENTS = 32
 REFERENCE_DIST = 10.0
-REFERENCE_SCALE = 1e-21
+# Scale the waveform generator to roughly match observed strain levels.
+# With AMP_LOGMEAN near -30 (median ~5e-14), a scale of 1e-7 yields
+# typical strains on the order of 1e-21 after the LogNormal draw.
+REFERENCE_SCALE = 1e-7
 BASE_WF_LEN = len(StarccatoCCSNe().generate(z=np.zeros((1, N_LATENTS)))[0])
-AMP_LOGMEAN = -30.756  # calibrated to map base SNR q5->3, q95->100
-AMP_LOGSIGMA = 0.932
+# Center amplitude prior near unity so the in-band rescaling can be matched by the sampler.
+# A wide LogNormal keeps support for weaker injections.
+AMP_LOGMEAN = 0.0
+AMP_LOGSIGMA = 1.5
 
 STARCCATO_SIGNAL = StarccatoCCSNe()
 STARCCATO_GLITCH = StarccatoBlip()
@@ -58,41 +65,137 @@ def band_mask(f: np.ndarray, band: tuple[float, float]) -> np.ndarray:
     return (f >= band[0]) & (f <= band[1])
 
 
-def fetch_strain(detector, trigger_time, duration, sample_rate, bulk_file=None):
-    if bulk_file is not None:
-        bulk_path = Path(bulk_file).expanduser().resolve()
-        if bulk_path.exists():
-            print(f"Loading bulk data from {bulk_path} (will crop to requested segment)...")
-            # Try common GWOSC HDF5 paths
-            path_options = ["strain/Strain", "Strain", None]
-            last_err = None
-            for path_opt in path_options:
-                try:
-                    if path_opt is None:
-                        strain_bulk = TimeSeries.read(bulk_path)
-                    else:
-                        strain_bulk = TimeSeries.read(bulk_path, path=path_opt)
-                    return strain_bulk.crop(trigger_time, trigger_time + duration)
-                except Exception as e:  # pragma: no cover
-                    last_err = e
-            print(f"Bulk read failed for known paths; falling back to cached fetch. Last error: {last_err}")
-        else:
-            print(f"Bulk file {bulk_path} not found. Falling back to cached fetch.")
+def _strain_has_invalid(strain: TimeSeries) -> bool:
+    data = strain.value
+    return not np.all(np.isfinite(data))
 
-    cache_file = CACHE_DIR / f"{detector}_{trigger_time}_{duration}s_{int(sample_rate)}Hz.hdf5"
-    if cache_file.exists():
-        print(f"Loading cached data from {cache_file}...")
-        strain = TimeSeries.read(cache_file)
-    else:
-        print(f"Fetching {detector} data around GPS {trigger_time}...")
-        strain = TimeSeries.fetch_open_data(
-            detector,
-            trigger_time - 2,
-            trigger_time + duration + 2,
-            sample_rate=sample_rate,
-        ).crop(trigger_time, trigger_time + duration)
-        print(f"Saving to cache: {cache_file}")
-        strain.write(cache_file)
+
+def _fetch_and_cache(detector, trigger_time, duration, sample_rate, cache_file: Path):
+    print(f"Fetching {detector} data around GPS {trigger_time}...")
+    strain = TimeSeries.fetch_open_data(
+        detector,
+        trigger_time - 2,
+        trigger_time + duration + 2,
+        sample_rate=sample_rate,
+    ).crop(trigger_time, trigger_time + duration)
+    if _strain_has_invalid(strain):
+        raise RuntimeError("Fetched strain contains NaNs or infs; aborting cache write.")
+    cache_file.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        cache_file.unlink()
+    except FileNotFoundError:
+        pass
+    print(f"Saving to cache: {cache_file}")
+    strain.write(cache_file)
+    return strain
+
+
+def _parse_gwosc_filename(path: Path) -> Optional[tuple[int, int]]:
+    name = path.stem
+    parts = name.split("-")
+    if len(parts) < 2:
+        return None
+    try:
+        start = int(parts[-2])
+        dur = int(parts[-1])
+    except ValueError:
+        return None
+    return start, dur
+
+
+def _find_local_gwosc_file(cache_dir: Path, detector: str, trigger_time: float, duration: float) -> Optional[Path]:
+    if cache_dir is None or not cache_dir.exists():
+        return None
+
+    trig_start = float(trigger_time)
+    trig_end = trig_start + duration
+    detector_tag = detector.upper()
+
+    best_match = None
+    best_start = -np.inf
+
+    for candidate in sorted(cache_dir.glob("*.hdf5")):
+        if detector_tag not in candidate.name.upper():
+            continue
+        parsed = _parse_gwosc_filename(candidate)
+        if not parsed:
+            continue
+        start, dur = parsed
+        file_end = start + dur
+        if start <= trig_start and trig_end <= file_end:
+            if start > best_start:
+                best_match = candidate
+                best_start = start
+
+    return best_match
+
+
+def _read_timeseries_from_file(file_path: Path, detector: str) -> TimeSeries:
+    suffix = file_path.suffix.lower()
+    is_hdf5 = suffix in {".hdf5", ".hdf", ".h5"}
+    channel = f"{detector}:GWOSC-4KHZ_R1_STRAIN"
+    attempts = []
+    if is_hdf5:
+        attempts.append({"format": "hdf5.gwosc"})
+    attempts.append({"channel": channel})
+    attempts.append({})
+
+    last_err = None
+    for options in attempts:
+        try:
+            return TimeSeries.read(file_path, **options)
+        except Exception as exc:  # pragma: no cover - fallback path
+            last_err = exc
+    raise RuntimeError(f"Failed to read {file_path}: {last_err}")
+
+
+def _compute_inband_snr(injected_wf: np.ndarray, ctx: dict) -> float:
+    if injected_wf is None or injected_wf.size == 0:
+        return 0.0
+    H_inj = np.fft.rfft(injected_wf * ctx["win"]) / ctx["C"]
+    return float(np.sqrt(np.sum(np.abs(H_inj[ctx["mask_r"]]) ** 2 / ctx["S_k"])))
+
+
+def _load_local_segment(cache_dir: Path, detector: str, trigger_time: float, duration: float) -> Optional[TimeSeries]:
+    local_file = _find_local_gwosc_file(cache_dir, detector, trigger_time, duration)
+    if local_file is None:
+        return None
+
+    print(f"Loading local GWOSC file {local_file}...")
+    ts_full = _read_timeseries_from_file(local_file, detector)
+    segment = ts_full.crop(trigger_time, trigger_time + duration)
+    if len(segment) == 0:
+        raise RuntimeError(f"Local file {local_file} does not cover requested GPS range.")
+    if _strain_has_invalid(segment):
+        raise RuntimeError(f"Local strain segment from {local_file} contains NaNs or infs.")
+    return segment
+
+
+def fetch_strain(detector, trigger_time, duration, sample_rate, cache_dir: Optional[Path] = None):
+    """
+    Load strain from a local GWOSC cache (HDF5) using the standard channel/format.
+    """
+    cache_dir = Path(cache_dir or DEFAULT_CACHE_DIR).expanduser().resolve()
+    cache_dir.mkdir(parents=True, exist_ok=True)
+
+    local_segment = _load_local_segment(cache_dir, detector, trigger_time, duration)
+    if local_segment is not None:
+        return local_segment
+
+    cache_file = cache_dir / f"{detector}_{trigger_time}_{duration}s_{int(sample_rate)}Hz.hdf5"
+    channel = f"{detector}:GWOSC-4KHZ_R1_STRAIN"
+    try:
+        if cache_file.exists():
+            print(f"Loading cached data from {cache_file}...")
+            strain = TimeSeries.read(cache_file, format="hdf5.gwosc", channel=channel)
+        else:
+            raise FileNotFoundError(f"{cache_file} not found in cache_dir {cache_dir}")
+    except Exception as exc:
+        raise RuntimeError(f"Failed to load strain from {cache_file}: {exc}")
+
+    strain = strain.crop(trigger_time, trigger_time + duration)
+    if _strain_has_invalid(strain):
+        raise RuntimeError("Strain contains NaNs or infs.")
     return strain
 
 
@@ -192,6 +295,61 @@ def initial_plot(time, data_vis, fs, detector, outdir):
     plt.close(fig)
 
 
+def plot_data(
+    raw_data: np.ndarray,
+    injection: Optional[np.ndarray],
+    welch_psd: tuple[np.ndarray, np.ndarray],
+    posterior_signal: Optional[np.ndarray] = None,
+    posterior_blip: Optional[np.ndarray] = None,
+    injection_snr: Optional[float] = None,
+    logBF: Optional[float] = None,
+    outpath: Optional[Path] = None,
+):
+    freqs_welch, psd_welch = welch_psd
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.loglog(freqs_welch, np.maximum(psd_welch, 1e-30), color="k", lw=1.2, label="Noise PSD (Welch)")
+
+    f_data, Pxx_data = periodogram(raw_data * tukey(len(raw_data), 0.1), fs=SAMPLE_RATE)
+    m_data = band_mask(f_data, BAND)
+    ax.loglog(f_data[m_data], np.maximum(Pxx_data[m_data], 1e-30), color="0.6", alpha=0.4, label="Data periodogram")
+
+    if injection is not None and injection.size > 0:
+        f_inj, Pxx_inj = periodogram(injection * tukey(len(injection), 0.1), fs=SAMPLE_RATE)
+        m_inj = band_mask(f_inj, BAND)
+        ax.loglog(f_inj[m_inj], np.maximum(Pxx_inj[m_inj], 1e-30), color="tab:orange", lw=1.1, label="Injection PSD")
+
+    def _plot_post(label, color, series):
+        if series is None or len(series) == 0:
+            return
+        f_p, Pxx_p = periodogram(series, fs=SAMPLE_RATE, axis=-1)
+        mask_p = band_mask(f_p, BAND)
+        med = np.median(Pxx_p[:, mask_p], axis=0)
+        lo = np.percentile(Pxx_p[:, mask_p], 5, axis=0)
+        hi = np.percentile(Pxx_p[:, mask_p], 95, axis=0)
+        ax.fill_between(f_p[mask_p], lo, hi, color=color, alpha=0.2, label=f"{label} 90% CI")
+        ax.loglog(f_p[mask_p], med, color=color, lw=1.1, label=f"{label} median")
+
+    _plot_post("Signal", "tab:red", posterior_signal)
+    _plot_post("Glitch", "tab:green", posterior_blip)
+
+    ax.set_xlim(*BAND)
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("PSD [1/Hz]")
+    title_parts = []
+    if injection_snr is not None:
+        title_parts.append(f"SNR≈{injection_snr:.1f}")
+    if logBF is not None:
+        title_parts.append(f"logBF≈{logBF:.1f}")
+    if title_parts:
+        ax.set_title(" | ".join(title_parts))
+    ax.grid(alpha=0.3, which="both")
+    ax.legend(fontsize=9)
+    fig.tight_layout()
+    if outpath:
+        fig.savefig(outpath, dpi=150)
+    plt.close(fig)
+
+
 # ----------------------------------------------------------------------
 # Whittle helpers
 # ----------------------------------------------------------------------
@@ -206,8 +364,9 @@ def build_whittle_context(data_ts, injected_wf, fs, analysis_len):
     win = tukey(N, 0.1)
     data_win = data_seg * win
 
-    # Off-source PSD using all but the tail segment, 50% overlap
-    data_off = data_ts[:-analysis_len] if len(data_ts) > analysis_len else data_ts
+    # Off-source PSD from the leading portion (avoid the injected tail)
+    off_len = max(8, min(len(data_ts), analysis_len // 2))
+    data_off = data_ts[:off_len]
     data_off_win = data_off * tukey(len(data_off), 0.1) if len(data_off) > 0 else data_off
     nper = min(512, len(data_off)) if len(data_off) > 0 else 256
     nper = max(nper, 8)
@@ -233,6 +392,7 @@ def build_whittle_context(data_ts, injected_wf, fs, analysis_len):
     f_k = f_rfft[mask_r]
     D_k = D_full[mask_r]
     S_k = np.interp(f_k, freqs_full, psd_full, left=psd_full[0], right=psd_full[-1])
+    S_k = np.clip(S_k, 1e-30, None)
 
     y_obs = np.stack([D_k.real, D_k.imag], axis=-1)
     sigma_comp = np.sqrt(S_k / 2.0)
@@ -246,6 +406,7 @@ def build_whittle_context(data_ts, injected_wf, fs, analysis_len):
         "y_obs": y_obs,
         "D_k": D_k,
         "S_k": S_k,
+        "f_k": f_k,
         "freqs_full": freqs_full,
         "psd_full": psd_full,
         "freqs_plot": freqs_plot,
@@ -429,127 +590,60 @@ def _psd_ci(draws):
     return f[m], med, lo, hi
 
 
-def plot_frequency_summary(f_data, P_data, psd_used, f_inj, P_inj, sig_ci, gli_ci, outpath):
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.loglog(f_data, P_data, color="k", lw=1.2, label="Data periodogram")
-    ax.loglog(psd_used[0], psd_used[1], color="0.3", lw=1.0, ls="--", label="PSD (Whittle)")
-    if f_inj is not None and P_inj is not None:
-        ax.loglog(f_inj, P_inj, color="tab:orange", lw=1.0, alpha=0.8, label="Injection")
-    if sig_ci is not None:
-        f_s, med_s, lo_s, hi_s = sig_ci
-        ax.fill_between(f_s, lo_s, hi_s, color="tab:red", alpha=0.25, label="Signal 90% CI")
-        ax.loglog(f_s, med_s, color="tab:red", lw=1.1, label="Signal median")
-    if gli_ci is not None:
-        f_g, med_g, lo_g, hi_g = gli_ci
-        ax.fill_between(f_g, lo_g, hi_g, color="tab:green", alpha=0.25, label="Glitch 90% CI")
-        ax.loglog(f_g, med_g, color="tab:green", lw=1.1, label="Glitch median")
-    ax.set_xlim(*BAND)
-    ax.set_xlabel("Frequency [Hz]")
-    ax.set_ylabel("PSD [1/Hz]")
-    ax.legend(fontsize=9)
-    ax.grid(alpha=0.3, which="both")
-    fig.tight_layout()
-    fig.savefig(outpath, dpi=150)
-    plt.close(fig)
-    print(f"Saved frequency-domain summary to {outpath}")
-
-
-def plot_summary(time, data_ts, injected_ts, freqs, psd, posterior_sig_ts, posterior_gli_ts, title, snr=None, lnBF_sig_noise=None, lnBF_sig_glitch=None, injected_raw=None):
-    fig, (ax_t, ax_p) = plt.subplots(2, 1, figsize=(9, 6), gridspec_kw={"height_ratios": [1, 1.2]})
-    ax_t.plot(time, data_ts, color="k", lw=0.8, label="Data")
-    if injected_ts is not None:
-        ax_t.plot(time, injected_ts, color="tab:orange", lw=1, label="Injection")
-    for draw in posterior_sig_ts:
-        ax_t.plot(time, draw, color="tab:red", alpha=0.25)
-    for draw in posterior_gli_ts:
-        ax_t.plot(time, draw, color="tab:green", alpha=0.20)
-    ax_t.set_ylabel("Strain")
-    ax_t.legend(fontsize=9)
-    txt = []
-    if snr is not None:
-        txt.append(f"SNR ≈ {snr:.1f}")
-    if lnBF_sig_noise is not None:
-        txt.append(f"ΔLnZ(sig–noise) ≈ {lnBF_sig_noise:.1f}")
-    if lnBF_sig_glitch is not None:
-        txt.append(f"ΔLnZ(sig–gli) ≈ {lnBF_sig_glitch:.1f}")
-    if txt:
-        ax_t.text(
-            0.02,
-            0.9,
-            "".join(txt),
-            transform=ax_t.transAxes,
-            fontsize=10,
-            va="top",
-            ha="left",
-            bbox=dict(boxstyle="round,pad=0.3", fc="w", alpha=0.5),
-        )
-    ax_t.set_title(title)
-
-    ax_p.loglog(freqs, psd, "k", lw=1.2, label="Noise PSD (Welch)")
-    if injected_raw is not None:
-        f_sig_inj, Pxx_sig_inj = periodogram(injected_raw, fs=SAMPLE_RATE)
-        m_sig = band_mask(f_sig_inj, BAND)
-        ax_p.loglog(f_sig_inj[m_sig], Pxx_sig_inj[m_sig], "tab:orange", alpha=0.7, label="Injection PSD")
-    if len(posterior_sig_ts) > 0:
-        f_s, Pxx_s = periodogram(posterior_sig_ts, fs=SAMPLE_RATE, axis=-1)
-        m_s = band_mask(f_s, BAND)
-        med_s = np.median(Pxx_s[:, m_s], axis=0)
-        lo_s = np.percentile(Pxx_s[:, m_s], 5, axis=0)
-        hi_s = np.percentile(Pxx_s[:, m_s], 95, axis=0)
-        ax_p.fill_between(f_s[m_s], lo_s, hi_s, color="tab:red", alpha=0.25, label="Signal 90% CI")
-        ax_p.loglog(f_s[m_s], med_s, color="tab:red", lw=1.2, label="Signal median")
-    if len(posterior_gli_ts) > 0:
-        f_g, Pxx_g = periodogram(posterior_gli_ts, fs=SAMPLE_RATE, axis=-1)
-        m_g = band_mask(f_g, BAND)
-        med_g = np.median(Pxx_g[:, m_g], axis=0)
-        lo_g = np.percentile(Pxx_g[:, m_g], 5, axis=0)
-        hi_g = np.percentile(Pxx_g[:, m_g], 95, axis=0)
-        ax_p.fill_between(f_g[m_g], lo_g, hi_g, color="tab:green", alpha=0.25, label="Glitch 90% CI")
-        ax_p.loglog(f_g[m_g], med_g, color="tab:green", lw=1.2, label="Glitch median")
-    ax_p.set_xlim(*BAND)
-    ax_p.set_xlabel("Frequency [Hz]")
-    ax_p.set_ylabel("PSD [1/Hz]")
-    ax_p.legend(fontsize=9)
-    ax_p.grid(alpha=0.3)
-    fig.tight_layout()
-    return fig
 
 
 # ----------------------------------------------------------------------
 # Main flow
 # ----------------------------------------------------------------------
-def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_kind=INJECT_KIND, seed=0, snr=100.0, snr_min=None, snr_max=None, bulk_file=None):
+def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_kind=INJECT_KIND, seed=0, snr=100.0, snr_min=None, snr_max=None, cache_dir: Optional[Path] = None):
     outdir = OUTROOT / f"{int(trigger_time)}_{inject_kind}"
     outdir.mkdir(parents=True, exist_ok=True)
 
     rng_master = jax.random.PRNGKey(seed)
 
-    strain = fetch_strain(detector, trigger_time, DURATION, SAMPLE_RATE, bulk_file=bulk_file)
+    strain = fetch_strain(detector, trigger_time, DURATION, SAMPLE_RATE, cache_dir=cache_dir)
     data = strain.value
     time = strain.times.value
     fs = strain.sample_rate.value
 
     sos = butter(4, BAND, btype="band", fs=fs, output="sos")
     data_vis = sosfilt(sos, data)
-    initial_plot(time, data_vis, fs, detector, outdir)
-
+    data_base = data_vis[-ANALYSIS_LEN:]
     snr_target = None
     if inject_kind == "noise":
-        data_used = data_vis.copy()
-        injected_wf = np.zeros_like(data_used)
-        snr_injected = None
+        analysis_len = ANALYSIS_LEN
+        injected_full = np.zeros_like(data_base)
+        data_used_full = data_base.copy()
     else:
+        # Default to uniform in [5, 100] if no range provided.
+        if snr_min is None and snr_max is None:
+            snr_min, snr_max = 5.0, 100.0
         if snr_min is not None and snr_max is not None and snr_max > snr_min:
             snr_target = float(jax.random.uniform(rng_master, (), minval=snr_min, maxval=snr_max))
         else:
             snr_target = snr
-        data_used, injected_wf, snr_injected = inject_signal_into_data(data_vis, inject_kind, snr_target, fs, sos)
+        data_used_seg, injected_wf_seg, _ = inject_signal_into_data(data_base, inject_kind, snr_target, fs, sos)
+        analysis_len = len(injected_wf_seg)
+        injected_full = injected_wf_seg
+        data_used_full = data_base + injected_full
 
-    analysis_len = min(len(data_used), len(injected_wf)) if inject_kind != "noise" else min(len(data_used), BASE_WF_LEN)
-    if analysis_len <= 0:
-        analysis_len = BASE_WF_LEN
-    ctx = build_whittle_context(data_used, injected_wf, fs, analysis_len)
+    ctx = build_whittle_context(data_used_full, injected_full, fs, analysis_len)
 
+    snr_inband = None
+    if inject_kind != "noise":
+        snr_inband = _compute_inband_snr(injected_full, ctx)
+        if snr_target is not None and snr_inband > 0.0:
+            scale = snr_target / snr_inband
+            injected_full = injected_full * scale
+            data_used_full = data_base + injected_full
+            ctx = build_whittle_context(data_used_full, injected_full, fs, analysis_len)
+            snr_inband = _compute_inband_snr(injected_full, ctx)
+            print(
+                f"Rescaled injection by {scale:.3g} to target in-band SNR ≈ {snr_target:.1f}; "
+                f"in-band now ≈ {snr_inband:.2f}"
+            )
+        else:
+            print(f"In-band injection SNR (Whittle band) ≈ {snr_inband:.2f} (target ≈ {snr_target or 0:.2f})")
     rng_sig, rng_gli = jax.random.split(rng_master)
     model_sig = make_whittle_model("signal", ctx)
     model_gli = make_whittle_model("glitch", ctx)
@@ -582,61 +676,27 @@ def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_ki
     print(f"Matched-filter SNR (data|MAP signal) ≈ {snr_mf_sig:.2f}")
     print(f"Matched-filter SNR (data|MAP glitch) ≈ {snr_mf_gli:.2f}")
     print(f"Excess-power SNR (Whittle band) ≈ {snr_excess:.2f}")
-    if snr_injected is not None and snr_target is not None:
-        print(f"Target injection SNR ≈ {snr_target:.2f}; achieved ≈ {snr_injected:.2f}")
 
     ts_sig = posterior_draw_time_series(res_sig, ctx, "signal", n_draws=20)
     ts_gli = posterior_draw_time_series(res_gli, ctx, "glitch", n_draws=20)
 
-    fig_pre = plot_summary(
-        ctx["time_used"],
-        ctx["data_ts"],
-        ctx["injected_wf"],
-        ctx["freqs_plot"],
-        ctx["psd_plot"],
-        [],
-        [],
-        title="Before analysis (time domain)",
-        injected_raw=ctx["injected_wf"] if inject_kind != "noise" else None,
-    )
-    fig_pre.savefig(outdir / "before_analysis.png", dpi=150)
-    plt.close(fig_pre)
-
-    H_inj_scaled = np.fft.rfft(ctx["injected_wf"] * ctx["win"]) / ctx["C"]
-    snr_est = np.sqrt(np.sum(np.abs(H_inj_scaled[ctx["mask_r"]]) ** 2 / ctx["S_k"])) if inject_kind != "noise" else None
     lnBF_sig_noise = lnz_sig_morph - lnz_noise
     lnBF_sig_glitch = lnz_sig_morph - lnz_gli_morph
 
-    fig_post = plot_summary(
-        ctx["time_used"],
-        ctx["data_ts"],
-        ctx["injected_wf"],
-        ctx["freqs_plot"],
-        ctx["psd_plot"],
-        ts_sig,
-        ts_gli,
-        title="Posterior predictive (time domain)",
-        snr=snr_est,
-        lnBF_sig_noise=lnBF_sig_noise,
-        lnBF_sig_glitch=lnBF_sig_glitch,
-        injected_raw=ctx["injected_wf"] if inject_kind != "noise" else None,
+    plot_data(
+        raw_data=ctx["data_ts"],
+        injection=ctx["injected_wf"] if inject_kind != "noise" else None,
+        welch_psd=(ctx["freqs_plot"], ctx["psd_plot"]),
+        posterior_signal=np.array(ts_sig) if len(ts_sig) > 0 else None,
+        posterior_blip=np.array(ts_gli) if len(ts_gli) > 0 else None,
+        injection_snr=snr_inband if inject_kind != "noise" else None,
+        logBF=float(logBF_sig_alt),
+        outpath=outdir / "frequency_summary.png",
     )
-    fig_post.savefig(outdir / "posterior_predictive.png", dpi=150)
-    plt.close(fig_post)
 
     sig_ci = _psd_ci(ts_sig)
     gli_ci = _psd_ci(ts_gli)
-    out_freq_plot = outdir / "frequency_summary.png"
-    plot_frequency_summary(
-        ctx["f_data"],
-        ctx["Pxx_data"],
-        (ctx["freqs_plot"], ctx["psd_plot"]),
-        ctx["f_sig"] if inject_kind != "noise" else None,
-        ctx["Pxx_sig"] if inject_kind != "noise" else None,
-        sig_ci,
-        gli_ci,
-        out_freq_plot,
-    )
+
 
     # Save metrics
     metrics_path = outdir / "metrics.csv"
@@ -645,7 +705,6 @@ def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_ki
         f.write(
             f"{detector},{trigger_time},{inject_kind},{seed},"
             f"{snr_target if inject_kind!='noise' else ''},"
-            f"{snr_injected if snr_injected is not None else ''},"
             f"{lnz_noise:.6f},{lnz_sig_morph:.6f},{lnz_sig_err:.6f},"
             f"{lnz_gli_morph:.6f},{lnz_gli_err:.6f},"
             f"{float(logBF_sig_alt):.6f},{snr_mf_sig:.6f},{snr_mf_gli:.6f},{snr_excess:.6f}\n"
@@ -663,8 +722,16 @@ if __name__ == "__main__":
     parser.add_argument("--snr", type=float, default=SNR_INJECTION, help="Target injection SNR (used if no range)")
     parser.add_argument("--snr-min", type=float, default=None, help="Min SNR (if set with --snr-max, sample uniform)")
     parser.add_argument("--snr-max", type=float, default=None, help="Max SNR (if set with --snr-min, sample uniform)")
-    parser.add_argument("--bulk-file", type=str, default=None, help="Optional pre-downloaded bulk HDF5 to crop from")
+    parser.add_argument(
+        "--cache-dir",
+        type=str,
+        default=str(DEFAULT_CACHE_DIR),
+        help="Directory containing GWOSC HDF5 files or where new caches will be stored.",
+    )
     args = parser.parse_args()
+
+    cache_dir = Path(args.cache_dir).expanduser().resolve()
+    cache_dir.mkdir(parents=True, exist_ok=True)
 
     main(
         detector=args.detector,
@@ -674,5 +741,5 @@ if __name__ == "__main__":
         snr=args.snr,
         snr_min=args.snr_min,
         snr_max=args.snr_max,
-        bulk_file=args.bulk_file,
+        cache_dir=cache_dir,
     )

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# set -euo pipefail
 
 # Configure runs here.
 # GPS_LIST=(
@@ -8,7 +8,10 @@ set -euo pipefail
 #   1186741737
 # )
 # To run 100 sequential GPS offsets, replace GPS_LIST above with e.g.:
-GPS_LIST=($(seq 1186741733 4 $((1186741733 + 4*5000))))
+GPS_LIST=($(seq 1187721218 4 $((1187721218 + 1*5000))))
+
+O2END=1187733618
+
 INJECT_LIST=(noise signal glitch)
 DETECTOR="H1"
 
