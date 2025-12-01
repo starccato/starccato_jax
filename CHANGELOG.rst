@@ -5,6 +5,19 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.1.18:
+
+v0.1.18 (2025-12-01)
+====================
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`68b9a27`_)
+
+.. _68b9a27: https://github.com/starccato/starccato_jax/commit/68b9a278f67cf87fc79b5b1655d7ffb7c47584ba
+
+
 .. _changelog-v0.1.17:
 
 v0.1.17 (2025-11-30)
@@ -13,7 +26,14 @@ v0.1.17 (2025-11-30)
 Bug Fixes
 ---------
 
+* fix: change weights downloader (`1ed12b1`_)
+
 * fix: update weights, add helper scripts to update defaults, log version of code in weights file (`5552adc`_)
+
+Chores
+------
+
+* chore(release): 0.1.17 (`59283fc`_)
 
 Unknown
 -------
@@ -50,7 +70,9 @@ Unknown
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`924cb11`_)
 
+.. _1ed12b1: https://github.com/starccato/starccato_jax/commit/1ed12b11bad25af5e389ec5ee14d090a08ec3c98
 .. _5552adc: https://github.com/starccato/starccato_jax/commit/5552adc24323e700106ab5326e932c984b7cc68f
+.. _59283fc: https://github.com/starccato/starccato_jax/commit/59283fce2e70da3c8d8bff1d05c4fd043199a388
 .. _1bf22c1: https://github.com/starccato/starccato_jax/commit/1bf22c17b9704d221ac71f7222edc7cb7fdeb048
 .. _cab7d0c: https://github.com/starccato/starccato_jax/commit/cab7d0cc7daa8d267f41fb9e986f41b80311e9b4
 .. _49f5ada: https://github.com/starccato/starccato_jax/commit/49f5ada2949da8fec0bf64eb1f13df95a0f1a030
