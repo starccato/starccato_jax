@@ -17,17 +17,17 @@ def get_default_weights_dir(
 
     should_download = clean or (not os.path.exists(fpath))
     if not should_download:
-    try:
-        age_seconds = time.time() - os.path.getmtime(fpath)
-        if age_seconds > 24 * 3600:
-        should_download = True
-    except OSError:
-        should_download = True
+        try:
+            age_seconds = time.time() - os.path.getmtime(fpath)
+            if age_seconds > 24 * 3600:
+                should_download = True
+        except OSError:
+            should_download = True
 
     if should_download:
-    if "blip" in dataset:
-        download_with_progress(BLIP_WEIGHTS_URL, fpath)
-    elif "ccsne" in dataset:
-        download_with_progress(CCSNE_WEIGHTS_URL, fpath)
+        if "blip" in dataset:
+            download_with_progress(BLIP_WEIGHTS_URL, fpath)
+        elif "ccsne" in dataset:
+            download_with_progress(CCSNE_WEIGHTS_URL, fpath)
 
     return model_dir
