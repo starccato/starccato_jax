@@ -12,7 +12,7 @@ GPS_LIST=($(seq 1187721218 4 $((1187721218 + 1*5000))))
 
 O2END=1187733618
 
-INJECT_LIST=(noise signal glitch)
+INJECT_LIST=(glitch) # noise signal glitch)
 DETECTOR="H1"
 
 # Optional: set seeds per run. If empty, uses loop index.
@@ -27,7 +27,7 @@ for gps in "${GPS_LIST[@]}"; do
     seed="${SEEDS[$run_idx]:-$run_idx}"
     echo ""
     echo ">>> Running detector=${DETECTOR} gps=${gps} inject=${inject} seed=${seed}"
-    python "${ANALYSIS_PY}" --detector "${DETECTOR}" --gps "${gps}" --inject "${inject}" --seed "${seed}" 
+    python "${ANALYSIS_PY}" --detector "${DETECTOR}" --gps "${gps}" --inject "${inject}" --seed "${seed}" --snr-min 20
     echo ">>> DONE <<<"
     echo ""
     ((run_idx++))

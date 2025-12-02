@@ -38,6 +38,8 @@ SAMPLE_RATE = 4096.0
 BAND = (100.0, 1024.0)
 DURATION = 4.0
 ANALYSIS_LEN = 512
+DEFAULT_SNR_RANGE = (5.0, 100.0)
+GLITCH_SNR_EXCESS_RANGE = (0.0, 100.0)
 
 N_LATENTS = 32
 REFERENCE_DIST = 10.0
@@ -153,6 +155,18 @@ def _compute_inband_snr(injected_wf: np.ndarray, ctx: dict) -> float:
     if injected_wf is None or injected_wf.size == 0:
         return 0.0
     H_inj = np.fft.rfft(injected_wf * ctx["win"]) / ctx["C"]
+    return float(np.sqrt(np.sum(np.abs(H_inj[ctx["mask_r"]]) ** 2 / ctx["S_k"])))
+
+
+def _compute_excess_power_snr_injection(injected_wf: np.ndarray, ctx: dict) -> float:
+    """
+    Excess-power SNR of the injection alone using the Whittle band/PSD in the context.
+    Keeps the scaling step independent of the stochastic noise realization.
+    """
+    if injected_wf is None or injected_wf.size == 0:
+        return 0.0
+    inj_seg = _center_crop_or_pad(np.asarray(injected_wf)[-ctx["N"] :], ctx["N"])
+    H_inj = np.fft.rfft(inj_seg * ctx["win"]) / ctx["C"]
     return float(np.sqrt(np.sum(np.abs(H_inj[ctx["mask_r"]]) ** 2 / ctx["S_k"])))
 
 
@@ -353,9 +367,10 @@ def plot_data(
 # ----------------------------------------------------------------------
 # Whittle helpers
 # ----------------------------------------------------------------------
-def build_whittle_context(data_ts, injected_wf, fs, analysis_len):
+def build_whittle_context(data_ts, injected_wf, fs, analysis_len, psd_ref_ts=None):
     data_ts = np.asarray(data_ts)
     injected_wf = np.asarray(injected_wf)
+    psd_source = data_ts if psd_ref_ts is None else np.asarray(psd_ref_ts)
     # Analysis window: tail (to include injected signal)
     data_seg = _center_crop_or_pad(data_ts[-analysis_len:], analysis_len)
     inj_seg = _center_crop_or_pad(injected_wf[-analysis_len:], analysis_len)
@@ -364,9 +379,10 @@ def build_whittle_context(data_ts, injected_wf, fs, analysis_len):
     win = tukey(N, 0.1)
     data_win = data_seg * win
 
-    # Off-source PSD from the leading portion (avoid the injected tail)
-    off_len = max(8, min(len(data_ts), analysis_len // 2))
-    data_off = data_ts[:off_len]
+    # Off-source PSD from the leading portion (avoid the injected tail). Use a
+    # reference noise segment to keep the PSD estimate injection-independent.
+    off_len = max(8, min(len(psd_source), analysis_len // 2))
+    data_off = psd_source[:off_len]
     data_off_win = data_off * tukey(len(data_off), 0.1) if len(data_off) > 0 else data_off
     nper = min(512, len(data_off)) if len(data_off) > 0 else 256
     nper = max(nper, 8)
@@ -596,7 +612,7 @@ def _psd_ci(draws):
 # Main flow
 # ----------------------------------------------------------------------
 def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_kind=INJECT_KIND, seed=0, snr=100.0, snr_min=None, snr_max=None, cache_dir: Optional[Path] = None):
-    outdir = OUTROOT / f"{int(trigger_time)}_{inject_kind}"
+    outdir = OUTROOT / f"{int(trigger_time)}_{inject_kind}_seed{seed}"
     outdir.mkdir(parents=True, exist_ok=True)
 
     rng_master = jax.random.PRNGKey(seed)
@@ -615,35 +631,58 @@ def main(detector=DEFAULT_DETECTOR, trigger_time=DEFAULT_TRIGGER_TIME, inject_ki
         injected_full = np.zeros_like(data_base)
         data_used_full = data_base.copy()
     else:
-        # Default to uniform in [5, 100] if no range provided.
-        if snr_min is None and snr_max is None:
-            snr_min, snr_max = 5.0, 100.0
-        if snr_min is not None and snr_max is not None and snr_max > snr_min:
-            snr_target = float(jax.random.uniform(rng_master, (), minval=snr_min, maxval=snr_max))
+        # Default to uniform in [5, 100] for signals and [0, 100] for glitches if no range is provided.
+        default_min, default_max = GLITCH_SNR_EXCESS_RANGE if inject_kind == "glitch" else DEFAULT_SNR_RANGE
+        lo = default_min if snr_min is None else snr_min
+        hi = default_max if snr_max is None else snr_max
+        if hi > lo:
+            snr_target = float(jax.random.uniform(rng_master, (), minval=lo, maxval=hi))
         else:
-            snr_target = snr
+            snr_target = lo
         data_used_seg, injected_wf_seg, _ = inject_signal_into_data(data_base, inject_kind, snr_target, fs, sos)
         analysis_len = len(injected_wf_seg)
         injected_full = injected_wf_seg
         data_used_full = data_base + injected_full
 
-    ctx = build_whittle_context(data_used_full, injected_full, fs, analysis_len)
+    ctx = build_whittle_context(data_used_full, injected_full, fs, analysis_len, psd_ref_ts=data_base)
 
     snr_inband = None
+    snr_excess_target = snr_target if inject_kind == "glitch" else None
     if inject_kind != "noise":
         snr_inband = _compute_inband_snr(injected_full, ctx)
-        if snr_target is not None and snr_inband > 0.0:
-            scale = snr_target / snr_inband
-            injected_full = injected_full * scale
-            data_used_full = data_base + injected_full
-            ctx = build_whittle_context(data_used_full, injected_full, fs, analysis_len)
-            snr_inband = _compute_inband_snr(injected_full, ctx)
-            print(
-                f"Rescaled injection by {scale:.3g} to target in-band SNR ≈ {snr_target:.1f}; "
-                f"in-band now ≈ {snr_inband:.2f}"
-            )
+        if inject_kind == "glitch":
+            snr_excess = excess_power_snr(ctx)
+            inj_excess = _compute_excess_power_snr_injection(injected_full, ctx)
+            if snr_excess_target is not None and inj_excess > 0.0:
+                scale = snr_excess_target / inj_excess
+                injected_full = injected_full * scale
+                data_used_full = data_base + injected_full
+                ctx = build_whittle_context(data_used_full, injected_full, fs, analysis_len, psd_ref_ts=data_base)
+                snr_inband = _compute_inband_snr(injected_full, ctx)
+                snr_excess = excess_power_snr(ctx)
+                inj_excess = _compute_excess_power_snr_injection(injected_full, ctx)
+                print(
+                    f"Rescaled glitch by {scale:.3g} to target excess-power SNR ≈ {snr_excess_target:.1f}; "
+                    f"injection-only excess ≈ {inj_excess:.2f}; excess now ≈ {snr_excess:.2f}; in-band ≈ {snr_inband:.2f}"
+                )
+            else:
+                print(
+                    f"Glitch injection SNRs: excess≈{snr_excess:.2f} (target≈{snr_excess_target or 0:.2f}), "
+                    f"injection-only excess≈{inj_excess:.2f}, in-band≈{snr_inband:.2f}"
+                )
         else:
-            print(f"In-band injection SNR (Whittle band) ≈ {snr_inband:.2f} (target ≈ {snr_target or 0:.2f})")
+            if snr_target is not None and snr_inband > 0.0:
+                scale = snr_target / snr_inband
+                injected_full = injected_full * scale
+                data_used_full = data_base + injected_full
+                ctx = build_whittle_context(data_used_full, injected_full, fs, analysis_len, psd_ref_ts=data_base)
+                snr_inband = _compute_inband_snr(injected_full, ctx)
+                print(
+                    f"Rescaled injection by {scale:.3g} to target in-band SNR ≈ {snr_target:.1f}; "
+                    f"in-band now ≈ {snr_inband:.2f}"
+                )
+            else:
+                print(f"In-band injection SNR (Whittle band) ≈ {snr_inband:.2f} (target ≈ {snr_target or 0:.2f})")
     rng_sig, rng_gli = jax.random.split(rng_master)
     model_sig = make_whittle_model("signal", ctx)
     model_gli = make_whittle_model("glitch", ctx)
