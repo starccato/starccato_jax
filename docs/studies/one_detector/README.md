@@ -1,0 +1,1 @@
+scp avajpeyi@nt.swin.edu.au:"/datasets/LIGO/public/gwosc.osgstorage.org/gwdata/O2/strain.4k/hdf.v1/H1/1186988032/H-H1_GWOSC_O2_4KHZ_R1-118772*" .
