@@ -3,7 +3,14 @@ import jax.numpy as jnp
 from .data_containers import Losses
 
 
-def vae_loss(params, x, rng, model, beta: float) -> Losses:
+def vae_loss(
+    params,
+    x,
+    rng,
+    model,
+    beta: float,
+    kl_free_bits: float = 0.0,
+) -> Losses:
     """
     Computes the VAE loss.
 
@@ -13,6 +20,8 @@ def vae_loss(params, x, rng, model, beta: float) -> Losses:
         rng: Random number generator key.
         model: The VAE model.
         beta: Weighting factor for the KL divergence.
+        kl_free_bits: Minimum KL divergence contribution (per batch). Set to 0
+            to disable.
 
     Returns:
         Losses: A container holding the reconstruction loss, KL divergence,
@@ -29,6 +38,8 @@ def vae_loss(params, x, rng, model, beta: float) -> Losses:
     kl_divergence = -0.5 * jnp.mean(
         1 + logvar - jnp.square(mean) - jnp.exp(logvar)
     )
+    # Apply free-bits as a floor; when kl_free_bits=0 this is a no-op.
+    kl_divergence = jnp.maximum(kl_divergence, kl_free_bits)
 
     # Total loss: reconstruction loss plus beta-scaled KL divergence.
     net_loss = reconstruction_loss + beta * kl_divergence

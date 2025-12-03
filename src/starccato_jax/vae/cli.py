@@ -11,9 +11,12 @@ from .starccato_vae import StarccatoVAE
 @click.option(
     "--outdir", default="model_out", help="Output directory for the model"
 )
+@click.option(
+    "--batch-size", default=64, help="Batch size for training"
+)
 @click.option("--dataset", default="ccsne", help="Source of the training data")
 def cli_train(
-    latent_dim: int, epochs: int, cycles: int, outdir: str, dataset: str
+    latent_dim: int, epochs: int, cycles: int, outdir: str, batch_size:int, dataset: str
 ):
     """Train the Starccato VAE model."""
     config = Config(
@@ -21,6 +24,7 @@ def cli_train(
         epochs=epochs,
         cyclical_annealing_cycles=cycles,
         dataset=dataset,
+        batch_size=batch_size,
     )
     StarccatoVAE.train(
         model_dir=outdir,

@@ -26,6 +26,22 @@ for t, c in zip(types, colors):
     subset = df[df["inject"] == t]
     plt.scatter(subset["logBF"], subset["excess_snr_injection"], label=t, color=c, alpha=0.7)
 
+plt.xlim(-1000, 1000)
+plt.ylim(1, 40)
+plt.yscale("log")
+
+# print percentage of signals with logBF > 0
+num_signals = len(df[df["inject"] == "signal"])
+num_signals_pos_logbf = len(df[(df["inject"] == "signal") & (df["logBF"] > 0)])
+perc_signals_pos_logbf = num_signals_pos_logbf / num_signals * 100
+print(f"Percentage of signals with logBF > 0: {perc_signals_pos_logbf:.2f}%")
+
+# percentage of glitches with logBF < 0
+num_glitches = len(df[df["inject"] == "glitch"])
+num_glitches_neg_logbf = len(df[(df["inject"] == "glitch") & (df["logBF"] < 0)])
+perc_glitches_neg_logbf = num_glitches_neg_logbf / num_glitches * 100
+print(f"Percentage of glitches with logBF < 0: {perc_glitches_neg_logbf:.2f}%")
+
 plt.legend()
 plt.xlabel("LnZsig - Log( Zglitch + Znoise )")
 plt.ylabel("Signal-to-Noise Ratio (SNR)")

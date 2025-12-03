@@ -35,9 +35,12 @@ def _train_step(
     rng: PRNGKey,
     model: VAE,
     beta: float,
+    kl_free_bits: float,
 ):
     loss, grads = jax.value_and_grad(
-        lambda params: vae_loss(params, x, rng, model, beta).loss
+        lambda params: vae_loss(
+            params, x, rng, model, beta, kl_free_bits
+        ).loss
     )(state.params)
     state = state.apply_gradients(grads=grads)
     return state, loss, grads
@@ -47,12 +50,15 @@ def _create_train_state(
     rng: PRNGKey,
     latent_dim: int,
     data_len: int,
-    learning_rate: float,
+    learning_rate_schedule,
+    gradient_clip_value: float | None = None,
 ) -> Tuple[train_state.TrainState, VAE]:
     model = VAE(latent_dim, data_dim=data_len)
     # Initialize the model with dummy data of shape (1, DATA_LEN)
     params = model.init(rng, jnp.ones((1, data_len)), rng)["params"]
-    tx = optax.adam(learning_rate)
+    tx = optax.adam(learning_rate_schedule)
+    if gradient_clip_value is not None:
+        tx = optax.chain(optax.clip_by_global_norm(gradient_clip_value), tx)
     state = train_state.TrainState.create(
         apply_fn=model.apply, params=params, tx=tx
     )
@@ -72,21 +78,40 @@ def train_vae(
     os.makedirs(save_dir, exist_ok=True)
     n_train, data_len = data.train.shape
     rng = jax.random.PRNGKey(0)
+    steps_per_epoch = max(n_train // config.batch_size, 1)
+    total_steps = config.epochs * steps_per_epoch
+    decay_steps = config.learning_rate_decay_steps or total_steps
+    lr_schedule = optax.cosine_decay_schedule(
+        init_value=config.learning_rate,
+        decay_steps=decay_steps,
+        alpha=config.learning_rate_final_mult,
+    )
     state, model = _create_train_state(
-        rng, config.latent_dim, data_len, config.learning_rate
+        rng,
+        config.latent_dim,
+        data_len,
+        lr_schedule,
+        config.gradient_clip_value,
     )
     metrics = TrainValMetrics.for_epochs(config.epochs)
 
     t0 = time.time()
     progress_bar = tqdm(range(config.epochs), desc="Training")
     for epoch in progress_bar:
-        rng, subkey = jax.random.split(rng)
-        batches = data.generate_training_batches(config.batch_size, rng)
-        train_args = (subkey, model, config.beta_schedule[epoch])
+        rng, data_rng, step_rng = jax.random.split(rng, 3)
+        batches = data.generate_training_batches(config.batch_size, data_rng)
+        train_args = (
+            model,
+            config.beta_schedule[epoch],
+            config.kl_free_bits,
+        )
 
         epoch_grads = []  # Store the norm of the gradients for each epoch
         for batch in batches:
-            state, _, batch_grad = _train_step(state, batch, *train_args)
+            step_rng, use_rng = jax.random.split(step_rng)
+            state, _, batch_grad = _train_step(
+                state, batch, use_rng, *train_args
+            )
 
             if track_gradients:  # TODO: do this in post (along with vae_loss)
                 epoch_grads.append(_compute_norms_for_tree(batch_grad))
@@ -105,6 +130,7 @@ def train_vae(
                 rng,
                 model,
                 config.beta_schedule[epoch],
+                config.kl_free_bits,
             ),
             val_loss=vae_loss(
                 model_data.params,
@@ -112,6 +138,7 @@ def train_vae(
                 rng,
                 model,
                 config.beta_schedule[epoch],
+                config.kl_free_bits,
             ),
             gradient_norms=epoch_grads,
         )
