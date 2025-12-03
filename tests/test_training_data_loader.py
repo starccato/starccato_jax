@@ -39,3 +39,5 @@ def test_cache_generation(source, cache):
     data = TrainValData.load(source=source, clean=True)
     # assert cache file exists
     assert os.path.exists(cache)
+    print(f"{source} -> {cache} [{data.train.shape, data.val.shape}]")
+

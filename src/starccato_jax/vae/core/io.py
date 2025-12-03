@@ -131,7 +131,13 @@ def load_model(savedir: str, model_fname: str = MODEL_FNAME) -> ModelData:
             raise RuntimeError(msg) from e
 
     # Non-failing but version mismatch: optionally emit a warning for visibility
-    if saved_version is not None and saved_version != CURRENT_VERSION:
+    major_minor_saved = (
+        ".".join(saved_version.split(".")[:2]) if saved_version is not None else None
+    )
+    major_minor_current = ".".join(CURRENT_VERSION.split(".")[:2])
+
+
+    if saved_version is not None and major_minor_saved != major_minor_current:
         # Lazy import to avoid circular logging dependency during early startup
         try:
             from starccato_jax.logging import logger  # type: ignore
