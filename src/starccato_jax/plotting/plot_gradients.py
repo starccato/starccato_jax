@@ -111,7 +111,7 @@ def plot_gradients(grad_dict, fname: str = None):
         plt.savefig(fname, bbox_inches="tight")
         plt.close(fig)
 
-    plt.show()
+
 
 
 def get_layer(string):

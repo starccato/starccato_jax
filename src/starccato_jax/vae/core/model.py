@@ -3,6 +3,7 @@ from typing import Tuple
 import jax
 import jax.numpy as jnp
 from flax import linen as nn
+from flax.core.frozen_dict import FrozenDict
 from jax import random
 from jax.random import PRNGKey
 
@@ -29,6 +30,14 @@ class Encoder(nn.Module):
         return mean_x, logvar_x
 
 
+def _has_legacy_decoder(params: dict) -> bool:
+    """Detect older decoder params (fc4 present, no layer norms)."""
+    if isinstance(params, FrozenDict):
+        params = params.unfreeze()
+    dec = params.get("decoder", {})
+    return "fc4" in dec
+
+
 class Decoder(nn.Module):
     """VAE Decoder."""
 
@@ -37,16 +46,34 @@ class Decoder(nn.Module):
     @nn.compact
     def __call__(self, z: jnp.ndarray, deterministic: bool = True) -> jnp.ndarray:
         z = nn.Dense(64, name="fc1")(z)
-        z = nn.LayerNorm(name="ln1")(z)
+        # use_scale/use_bias=False to keep compatibility with older checkpoints
+        z = nn.LayerNorm(name="ln1", use_scale=False, use_bias=False)(z)
         z = nn.leaky_relu(z, negative_slope=0.01)
         z = nn.Dropout(rate=0.1, name="drop1")(z, deterministic=deterministic)
 
         z = nn.Dense(128, name="fc2")(z)
-        z = nn.LayerNorm(name="ln2")(z)
+        z = nn.LayerNorm(name="ln2", use_scale=False, use_bias=False)(z)
         z = nn.leaky_relu(z, negative_slope=0.01)
         z = nn.Dropout(rate=0.1, name="drop2")(z, deterministic=deterministic)
 
         z = nn.Dense(self.output_dim, name="fc3")(z)
+        return z
+
+
+class LegacyDecoder(nn.Module):
+    """Legacy decoder (pre-LayerNorm/Dropout) for backward compatibility."""
+
+    output_dim: int
+
+    @nn.compact
+    def __call__(self, z: jnp.ndarray, deterministic: bool = True) -> jnp.ndarray:
+        z = nn.Dense(64, name="fc1")(z)
+        z = nn.leaky_relu(z, negative_slope=0.01)
+        z = nn.Dense(128, name="fc2")(z)
+        z = nn.leaky_relu(z, negative_slope=0.01)
+        z = nn.Dense(256, name="fc3")(z)
+        z = nn.leaky_relu(z, negative_slope=0.01)
+        z = nn.Dense(self.output_dim, name="fc4")(z)
         return z
 
 
@@ -55,12 +82,17 @@ class VAE(nn.Module):
 
     latents: int = 32
     data_dim: int | None = None
+    use_legacy_decoder: bool = False
 
     def setup(self):
         if self.data_dim is None:
             raise ValueError("VAE requires data_dim to be set.")
         self.encoder = Encoder(self.latents)
-        self.decoder = Decoder(self.data_dim)
+        self.decoder = (
+            LegacyDecoder(self.data_dim)
+            if self.use_legacy_decoder
+            else Decoder(self.data_dim)
+        )
 
     def __call__(self, x: jnp.ndarray, rng: PRNGKey, deterministic: bool = True):
         if x.shape[-1] != self.data_dim:
@@ -102,7 +134,11 @@ def generate(
     model: VAE = None,
 ) -> jnp.ndarray:
     if model is None:
-        model = VAE(model_data.latent_dim, data_dim=model_data.data_dim)
+        model = VAE(
+            model_data.latent_dim,
+            data_dim=model_data.data_dim,
+            use_legacy_decoder=_has_legacy_decoder(model_data.params),
+        )
 
     return model.apply({"params": model_data.params}, z, method=model.generate)
 
@@ -127,7 +163,11 @@ def encode(
     """
     rng = rng if rng is not None else PRNGKey(0)
     if model is None:
-        model = VAE(model_data.latent_dim, data_dim=model_data.data_dim)
+        model = VAE(
+            model_data.latent_dim,
+            data_dim=model_data.data_dim,
+            use_legacy_decoder=_has_legacy_decoder(model_data.params),
+        )
 
     z = model.apply({"params": model_data.params}, x, rng, method=model.encode)
     return z
@@ -148,6 +188,10 @@ def reconstruct(
         x = jnp.repeat(x[None, :], n_reps, axis=0)
 
     if model is None:
-        model = VAE(model_data.latent_dim, data_dim=model_data.data_dim)
+        model = VAE(
+            model_data.latent_dim,
+            data_dim=model_data.data_dim,
+            use_legacy_decoder=_has_legacy_decoder(model_data.params),
+        )
 
     return model.apply({"params": model_data.params}, x, rng)[0]

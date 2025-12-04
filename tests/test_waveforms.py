@@ -1,62 +1,38 @@
 import matplotlib.pyplot as plt
-
+import pytest
 from starccato_jax.data.default_weights import get_default_weights_dir
-from starccato_jax.waveforms import StarccatoBlip, StarccatoCCSNe
+from starccato_jax.waveforms import StarccatoBlip, StarccatoCCSNe, get_model
+
 import numpy as np
+
+
+def test_get_model_invalid_raises():
+    with pytest.raises(ValueError):
+        get_model("not-a-valid-model")
 
 
 def test_waveforms(outdir):
     """
     Test the StarccatoWaveform class.
     """
-    # Initialize the StarccatoBlip and StarccatoCCSNe classes
-    blip = StarccatoBlip()
-    ccsne = StarccatoCCSNe()
 
-    # ensure that the paths of the model are correct
-    assert blip.model_dir == get_default_weights_dir("blip")
-    assert ccsne.model_dir == get_default_weights_dir("ccsne")
+    model_types = ["ccsne", "blip"]
+    demo_signals = {}
 
-    sig = ccsne.generate(n=1)
-    glitch = blip.generate(n=1)
+    for model_type in model_types:
+        model = get_model(model_type)
+        assert isinstance(model, StarccatoCCSNe) or isinstance(model, StarccatoBlip)
+        assert model.model_name == model_type
+        assert model.model_dir == get_default_weights_dir(model_type)
+        demo_signals[model_type] = model.generate(n=1)[0]
+        assert demo_signals[model_type].shape == (512,)
 
     # Plot the generated signals
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
-    plt.plot(sig[0])
-    plt.title("CCSNe Signal")
-    plt.subplot(1, 2, 2)
-    plt.plot(glitch[0])
-    plt.title("Blip Signal")
-    plt.savefig(f"{outdir}/waveforms.png")
-    plt.close()
-
-
-def test_waveform_default(outdir):
-    """
-    Test the default waveforms.
-    """
-    ccsne = StarccatoCCSNe()
-    blip = StarccatoBlip()
-
-    # Generate default waveforms
-    ccsne_signal = ccsne.generate(n=1)[0]
-    blip_signal = blip.generate(n=1)[0]
-
-    # Check the shapes of the generated signals
-    assert ccsne_signal.shape == (512,)
-    assert blip_signal.shape == (512,)
-
-    # Save the generated signals
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
-    plt.plot(ccsne_signal)
-    plt.title("Default CCSNe Signal")
-    plt.subplot(1, 2, 2)
-    plt.plot(blip_signal)
-    plt.title("Default Blip Signal")
-    plt.savefig(f"{outdir}/default_waveforms.png")
-    plt.close()
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+    for i, (model_type, sig) in enumerate(demo_signals.items()):
+        ax[i].plot(sig)
+        ax[i].set_title(f"{model_type.upper()} Signal")
+    fig.savefig(f"{outdir}/waveforms.png")
 
 
 def test_outliers(outdir):
@@ -101,8 +77,10 @@ def test_outliers(outdir):
     # place bins according to Blip density
     bins = make_bins(blip_in_blip_norms, ccsne_in_blip_norms)
     ax = axes[0]
-    ax.hist(ccsne_in_blip_norms, bins=bins, alpha=0.5, lw=2, label='CCSNe in Blip Latent', color=ccsne_col, histtype='step')
-    ax.hist(blip_in_blip_norms, bins=bins, alpha=0.5, lw=2, label='Blip in Blip Latent', color=blip_col, histtype='step')
+    ax.hist(ccsne_in_blip_norms, bins=bins, alpha=0.5, lw=2, label='CCSNe in Blip Latent', color=ccsne_col,
+            histtype='step')
+    ax.hist(blip_in_blip_norms, bins=bins, alpha=0.5, lw=2, label='Blip in Blip Latent', color=blip_col,
+            histtype='step')
     ax.set_xscale('log')
     ax.set_title("Blip Latent Space Norms")
     ax.legend()
@@ -112,8 +90,10 @@ def test_outliers(outdir):
     # Right subplot: CCSNe latent norms (keep existing binning)
     bins = make_bins(blip_in_ccsne_norms, ccsne_in_ccsne_norms)
     ax = axes[1]
-    ax.hist(ccsne_in_ccsne_norms, bins=bins, alpha=0.5, lw=2, label='CCSNe in CCSNe Latent', color=ccsne_col, histtype='step')
-    ax.hist(blip_in_ccsne_norms, bins=bins, alpha=0.5, lw=2,  label='Blip in CCSNe Latent', color=blip_col, histtype='step')
+    ax.hist(ccsne_in_ccsne_norms, bins=bins, alpha=0.5, lw=2, label='CCSNe in CCSNe Latent', color=ccsne_col,
+            histtype='step')
+    ax.hist(blip_in_ccsne_norms, bins=bins, alpha=0.5, lw=2, label='Blip in CCSNe Latent', color=blip_col,
+            histtype='step')
     ax.set_xscale('log')
     ax.set_title("CCSNe Latent Space Norms")
     ax.legend()
@@ -123,7 +103,6 @@ def test_outliers(outdir):
     fig.tight_layout()
     fig.savefig(f"{outdir}/outlier_norms.png")
     plt.close(fig)
-
 
     # print means, std, max, min for the generated waveforms (not latent spaces) (4SF)
     print("\n")

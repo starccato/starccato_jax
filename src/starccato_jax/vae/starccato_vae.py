@@ -35,7 +35,9 @@ class StarccatoVAE(StarccatoModel):
             self.model_dir = get_default_weights_dir(model_dir)
         self._data: ModelData = load_model(self.model_dir)
         self._model: VAE = VAE(
-            latents=self.latent_dim, data_dim=self.data_dim
+            latents=self.latent_dim,
+            data_dim=self.data_dim,
+            use_legacy_decoder=self._has_legacy_decoder,
         )
 
     def __repr__(self):
@@ -48,6 +50,11 @@ class StarccatoVAE(StarccatoModel):
     @property
     def data_dim(self) -> int:
         return self._data.data_dim
+    
+    @property
+    def _has_legacy_decoder(self) -> bool:
+        from .core.model import _has_legacy_decoder
+        return _has_legacy_decoder(self._data.params)
 
     @classmethod
     def train(
