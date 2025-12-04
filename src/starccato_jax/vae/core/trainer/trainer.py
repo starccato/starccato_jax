@@ -28,7 +28,7 @@ __all__ = ["train_vae"]
 # ------------------------------
 
 
-@partial(jax.jit, static_argnames=("model",))
+@partial(jax.jit, static_argnames=("model", "use_capacity"))
 def _train_step(
     state: train_state.TrainState,
     x: jnp.ndarray,
@@ -36,10 +36,22 @@ def _train_step(
     model: VAE,
     beta: float,
     kl_free_bits: float,
+    use_capacity: bool,
+    capacity: float,
+    beta_capacity: float,
 ):
     loss, grads = jax.value_and_grad(
         lambda params: vae_loss(
-            params, x, rng, model, beta, kl_free_bits
+            params,
+            x,
+            rng,
+            model,
+            beta,
+            kl_free_bits,
+            use_capacity,
+            capacity,
+            beta_capacity,
+            deterministic=False,
         ).loss
     )(state.params)
     state = state.apply_gradients(grads=grads)
@@ -55,7 +67,7 @@ def _create_train_state(
 ) -> Tuple[train_state.TrainState, VAE]:
     model = VAE(latent_dim, data_dim=data_len)
     # Initialize the model with dummy data of shape (1, DATA_LEN)
-    params = model.init(rng, jnp.ones((1, data_len)), rng)["params"]
+    params = model.init(rng, jnp.ones((1, data_len)), rng, True)["params"]
     tx = optax.adam(learning_rate_schedule)
     if gradient_clip_value is not None:
         tx = optax.chain(optax.clip_by_global_norm(gradient_clip_value), tx)
@@ -93,7 +105,13 @@ def train_vae(
         lr_schedule,
         config.gradient_clip_value,
     )
-    metrics = TrainValMetrics.for_epochs(config.epochs)
+    metrics = TrainValMetrics.for_epochs(
+        config.epochs, use_capacity=config.use_capacity
+    )
+    best_val_recon = jnp.inf
+    best_epoch = -1
+    best_params = state.params
+    patience_counter = 0
 
     t0 = time.time()
     progress_bar = tqdm(range(config.epochs), desc="Training")
@@ -104,6 +122,9 @@ def train_vae(
             model,
             config.beta_schedule[epoch],
             config.kl_free_bits,
+            config.use_capacity,
+            config.capacity_schedule[epoch],
+            config.beta_capacity,
         )
 
         epoch_grads = []  # Store the norm of the gradients for each epoch
@@ -131,6 +152,10 @@ def train_vae(
                 model,
                 config.beta_schedule[epoch],
                 config.kl_free_bits,
+                config.use_capacity,
+                config.capacity_schedule[epoch],
+                config.beta_capacity,
+                deterministic=True,
             ),
             val_loss=vae_loss(
                 model_data.params,
@@ -139,10 +164,33 @@ def train_vae(
                 model,
                 config.beta_schedule[epoch],
                 config.kl_free_bits,
+                config.use_capacity,
+                config.capacity_schedule[epoch],
+                config.beta_capacity,
+                deterministic=True,
             ),
             gradient_norms=epoch_grads,
         )
         progress_bar.set_postfix(dict(Metrics=f"{metrics}"))
+
+        # Early stopping on validation reconstruction loss
+        val_recon = metrics.val_metrics.reconstruction_loss[epoch]
+        if val_recon + config.early_stopping_min_delta < best_val_recon:
+            best_val_recon = val_recon
+            best_epoch = epoch
+            best_params = jax.tree_util.tree_map(lambda x: x.copy(), state.params)
+            patience_counter = 0
+        else:
+            patience_counter += 1
+
+        if patience_counter >= config.early_stopping_patience:
+            logger.info(
+                "Early stopping at epoch %d (best val recon %.4f at epoch %d)",
+                epoch,
+                best_val_recon,
+                best_epoch,
+            )
+            break
 
         if plot_every != np.inf and epoch % plot_every == 0 and epoch > 0:
             progress_bar.set_description("Plotting")
@@ -156,6 +204,8 @@ def train_vae(
             )
             progress_bar.set_description("Training")
 
+    # Restore best params before saving
+    state = state.replace(params=best_params)
     model_data = ModelData(
         params=state.params, latent_dim=config.latent_dim, data_dim=data_len
     )

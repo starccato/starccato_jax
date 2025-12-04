@@ -20,6 +20,7 @@ class Losses:
     kl_divergence: Union[float, List[float]]
     loss: Union[float, List[float]]
     beta: Union[float, List[float]]
+    capacity: Union[float, List[float]] = 0.0
 
 
 @dataclass
@@ -51,23 +52,27 @@ class TrainValMetrics:
     train_metrics: Losses
     val_metrics: Losses
     gradient_norms: Gradients
+    use_capacity: bool = False
 
     @classmethod
-    def for_epochs(cls, n: int) -> "TrainValMetrics":
+    def for_epochs(cls, n: int, use_capacity: bool = False) -> "TrainValMetrics":
         return cls(
             train_metrics=Losses(
                 reconstruction_loss=np.zeros(n),
                 kl_divergence=np.zeros(n),
                 loss=np.zeros(n),
                 beta=np.zeros(n),
+                capacity=np.zeros(n),
             ),
             val_metrics=Losses(
                 reconstruction_loss=np.zeros(n),
                 kl_divergence=np.zeros(n),
                 loss=np.zeros(n),
                 beta=np.zeros(n),
+                capacity=np.zeros(n),
             ),
             gradient_norms=Gradients(n),
+            use_capacity=use_capacity,
         )
 
     def __str__(self) -> str:

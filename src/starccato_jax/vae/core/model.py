@@ -33,16 +33,20 @@ class Decoder(nn.Module):
     """VAE Decoder."""
 
     output_dim: int
-    
+
     @nn.compact
-    def __call__(self, z: jnp.ndarray) -> jnp.ndarray:
+    def __call__(self, z: jnp.ndarray, deterministic: bool = True) -> jnp.ndarray:
         z = nn.Dense(64, name="fc1")(z)
+        z = nn.LayerNorm(name="ln1")(z)
         z = nn.leaky_relu(z, negative_slope=0.01)
+        z = nn.Dropout(rate=0.1, name="drop1")(z, deterministic=deterministic)
+
         z = nn.Dense(128, name="fc2")(z)
+        z = nn.LayerNorm(name="ln2")(z)
         z = nn.leaky_relu(z, negative_slope=0.01)
-        z = nn.Dense(256, name="fc3")(z)
-        z = nn.leaky_relu(z, negative_slope=0.01)
-        z = nn.Dense(self.output_dim, name="fc4")(z)
+        z = nn.Dropout(rate=0.1, name="drop2")(z, deterministic=deterministic)
+
+        z = nn.Dense(self.output_dim, name="fc3")(z)
         return z
 
 
@@ -58,7 +62,7 @@ class VAE(nn.Module):
         self.encoder = Encoder(self.latents)
         self.decoder = Decoder(self.data_dim)
 
-    def __call__(self, x: jnp.ndarray, rng: PRNGKey):
+    def __call__(self, x: jnp.ndarray, rng: PRNGKey, deterministic: bool = True):
         if x.shape[-1] != self.data_dim:
             raise ValueError(
                 f"Input dimension {x.shape[-1]} does not match configured "
@@ -66,11 +70,11 @@ class VAE(nn.Module):
             )
         mean, logvar = self.encoder(x)
         z = _reparameterize(rng, mean, logvar)
-        recon_x = self.decoder(z)
+        recon_x = self.decoder(z, deterministic=deterministic)
         return recon_x, mean, logvar
 
     def generate(self, z: jnp.ndarray) -> jnp.ndarray:
-        return self.decoder(z)
+        return self.decoder(z, deterministic=True)
 
     def encode(self, x: jnp.ndarray, rng: PRNGKey) -> jnp.ndarray:
         mean, logvar = self.encoder(x)
