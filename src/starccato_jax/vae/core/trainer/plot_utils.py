@@ -15,6 +15,7 @@ from ....plotting import (
     plot_training_metrics,
 )
 from ..data_containers import ModelData, TrainValMetrics
+from ..metrics import compute_latent_stats
 from ..model import VAE, reconstruct
 
 
@@ -78,36 +79,32 @@ def _plot_latent_kl(
 ):
     """Compute per-dimension KL on the train set and save a diagnostic plot."""
     model = VAE(model_data.latent_dim, data_dim=model_data.data_dim)
-    _, mean, logvar = model.apply(
-        {"params": model_data.params}, data.train, rng
-    )
-    kl_per_dim = np.array(
-        jax.device_get(
-            jnp.mean(-0.5 * (1 + logvar - jnp.square(mean) - jnp.exp(logvar)), axis=0)
-        )
-    )
+    stats = compute_latent_stats(model_data.params, model, data.train, rng)
+    kl_per_dim = np.array(stats["kl_per_dim"])
     threshold = 0.1
 
-    active_mask = kl_per_dim >= threshold
-    active_dims = np.where(active_mask)[0].tolist()
-    dead_dims = np.where(~active_mask)[0].tolist()
-    n_active = len(active_dims)
-    n_total = kl_per_dim.shape[0]
-
     logger.info(
-        "KL per dim: %d/%d active (>=%.2f)=%s dead=%s",
-        n_active,
-        n_total,
+        f"KL per dim: %d/%d active (>=%.2f)=%s dead=%s; dims for 80%%=%d, 90%%=%d; "
+        f"mean|corr|=%.3f max|corr|=%.3f TC=%.3f",
+        stats["active"],
+        kl_per_dim.shape[0],
         threshold,
-        active_dims,
-        dead_dims,
+        np.where(kl_per_dim >= threshold)[0].tolist(),
+        np.where(kl_per_dim < threshold)[0].tolist(),
+        stats["n80"],
+        stats["n90"],
+        stats["mean_abs_corr"],
+        stats["max_abs_corr"],
+        stats["total_corr"],
     )
     plot_latent_kl(
         kl_per_dim,
         threshold=threshold,
         fname=f"{save_dir}/plots/kl_per_dim.png",
+        save_sorted=True,
+        sorted_fname=f"{save_dir}/plots/kl_per_dim_sorted.png",
         title=(
             f"Latent KL per dimension (train set)\n"
-            f"{n_active}/{n_total} active (>= {threshold})"
+            f"{stats['active']}/{kl_per_dim.shape[0]} active (>= {threshold})"
         ),
     )

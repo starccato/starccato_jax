@@ -20,13 +20,18 @@ def plot_training_metrics(
     )
 
     metrics = training_metrics
+    # Truncate to the actual trained length (e.g., early stopping).
+    if hasattr(metrics, "_i"):
+        n = metrics._i + 1
+    else:
+        n = metrics.n
 
     # Top plot (Beta or Capacity)
     beta = metrics.train_metrics.beta
     has_cyclical_beta = beta.max() - beta.min() > 1e-6
     if metrics.use_capacity:
         ax_top.plot(
-            metrics.train_metrics.capacity,
+            metrics.train_metrics.capacity[:n],
             label="Capacity",
             color="tab:red",
             alpha=1,
@@ -36,7 +41,7 @@ def plot_training_metrics(
         ax_top.set_ylim(bottom=0)
     elif has_cyclical_beta:
         ax_top.plot(
-            beta,
+            beta[:n],
             label="Beta",
             color="tab:red",
             alpha=1,
@@ -51,23 +56,25 @@ def plot_training_metrics(
     # Reconstruction loss per epoch
     _plot_series(
         ax_recon,
-        metrics.train_metrics.reconstruction_loss,
-        metrics.val_metrics.reconstruction_loss,
+        metrics.train_metrics.reconstruction_loss[:n],
+        metrics.val_metrics.reconstruction_loss[:n],
         ylabel=r"$\mathcal{L}_{\rm Recon}$",
         title="Reconstruction loss",
     )
     ax_recon.set_ylim(bottom=0)
+    ax_recon.set_xlim(0, n)
 
     # KL loss per epoch
     _plot_series(
         ax_kl,
-        metrics.train_metrics.kl_divergence,
-        metrics.val_metrics.kl_divergence,
+        metrics.train_metrics.kl_divergence[:n],
+        metrics.val_metrics.kl_divergence[:n],
         ylabel=r"$\mathcal{L}_{\rm KL}$",
         title="KL divergence",
     )
     ax_kl.set_ylim(bottom=0)
     ax_kl.set_xlabel("Epoch")
+    ax_kl.set_xlim(0, n)
 
     # Remove x ticks from the top and middle plots
     ax_top.tick_params(labelbottom=False)
