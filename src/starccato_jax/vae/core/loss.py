@@ -14,6 +14,7 @@ def vae_loss(
     use_capacity: bool = False,
     capacity: float = 0.0,
     beta_capacity: float = 1.0,
+    deterministic: bool = True,
 ) -> Losses:
     """
     Computes the VAE loss.
@@ -35,7 +36,9 @@ def vae_loss(
                 total loss, and beta.
     """
     # Forward pass: get reconstruction, mean, and log variance from the model.
-    reconstructed, mean, logvar = model.apply({"params": params}, x, rng)
+    reconstructed, mean, logvar = model.apply(
+        {"params": params}, x, rng, deterministic, rngs={"dropout": rng}
+    )
 
     # Reconstruction loss: mean squared error over all pixels (or features)
     reconstruction_loss = jnp.mean((x - reconstructed) ** 2)
