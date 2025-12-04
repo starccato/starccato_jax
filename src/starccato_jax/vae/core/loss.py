@@ -1,3 +1,4 @@
+import jax
 import jax.numpy as jnp
 
 from .data_containers import Losses
@@ -10,6 +11,9 @@ def vae_loss(
     model,
     beta: float,
     kl_free_bits: float = 0.0,
+    use_capacity: bool = False,
+    capacity: float = 0.0,
+    beta_capacity: float = 1.0,
 ) -> Losses:
     """
     Computes the VAE loss.
@@ -22,6 +26,9 @@ def vae_loss(
         beta: Weighting factor for the KL divergence.
         kl_free_bits: Minimum KL divergence contribution (per batch). Set to 0
             to disable.
+        use_capacity: If True, use capacity-controlled KL objective.
+        capacity: Target KL (nats) for capacity objective.
+        beta_capacity: Weight for capacity objective.
 
     Returns:
         Losses: A container holding the reconstruction loss, KL divergence,
@@ -42,6 +49,20 @@ def vae_loss(
     kl_divergence = jnp.maximum(kl_divergence, kl_free_bits)
 
     # Total loss: reconstruction loss plus beta-scaled KL divergence.
-    net_loss = reconstruction_loss + beta * kl_divergence
+    if use_capacity:
+        # Capacity-based objective encourages KL to match the target capacity.
+        cap = jnp.asarray(capacity)
+        # Hinge version: only penalize when KL exceeds capacity; smoother curves.
+        net_loss = reconstruction_loss + beta_capacity * jnp.maximum(
+            kl_divergence - jax.lax.stop_gradient(cap), 0.0
+        )
+    else:
+        net_loss = reconstruction_loss + beta * kl_divergence
 
-    return Losses(reconstruction_loss, kl_divergence, net_loss, beta)
+    return Losses(
+        reconstruction_loss=reconstruction_loss,
+        kl_divergence=kl_divergence,
+        loss=net_loss,
+        beta=beta,
+        capacity=capacity,
+    )

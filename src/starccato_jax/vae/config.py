@@ -20,6 +20,11 @@ class Config:
     gradient_clip_value: float | None = 1.0
     learning_rate_final_mult: float = 0.1  # final lr fraction for decay schedule
     learning_rate_decay_steps: int | None = None  # None -> computed from data
+    use_capacity: bool = True
+    capacity_start: float = 0.0
+    capacity_end: float = 4.0
+    capacity_warmup_epochs: int = 500
+    beta_capacity: float = 5.0
     train_fraction: float = 0.8
     dataset: str = "ccsne"
     data_dim: int | None = None
@@ -37,6 +42,11 @@ class Config:
             f"gradient_clip_value={self.gradient_clip_value}, "
             f"learning_rate_final_mult={self.learning_rate_final_mult}, "
             f"learning_rate_decay_steps={self.learning_rate_decay_steps}, "
+            f"use_capacity={self.use_capacity}, "
+            f"capacity_start={self.capacity_start}, "
+            f"capacity_end={self.capacity_end}, "
+            f"capacity_warmup_epochs={self.capacity_warmup_epochs}, "
+            f"beta_capacity={self.beta_capacity}, "
             f"source={self.dataset}, "
             f"data_dim={self.data_dim}"
             ")"
@@ -49,6 +59,12 @@ class Config:
             stop=self.beta_end,
             n_cycle=self.cyclical_annealing_cycles,
             ratio=self.beta_ratio,
+        )
+        self.capacity_schedule = capacity_schedule(
+            n_epoch=self.epochs,
+            start=self.capacity_start,
+            stop=self.capacity_end,
+            warmup_epochs=self.capacity_warmup_epochs,
         )
 
         self.data = TrainValData.load(
@@ -111,3 +127,18 @@ def cyclical_annealing_beta(
                 v += step
 
     return beta_schedule
+
+
+def capacity_schedule(
+    n_epoch: int,
+    start: float = 0.0,
+    stop: float = 4.0,
+    warmup_epochs: int = 500,
+) -> np.ndarray:
+    """Linear ramp for target KL capacity (Burgess et al. 2018)."""
+    warmup_epochs = max(1, warmup_epochs)
+    ramp = np.linspace(start, stop, warmup_epochs)
+    if warmup_epochs < n_epoch:
+        tail = np.full(n_epoch - warmup_epochs, stop)
+        return np.concatenate([ramp, tail])
+    return ramp[:n_epoch]

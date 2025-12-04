@@ -28,7 +28,7 @@ __all__ = ["train_vae"]
 # ------------------------------
 
 
-@partial(jax.jit, static_argnames=("model",))
+@partial(jax.jit, static_argnames=("model", "use_capacity"))
 def _train_step(
     state: train_state.TrainState,
     x: jnp.ndarray,
@@ -36,10 +36,21 @@ def _train_step(
     model: VAE,
     beta: float,
     kl_free_bits: float,
+    use_capacity: bool,
+    capacity: float,
+    beta_capacity: float,
 ):
     loss, grads = jax.value_and_grad(
         lambda params: vae_loss(
-            params, x, rng, model, beta, kl_free_bits
+            params,
+            x,
+            rng,
+            model,
+            beta,
+            kl_free_bits,
+            use_capacity,
+            capacity,
+            beta_capacity,
         ).loss
     )(state.params)
     state = state.apply_gradients(grads=grads)
@@ -93,7 +104,9 @@ def train_vae(
         lr_schedule,
         config.gradient_clip_value,
     )
-    metrics = TrainValMetrics.for_epochs(config.epochs)
+    metrics = TrainValMetrics.for_epochs(
+        config.epochs, use_capacity=config.use_capacity
+    )
 
     t0 = time.time()
     progress_bar = tqdm(range(config.epochs), desc="Training")
@@ -104,6 +117,9 @@ def train_vae(
             model,
             config.beta_schedule[epoch],
             config.kl_free_bits,
+            config.use_capacity,
+            config.capacity_schedule[epoch],
+            config.beta_capacity,
         )
 
         epoch_grads = []  # Store the norm of the gradients for each epoch
@@ -131,6 +147,9 @@ def train_vae(
                 model,
                 config.beta_schedule[epoch],
                 config.kl_free_bits,
+                config.use_capacity,
+                config.capacity_schedule[epoch],
+                config.beta_capacity,
             ),
             val_loss=vae_loss(
                 model_data.params,
@@ -139,6 +158,9 @@ def train_vae(
                 model,
                 config.beta_schedule[epoch],
                 config.kl_free_bits,
+                config.use_capacity,
+                config.capacity_schedule[epoch],
+                config.beta_capacity,
             ),
             gradient_norms=epoch_grads,
         )
