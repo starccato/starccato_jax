@@ -5,16 +5,79 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.2.0:
+
+v0.2.0 (2025-12-04)
+===================
+
+Features
+--------
+
+* feat: change model structure (`77fd8ec`_)
+
+Unknown
+-------
+
+* add: use dropout layers (new model structure) (`909731c`_)
+
+* Merge pull request #4 from starccato/matt_decoder_suggestions
+
+matt decoder suggestions (`648c90f`_)
+
+* add changes to model (`7f6dfcc`_)
+
+* add capacity learning (`eca7ae6`_)
+
+* add kl-per-latent diagnostic (`5276f4b`_)
+
+* adding more training setting with Matts suggestions (`e2b74f2`_)
+
+* more hacking on NZSA (`469aa0e`_)
+
+* add faster runner (`8f0f699`_)
+
+* add changes (`52e8d9a`_)
+
+* get data (`29906e1`_)
+
+* add runners (`8e4f08c`_)
+
+* add runner (`7491b70`_)
+
+* remove gunk (`cbb35b5`_)
+
+.. _77fd8ec: https://github.com/starccato/starccato_jax/commit/77fd8ecff0f019fa7e5196d4870c680bb1535611
+.. _909731c: https://github.com/starccato/starccato_jax/commit/909731c1a0f22b8be4882fb75b86709447d78d23
+.. _648c90f: https://github.com/starccato/starccato_jax/commit/648c90f49a11f901dc896d6e364ae54d8d390fdd
+.. _7f6dfcc: https://github.com/starccato/starccato_jax/commit/7f6dfcc45eea4894800f95d92ba6437273f93139
+.. _eca7ae6: https://github.com/starccato/starccato_jax/commit/eca7ae6e945d0021896e715c7ed49fceeab987b7
+.. _5276f4b: https://github.com/starccato/starccato_jax/commit/5276f4b7c58c5dc448ad0d6468b61664880af8df
+.. _e2b74f2: https://github.com/starccato/starccato_jax/commit/e2b74f2bfd45dd198203eb0df00ce4bcad2dcbe3
+.. _469aa0e: https://github.com/starccato/starccato_jax/commit/469aa0ed4972becdd94eb046170a8a5eddd03365
+.. _8f0f699: https://github.com/starccato/starccato_jax/commit/8f0f69960fdc63bea90783c775d93e91c047aea1
+.. _52e8d9a: https://github.com/starccato/starccato_jax/commit/52e8d9a7d5f62667056eae8186e80beb658bf129
+.. _29906e1: https://github.com/starccato/starccato_jax/commit/29906e130989d4b5b1c7938e6ee243d0ac64d931
+.. _8e4f08c: https://github.com/starccato/starccato_jax/commit/8e4f08c5b4f8a54f9a58fae4ea73d0b71e6395c8
+.. _7491b70: https://github.com/starccato/starccato_jax/commit/7491b708523a0a25b9a904b6bc946d178dbfaffa
+.. _cbb35b5: https://github.com/starccato/starccato_jax/commit/cbb35b5ec1f0912f96c655b3ac1d6db6d86c1d20
+
+
 .. _changelog-v0.1.18:
 
 v0.1.18 (2025-12-01)
 ====================
+
+Chores
+------
+
+* chore(release): 0.1.18 (`db21a0b`_)
 
 Unknown
 -------
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`68b9a27`_)
 
+.. _db21a0b: https://github.com/starccato/starccato_jax/commit/db21a0b484bf5896ce223f87726da220f138a37f
 .. _68b9a27: https://github.com/starccato/starccato_jax/commit/68b9a278f67cf87fc79b5b1655d7ffb7c47584ba
 
 
