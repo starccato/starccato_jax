@@ -1,2 +1,2 @@
-train-vae --latent-dim 5 --epochs 2000 --cycles 3 --dataset ccsne --outdir out_ccsne5 --batch-size 128
-train-vae --latent-dim 2 --epochs 2000 --cycles 3 --dataset blip --outdir out_blip2 --batch-size 128
+train-vae --latent-dim 5 --epochs 2000  --dataset ccsne --outdir out_ccsne --batch-size 64
+train-vae --latent-dim 5 --epochs 2000  --dataset blip --outdir out_blip --batch-size 64
