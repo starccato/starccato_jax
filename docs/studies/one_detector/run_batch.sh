@@ -18,7 +18,7 @@ ALLOWED_MAX=$((CACHE_END - DURATION))
 # GPS start times to run (within cache span). Adjust step/count as needed.
 GPS_LIST=($(seq -f "%.0f" ${CACHE_START} 4 ${ALLOWED_MAX}))
 
-INJECT_LIST=(glitch signal glitch)
+INJECT_LIST=(glitch signal)
 DETECTOR="H1"
 
 # Optional: set seeds per run. If empty, uses loop index.

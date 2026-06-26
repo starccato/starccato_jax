@@ -25,6 +25,7 @@ import numpyro.distributions as dist
 from numpyro.infer import MCMC, NUTS
 from scipy.signal.windows import tukey
 from starccato_jax import Config, StarccatoVAE
+from starccato_jax.waveforms import get_model
 from morphZ import evidence as morph_evidence
 
 jax.config.update("jax_enable_x64", True)
@@ -45,6 +46,8 @@ WINDOW_NP = np.asarray(WINDOW)
 FREQ = np.fft.rfftfreq(N, 1.0 / FS)
 FMASK = np.array((FREQ >= BAND[0]) & (FREQ <= BAND[1]))
 FMASK_JAX = jnp.array(FMASK, dtype=bool)
+
+LATENT_DIM = 5
 
 # Priors
 AMP_LOGMEAN = -2.0
@@ -73,17 +76,6 @@ def _psd_consistent(series: np.ndarray):
     return FREQ[FMASK], Pxx[..., FMASK]
 
 
-def load_or_train(model_dir: Path, dataset: str) -> StarccatoVAE:
-    model_dir = Path(model_dir)
-    # Avoid retraining if weights already exist (config.json is not persisted)
-    if (model_dir / "model.h5").exists():
-        return StarccatoVAE(str(model_dir))
-    model_dir.mkdir(parents=True, exist_ok=True)
-    cfg = Config(latent_dim=6, epochs=300, dataset=dataset)
-    StarccatoVAE.train(model_dir=str(model_dir), config=cfg, plot_every=np.inf)
-    return StarccatoVAE(str(model_dir))
-
-
 def simulate_noise(psd_level: float, key) -> np.ndarray:
     rng = np.random.default_rng(int(key[0]))
     sigma = np.sqrt(psd_level)
@@ -93,7 +85,7 @@ def simulate_noise(psd_level: float, key) -> np.ndarray:
 def sample_injection(model: StarccatoVAE, key) -> np.ndarray:
     rng_amp, rng_z = jax.random.split(key)
     amp = float(dist.LogNormal(AMP_LOGMEAN, AMP_LOGSIGMA).sample(rng_amp))
-    z = dist.Normal(0, 1).sample(rng_z, (6,))
+    z = dist.Normal(0, 1).sample(rng_z, (model.latent_dim,))
     wf = model.generate(z=z[None, :])[0]
     wf = np.array(wf, dtype=np.float64)
     return wf * amp * REFERENCE_SCALE
@@ -137,10 +129,9 @@ def log_likelihood_whittle(model, z, amp, ctx):
 def make_model(model_obj, ctx):
     def model():
         amp = numpyro.sample("amp", dist.LogNormal(AMP_LOGMEAN, AMP_LOGSIGMA))
-        z = numpyro.sample("z", dist.Normal(0, 1).expand([6]))
+        z = numpyro.sample("z", dist.Normal(0, 1).expand([LATENT_DIM]))
         ll = log_likelihood_whittle(model_obj, z, amp, ctx)
         numpyro.factor("whittle_ll", ll)
-
     return model
 
 
@@ -167,7 +158,7 @@ def estimate_evidence(samples, ll_total, which, ctx, outdir, n_resamples):
         return lp + log_likelihood_whittle(which.model_obj, z, amp, ctx)
 
     log_post_vals = np.array(jax.vmap(log_post_single)(jnp.array(theta_samples)))
-    param_names = ["amp"] + [f"z{i}" for i in range(6)]
+    param_names = ["amp"] + [f"z{i}" for i in range(LATENT_DIM)]
     out = f"{outdir}/morph_{which.name}"
     results = morph_evidence(
         post_samples=theta_samples,
@@ -188,7 +179,17 @@ def estimate_evidence(samples, ll_total, which, ctx, outdir, n_resamples):
     return logz_mean, logz_err
 
 
-def plot_summary(ctx, injection, post_sig, post_gli, inj_type, logBF, outdir):
+def classify_run(inj_type: str, logBF: float) -> str:
+    """Rudimentary success/fail classification from log Bayes factor."""
+    if np.isnan(logBF):
+        return "undetermined"
+    if inj_type == "signal":
+        return "success" if logBF > 0 else "fail"
+    # For glitch/noise injections we expect the alternative (glitch/noise) to win.
+    return "success" if logBF < 0 else "fail"
+
+
+def plot_summary(ctx, injection, post_sig, post_gli, inj_type, logBF, inj_snr, data_snr, outdir):
     f_k = ctx["f_k"]
     plt.figure(figsize=(8, 5))
     plt.loglog(f_k, ctx["PSD_k"], color="k", lw=1.2, label="Noise PSD (flat)")
@@ -211,7 +212,8 @@ def plot_summary(ctx, injection, post_sig, post_gli, inj_type, logBF, outdir):
     plt.xlim(*BAND)
     plt.xlabel("Frequency [Hz]")
     plt.ylabel("PSD [1/Hz]")
-    title = f"SNR≈{(np.sqrt(np.sum(ctx['Pxx_inj'])) if inj_type != 'noise' else 0):.1f} | inj={inj_type}"
+    status = classify_run(inj_type, logBF)
+    title = f"inj SNR={inj_snr:.1f}, data SNR={data_snr:.1f} | inj={inj_type} | {status}"
     if logBF is not None and not np.isnan(logBF):
         title += f" | logBF≈{logBF:.1f}"
     plt.title(title)
@@ -228,8 +230,8 @@ def main(args):
     rng = jax.random.PRNGKey(args.seed)
     rng_inj, rng_sig, rng_gli = jax.random.split(rng, 3)
 
-    sig_model = load_or_train(MODEL_DIR_SIG, "ccsne")
-    gli_model = load_or_train(MODEL_DIR_GLI, "blip")
+    sig_model = get_model("ccsne")
+    gli_model = get_model("blip")
 
     noise = simulate_noise(psd_level=args.psd_level, key=rng)
     if args.inject == "signal":
@@ -277,7 +279,7 @@ def main(args):
 
     post_sig_ts = posterior_draws(res_sig, sig_model)
     post_gli_ts = posterior_draws(res_gli, gli_model)
-    plot_summary(ctx, injection, post_sig_ts, post_gli_ts, args.inject, float(logBF), outdir)
+    plot_summary(ctx, injection, post_sig_ts, post_gli_ts, args.inject, float(logBF), inj_snr, data_snr, outdir)
 
     metrics = {
         "inject": args.inject,
@@ -290,6 +292,7 @@ def main(args):
         "lnz_glitch": lnz_gli,
         "lnz_glitch_err": lnz_gli_err,
         "logBF": float(logBF),
+        "classification": classify_run(args.inject, float(logBF)),
     }
     with open(outdir / "metrics.json", "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
@@ -308,7 +311,7 @@ if __name__ == "__main__":
 
     # do the above for 100 seeds, injecting either signal, glitch, or noise
     for seed in range(100):
-        for inject_type in ["signal", "glitch", "noise"]:
+        for inject_type in ["signal", "glitch"]:
             args.seed = seed
             args.inject = inject_type
             main(args)

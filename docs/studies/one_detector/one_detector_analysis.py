@@ -60,7 +60,7 @@ def _psd_consistent(series: np.ndarray):
 def band_mask(f: np.ndarray, band: tuple[float, float]) -> np.ndarray:
     return (f >= band[0]) & (f <= band[1])
 
-N_LATENTS = 32
+N_LATENTS = 5
 REFERENCE_DIST = 10.0
 # Scale the waveform generator to roughly match observed strain levels.
 # With AMP_LOGMEAN near -2.5 (median ~8e-2), a scale of 2e-20 yields
