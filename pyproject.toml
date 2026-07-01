@@ -47,7 +47,7 @@ dev = [
     "black[jupyter]>=22.12.0",
     "isort",
     "mypy",
-    "jupyter-book",
+    "jupyter-book<2",
     "pre-commit"
 ]
 
