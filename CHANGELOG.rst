@@ -5,10 +5,83 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.2.1:
+
+v0.2.1 (2026-07-01)
+===================
+
+Bug Fixes
+---------
+
+* fix: docs fix (`393df4a`_)
+
+Chores
+------
+
+* chore: update default VAE training config
+
+Use latent-dim 5 and batch-size 64 for both ccsne and blip default
+weights, matching the shipped default models. (`6f3b7e2`_)
+
+Refactoring
+-----------
+
+* refactor: remove study code superseded by starccato_lvk
+
+Drop the bilby_analysis, coverage, evidence, and one_detector study
+directories. Their single-detector likelihood, MCMC, and evidence
+machinery is replaced by the multi-detector BCR pipeline in the
+separate starccato_lvk package. Ignore the locally cloned LVK repo
+and the manuscript build directory.
+
+The one-detector work remains recoverable from the preceding commit. (`ebc9eff`_)
+
+* refactor: update one-detector study scripts
+
+Preserve in-progress edits to the single-detector analysis and
+result loaders before retiring this study in favour of the
+multi-detector starccato_lvk pipeline. (`74dd3f6`_)
+
+Unknown
+-------
+
+* fix docs (`81ee914`_)
+
+* prevent pypi on no release (`64f9def`_)
+
+* Merge pull request #5 from starccato/refactor/remove-superseded-studies
+
+refactor/remove superseded studies (`5a219e5`_)
+
+* add cross valid scripts (`ecb6dde`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`6e5065b`_)
+
+.. _393df4a: https://github.com/starccato/starccato_jax/commit/393df4a2d431eab60dbd04fd6e87db1932c1f2fd
+.. _6f3b7e2: https://github.com/starccato/starccato_jax/commit/6f3b7e24e2f5fb81ff98a09895b34da6b875e4f4
+.. _ebc9eff: https://github.com/starccato/starccato_jax/commit/ebc9eff981ca16b8fdcecaddeb79b3233966f71b
+.. _74dd3f6: https://github.com/starccato/starccato_jax/commit/74dd3f6f21bb005cb0750a7c8dbf8404a654db0e
+.. _81ee914: https://github.com/starccato/starccato_jax/commit/81ee914e0cf88cb2a92f6295233ec67752cb3e57
+.. _64f9def: https://github.com/starccato/starccato_jax/commit/64f9def5cc73176d2768235e70f9410b57f99e5c
+.. _5a219e5: https://github.com/starccato/starccato_jax/commit/5a219e5df751a54c50bfe31850a09cb405742459
+.. _ecb6dde: https://github.com/starccato/starccato_jax/commit/ecb6dde56805b1f903b3345ed4f355e3c73bf882
+.. _6e5065b: https://github.com/starccato/starccato_jax/commit/6e5065b9631bf889b7be1bf6bd511ff89d77416d
+
+
 .. _changelog-v0.2.0:
 
 v0.2.0 (2025-12-04)
 ===================
+
+Chores
+------
+
+* chore(release): 0.2.0 (`07ecfb4`_)
+
+Continuous Integration
+----------------------
+
+* ci: update ci chore (`6a435c0`_)
 
 Features
 --------
@@ -46,6 +119,8 @@ matt decoder suggestions (`648c90f`_)
 
 * remove gunk (`cbb35b5`_)
 
+.. _07ecfb4: https://github.com/starccato/starccato_jax/commit/07ecfb46e529d655290653492cb98057eec74454
+.. _6a435c0: https://github.com/starccato/starccato_jax/commit/6a435c0fbeff967b3c3c9f22ac4744883153ba0d
 .. _77fd8ec: https://github.com/starccato/starccato_jax/commit/77fd8ecff0f019fa7e5196d4870c680bb1535611
 .. _909731c: https://github.com/starccato/starccato_jax/commit/909731c1a0f22b8be4882fb75b86709447d78d23
 .. _648c90f: https://github.com/starccato/starccato_jax/commit/648c90f49a11f901dc896d6e364ae54d8d390fdd
