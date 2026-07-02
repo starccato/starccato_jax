@@ -5,6 +5,25 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.2.2:
+
+v0.2.2 (2026-07-02)
+===================
+
+Bug Fixes
+---------
+
+* fix: update defaults (`e43836a`_)
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`a8c7d7b`_)
+
+.. _e43836a: https://github.com/starccato/starccato_jax/commit/e43836ac52697c213e77bd83fa055b0d7093c60e
+.. _a8c7d7b: https://github.com/starccato/starccato_jax/commit/a8c7d7b165412910b8f03d5382480a62ad97d7d4
+
+
 .. _changelog-v0.2.1:
 
 v0.2.1 (2026-07-01)
@@ -17,6 +36,8 @@ Bug Fixes
 
 Chores
 ------
+
+* chore(release): 0.2.1 (`c20033f`_)
 
 * chore: update default VAE training config
 
@@ -45,6 +66,8 @@ multi-detector starccato_lvk pipeline. (`74dd3f6`_)
 Unknown
 -------
 
+* DELETE OLD STUDIES (`ff211e3`_)
+
 * fix docs (`81ee914`_)
 
 * prevent pypi on no release (`64f9def`_)
@@ -58,9 +81,11 @@ refactor/remove superseded studies (`5a219e5`_)
 * Merge branch 'main' of github.com:starccato/starccato_jax (`6e5065b`_)
 
 .. _393df4a: https://github.com/starccato/starccato_jax/commit/393df4a2d431eab60dbd04fd6e87db1932c1f2fd
+.. _c20033f: https://github.com/starccato/starccato_jax/commit/c20033f5bb5f397ec9d4fc5c8e72276eeb0fb952
 .. _6f3b7e2: https://github.com/starccato/starccato_jax/commit/6f3b7e24e2f5fb81ff98a09895b34da6b875e4f4
 .. _ebc9eff: https://github.com/starccato/starccato_jax/commit/ebc9eff981ca16b8fdcecaddeb79b3233966f71b
 .. _74dd3f6: https://github.com/starccato/starccato_jax/commit/74dd3f6f21bb005cb0750a7c8dbf8404a654db0e
+.. _ff211e3: https://github.com/starccato/starccato_jax/commit/ff211e38dd23ee6b041880f85143b8fbeabbfc79
 .. _81ee914: https://github.com/starccato/starccato_jax/commit/81ee914e0cf88cb2a92f6295233ec67752cb3e57
 .. _64f9def: https://github.com/starccato/starccato_jax/commit/64f9def5cc73176d2768235e70f9410b57f99e5c
 .. _5a219e5: https://github.com/starccato/starccato_jax/commit/5a219e5df751a54c50bfe31850a09cb405742459
