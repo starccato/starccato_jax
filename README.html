@@ -60,6 +60,8 @@
     <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'README';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -141,8 +143,14 @@
   
   
   
+    
+    
+      
+    
+    
+    <img src="_static/starccato-logo.png" class="logo__image only-light" alt="Starccato-JAX - Home"/>
+    <img src="_static/starccato-logo.png" class="logo__image only-dark pst-js-only" alt="Starccato-JAX - Home"/>
   
-    <p class="title logo__title">Starccato-JAX</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -353,11 +361,15 @@
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-the-models-produce">What the Models Produce</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install">Install</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#train-a-vae">Train a VAE</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-the-default-latent-dimension-is-5">Why the Default Latent Dimension is 5</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-and-sample-models">Load and Sample Models</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compare-signal-and-glitch-embeddings">Compare Signal and Glitch Embeddings</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next Steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#class-separation-score">Class Separation Score</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#latent-projection-study">Latent Projection Study</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#recommended-workflow">Recommended Workflow</a></li>
 </ul>
             </nav>
         </div>
@@ -383,6 +395,28 @@ classes used in Starccato analyses:</p>
 <li><p>Compare the signal and glitch VAEs in latent space to see how much their
 encoded populations overlap.</p></li>
 </ol>
+<p>The documentation below shows three complementary diagnostics:</p>
+<ul class="simple">
+<li><p><strong>Latent norm overlap</strong> asks whether the two waveform families occupy
+similar radii after encoding.</p></li>
+<li><p><strong>Cross-reconstruction score</strong> asks which VAE reconstructs a waveform better.
+This is the most useful simple class-separation score.</p></li>
+<li><p><strong>Latent PCA projection</strong> asks whether the full latent vectors separate in a
+low-dimensional view.</p></li>
+</ul>
+<section id="what-the-models-produce">
+<h2>What the Models Produce<a class="headerlink" href="#what-the-models-produce" title="Link to this heading">#</a></h2>
+<p>The shipped default models can generate both signal-like waveforms and
+glitch-like waveforms. These samples are standardized strain time series with
+512 points.</p>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="_images/waveform_samples.png"><img alt="Generated CCSNe and blip waveform samples" src="_images/waveform_samples.png" style="width: 95%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">Example waveforms generated from the default signal and glitch VAEs.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
 <section id="install">
 <h2>Install<a class="headerlink" href="#install" title="Link to this heading">#</a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>starccato-jax
@@ -399,11 +433,20 @@ uv<span class="w"> </span>run<span class="w"> </span>train-vae<span class="w"> <
 <p>The training CLI downloads/loads the requested dataset, standardizes each
 waveform, trains the VAE, and writes weights plus diagnostic plots into the
 output directory.</p>
+<p>Training runs write model weights and diagnostics under the requested
+<code class="docutils literal notranslate"><span class="pre">--outdir</span></code>. A typical reconstruction diagnostic looks like this:</p>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="_images/reconstructions.png"><img alt="Example VAE reconstruction diagnostic" src="_images/reconstructions.png" style="width: 80%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 2 </span><span class="caption-text">Example reconstruction plot produced by the VAE diagnostics.</span><a class="headerlink" href="#id2" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <p>Train the signal VAE:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>train-vae<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--dataset<span class="w"> </span>ccsne<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--outdir<span class="w"> </span>runs/ccsne_vae<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--latent-dim<span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--latent-dim<span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--epochs<span class="w"> </span><span class="m">1000</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--batch-size<span class="w"> </span><span class="m">64</span>
 </pre></div>
@@ -412,19 +455,64 @@ output directory.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>train-vae<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--dataset<span class="w"> </span>blip<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--outdir<span class="w"> </span>runs/blip_vae<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--latent-dim<span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--latent-dim<span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--epochs<span class="w"> </span><span class="m">1000</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--batch-size<span class="w"> </span><span class="m">64</span>
 </pre></div>
 </div>
 <p>Useful knobs:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">--latent-dim</span></code> controls the dimension of the learned latent space.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--latent-dim</span></code> controls the dimension of the learned latent space. The
+default is <code class="docutils literal notranslate"><span class="pre">5</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--cycles</span></code> controls cyclical KL annealing.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--use-capacity</span></code> / <code class="docutils literal notranslate"><span class="pre">--no-use-capacity</span></code> switches the capacity-controlled
 KL objective.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--capacity-end</span></code> and <code class="docutils literal notranslate"><span class="pre">--capacity-warmup-epochs</span></code> tune the target KL ramp.</p></li>
 </ul>
+</section>
+<section id="why-the-default-latent-dimension-is-5">
+<h2>Why the Default Latent Dimension is 5<a class="headerlink" href="#why-the-default-latent-dimension-is-5" title="Link to this heading">#</a></h2>
+<p>The VAE training default is <code class="docutils literal notranslate"><span class="pre">latent_dim=5</span></code>. This was selected from a
+dimensionality sweep over small latent sizes, using three families of
+diagnostics:</p>
+<ul class="simple">
+<li><p>latent geometry: total correlation and maximum off-diagonal correlation;</p></li>
+<li><p>cross-model separability: linear discriminant ROC-AUC and Gaussian
+Jensen-Shannon divergence;</p></li>
+<li><p>model fit: train/validation reconstruction loss and final total KL
+divergence.</p></li>
+</ul>
+<p>The sweep showed that the effective intrinsic dimensionality of the waveform
+morphology is low, around <code class="docutils literal notranslate"><span class="pre">4-6</span></code> latent dimensions. Reconstruction loss
+decreases rapidly up to <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">~=</span> <span class="pre">4-5</span></code> and then saturates. Cross-model
+separability is already strong by <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">~=</span> <span class="pre">4-5</span></code> and is essentially saturated by
+<code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>. Larger latent spaces do not add much independent descriptive
+power; instead they introduce correlated and sampler-hostile geometry.</p>
+<p>Observed geometry:</p>
+<ul class="simple">
+<li><p>For small <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">~=</span> <span class="pre">4-6</span></code>, total correlation is near zero to order unity and the
+largest pairwise latent correlation is typically weak.</p></li>
+<li><p>For larger <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">~=</span> <span class="pre">8-16</span></code>, total correlation rises quickly and the largest
+pairwise correlations can become large.</p></li>
+<li><p>The total KL plateaus near the capacity target, about <code class="docutils literal notranslate"><span class="pre">4</span></code> nats, so larger
+latent dimensions mostly spread the same information across more correlated
+coordinates.</p></li>
+</ul>
+<p>The chosen default, <code class="docutils literal notranslate"><span class="pre">z=5</span></code>, sits in the stable part of the sweep:</p>
+<ul class="simple">
+<li><p>reconstruction loss decreases smoothly with train and validation curves close
+together;</p></li>
+<li><p>train/validation KL climbs smoothly and sits just below the capacity target;</p></li>
+<li><p>all five dimensions are active by the <code class="docutils literal notranslate"><span class="pre">KL</span> <span class="pre">&gt;=</span> <span class="pre">0.1</span></code> criterion;</p></li>
+<li><p>roughly <code class="docutils literal notranslate"><span class="pre">80%</span></code> of the KL is carried by four dimensions and <code class="docutils literal notranslate"><span class="pre">90%</span></code> by all
+five;</p></li>
+<li><p>mean absolute latent correlation is about <code class="docutils literal notranslate"><span class="pre">0.039</span></code>;</p></li>
+<li><p>maximum absolute latent correlation is about <code class="docutils literal notranslate"><span class="pre">0.106</span></code>;</p></li>
+<li><p>total correlation is about <code class="docutils literal notranslate"><span class="pre">0.016</span></code>.</p></li>
+</ul>
+<p>This makes <code class="docutils literal notranslate"><span class="pre">z=5</span></code> a practical compromise: enough dimensions to reconstruct and
+separate the two waveform families, but small enough to keep the latent space
+nearly factorised for downstream sampling and parameter-estimation workflows.</p>
 </section>
 <section id="load-and-sample-models">
 <h2>Load and Sample Models<a class="headerlink" href="#load-and-sample-models" title="Link to this heading">#</a></h2>
@@ -450,7 +538,22 @@ directory:</p>
 <section id="compare-signal-and-glitch-embeddings">
 <h2>Compare Signal and Glitch Embeddings<a class="headerlink" href="#compare-signal-and-glitch-embeddings" title="Link to this heading">#</a></h2>
 <p>A direct comparison is to generate examples from each VAE, encode both
-populations through both encoders, and compare the latent norm distributions.</p>
+populations through both encoders, and compare the latent norm distributions.
+This is a compact manifold-overlap check: it reduces each latent vector to its
+Euclidean norm, then compares the resulting one-dimensional distributions.</p>
+<p>This plot is useful for answering: “Does the other waveform family land in the
+same broad part of this model’s latent space?” It is not, by itself, the best
+classifier, because two latent clouds can have similar radii while still being
+separated by direction or local geometry.</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="_images/embedding_overlap.png"><img alt="Cross-encoded signal and glitch latent norm overlap" src="_images/embedding_overlap.png" style="width: 95%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">Cross-encoding generated waveforms through both VAEs. With the current
+default weights, the signal latent-space norm overlap is about <code class="docutils literal notranslate"><span class="pre">0.72</span></code> and
+the glitch latent-space norm overlap is about <code class="docutils literal notranslate"><span class="pre">0.005</span></code>.</span><a class="headerlink" href="#id3" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <p>Interpretation:</p>
 <ul class="simple">
 <li><p>Low overlap in the <code class="docutils literal notranslate"><span class="pre">ccsne</span></code> latent space means the signal encoder places
@@ -460,6 +563,11 @@ signal-like waveforms away from the glitch manifold.</p></li>
 <li><p>The overlap score below is the shared area between two normalized
 histograms. <code class="docutils literal notranslate"><span class="pre">0</span></code> means separated; <code class="docutils literal notranslate"><span class="pre">1</span></code> means indistinguishable by this
 one-dimensional norm summary.</p></li>
+<li><p>In the current default models, the glitch VAE latent norm is highly
+discriminating, while the signal VAE latent norm is less discriminating. That
+asymmetry is useful: it says the glitch model strongly rejects signal-like
+waveforms by latent radius, but the signal model’s latent radius alone is not
+enough to reject all glitch-like waveforms.</p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
@@ -553,12 +661,163 @@ one-dimensional norm summary.</p></li>
 </pre></div>
 </div>
 </section>
-<section id="next-steps">
-<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h2>
-<p>The latent-norm plot is a compact first pass. For publication-quality
-separation studies, repeat the same cross-encoding idea on held-out validation
-waveforms and add a multidimensional projection, such as PCA or UMAP, of the
-latent vectors themselves.</p>
+<section id="class-separation-score">
+<h2>Class Separation Score<a class="headerlink" href="#class-separation-score" title="Link to this heading">#</a></h2>
+<p>For classification, the strongest simple diagnostic is a cross-reconstruction
+score. Reconstruct the same waveform with both VAEs and compare the mean
+squared reconstruction error:</p>
+<div class="math notranslate nohighlight">
+\[s(x) = \log_{10}\left(
+    \frac{\mathrm{MSE}(\mathrm{glitch\ VAE}, x)}
+         {\mathrm{MSE}(\mathrm{signal\ VAE}, x)}
+\right)\]</div>
+<p>Positive scores favor the signal VAE. Negative scores favor the glitch VAE.
+On the held-out validation waveforms sampled below, the current default
+weights separate the two classes cleanly with a threshold at <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+<p>Why this works:</p>
+<ul class="simple">
+<li><p>Each VAE is trained to reconstruct one waveform family.</p></li>
+<li><p>A waveform should reconstruct better under the model whose training
+distribution it resembles.</p></li>
+<li><p>The log ratio makes the score symmetric and easy to threshold: <code class="docutils literal notranslate"><span class="pre">0</span></code> means
+both VAEs reconstruct equally well.</p></li>
+<li><p>The magnitude is interpretable. A score of <code class="docutils literal notranslate"><span class="pre">+1</span></code> means the glitch VAE has
+about ten times the reconstruction MSE of the signal VAE. A score of <code class="docutils literal notranslate"><span class="pre">-2</span></code>
+means the glitch VAE has about one hundredth of the signal VAE’s
+reconstruction MSE.</p></li>
+</ul>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="_images/cross_reconstruction_score.png"><img alt="Cross-reconstruction score separating held-out CCSNe and blip waveforms" src="_images/cross_reconstruction_score.png" style="width: 95%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">Cross-reconstruction error is a direct class-separation diagnostic. The
+left panel shows the signed decision score; the right panel shows the median
+reconstruction error under each model.</span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>For the current default weights, the held-out validation sample used to make
+this figure gives:</p>
+<ul class="simple">
+<li><p>CCSNe accuracy at threshold <code class="docutils literal notranslate"><span class="pre">0</span></code>: <code class="docutils literal notranslate"><span class="pre">1.000</span></code>.</p></li>
+<li><p>Blip accuracy at threshold <code class="docutils literal notranslate"><span class="pre">0</span></code>: <code class="docutils literal notranslate"><span class="pre">1.000</span></code>.</p></li>
+<li><p>Balanced accuracy: <code class="docutils literal notranslate"><span class="pre">1.000</span></code>.</p></li>
+<li><p>Median CCSNe score: <code class="docutils literal notranslate"><span class="pre">+1.156</span></code>.</p></li>
+<li><p>Median blip score: <code class="docutils literal notranslate"><span class="pre">-1.997</span></code>.</p></li>
+</ul>
+<p>These numbers should be treated as a model diagnostic, not a final detection
+claim. For an analysis paper, recompute them on the exact held-out data,
+preprocessing, and trained weights used in the experiment.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">TrainValData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.waveforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">StarccatoBlip</span><span class="p">,</span> <span class="n">StarccatoCCSNe</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">reconstruction_mse</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="n">xhat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">reconstruct</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">xhat</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="n">signal_vae</span> <span class="o">=</span> <span class="n">StarccatoCCSNe</span><span class="p">()</span>
+<span class="n">glitch_vae</span> <span class="o">=</span> <span class="n">StarccatoBlip</span><span class="p">()</span>
+
+<span class="n">signal_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">TrainValData</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">&quot;ccsne&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">val</span><span class="p">)</span>
+<span class="n">glitch_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">TrainValData</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">&quot;blip&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">val</span><span class="p">)</span>
+
+<span class="n">signal_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
+    <span class="n">reconstruction_mse</span><span class="p">(</span><span class="n">glitch_vae</span><span class="p">,</span> <span class="n">signal_x</span><span class="p">)</span>
+    <span class="o">/</span> <span class="n">reconstruction_mse</span><span class="p">(</span><span class="n">signal_vae</span><span class="p">,</span> <span class="n">signal_x</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">glitch_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
+    <span class="n">reconstruction_mse</span><span class="p">(</span><span class="n">glitch_vae</span><span class="p">,</span> <span class="n">glitch_x</span><span class="p">)</span>
+    <span class="o">/</span> <span class="n">reconstruction_mse</span><span class="p">(</span><span class="n">signal_vae</span><span class="p">,</span> <span class="n">glitch_x</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">signal_accuracy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">signal_score</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">glitch_accuracy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">glitch_score</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">balanced_accuracy</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">signal_accuracy</span> <span class="o">+</span> <span class="n">glitch_accuracy</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="latent-projection-study">
+<h2>Latent Projection Study<a class="headerlink" href="#latent-projection-study" title="Link to this heading">#</a></h2>
+<p>The norm plot compresses each latent vector to one number. A second useful
+view is to keep the full latent vectors, combine the signal and glitch
+encodings in each VAE latent space, and project them to two dimensions with
+PCA.</p>
+<p>This plot is qualitative. It helps show whether separation is visible in the
+dominant latent directions, but it should not replace a numerical score such as
+the cross-reconstruction ratio. PCA is used here because it is deterministic,
+dependency-free, and sufficient for a lightweight documentation diagnostic.</p>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="_images/latent_pca_projection.png"><img alt="PCA projection of cross-encoded signal and glitch latent vectors" src="_images/latent_pca_projection.png" style="width: 95%;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text">Two-dimensional PCA projection of the encoded latent vectors. Each panel is
+fit within one VAE latent space, then both waveform families are plotted in
+that same projected coordinate system.</span><a class="headerlink" href="#id5" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">starccato_jax.waveforms</span><span class="w"> </span><span class="kn">import</span> <span class="n">StarccatoBlip</span><span class="p">,</span> <span class="n">StarccatoCCSNe</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">encode</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span> <span class="n">waveforms</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">encoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">waveforms</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pca2</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">z0</span> <span class="o">=</span> <span class="n">z</span> <span class="o">-</span> <span class="n">z</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">vt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">z0</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">z0</span> <span class="o">@</span> <span class="n">vt</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+
+
+<span class="n">n</span> <span class="o">=</span> <span class="mi">2500</span>
+<span class="n">signal_vae</span> <span class="o">=</span> <span class="n">StarccatoCCSNe</span><span class="p">()</span>
+<span class="n">glitch_vae</span> <span class="o">=</span> <span class="n">StarccatoBlip</span><span class="p">()</span>
+
+<span class="n">signal_x</span> <span class="o">=</span> <span class="n">signal_vae</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+<span class="n">glitch_x</span> <span class="o">=</span> <span class="n">glitch_vae</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">signal_space_xy</span> <span class="o">=</span> <span class="n">pca2</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">encode</span><span class="p">(</span><span class="n">signal_vae</span><span class="p">,</span> <span class="n">signal_x</span><span class="p">),</span>
+            <span class="n">encode</span><span class="p">(</span><span class="n">signal_vae</span><span class="p">,</span> <span class="n">glitch_x</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">glitch_space_xy</span> <span class="o">=</span> <span class="n">pca2</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">encode</span><span class="p">(</span><span class="n">glitch_vae</span><span class="p">,</span> <span class="n">glitch_x</span><span class="p">),</span>
+            <span class="n">encode</span><span class="p">(</span><span class="n">glitch_vae</span><span class="p">,</span> <span class="n">signal_x</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="recommended-workflow">
+<h2>Recommended Workflow<a class="headerlink" href="#recommended-workflow" title="Link to this heading">#</a></h2>
+<p>Use the diagnostics in this order:</p>
+<ol class="arabic simple">
+<li><p>Train one <code class="docutils literal notranslate"><span class="pre">ccsne</span></code> VAE and one <code class="docutils literal notranslate"><span class="pre">blip</span></code> VAE with matched preprocessing and
+comparable latent dimensions.</p></li>
+<li><p>Check reconstruction plots from each model to confirm that the VAE learned
+the basic waveform morphology.</p></li>
+<li><p>Compute cross-reconstruction scores on held-out validation waveforms. This
+is the main class-separation diagnostic.</p></li>
+<li><p>Use latent norm overlap to summarize whether one model’s latent space
+broadly accepts or rejects the other waveform family.</p></li>
+<li><p>Use PCA projections as a visual sanity check of the full latent vectors.</p></li>
+</ol>
+<p>If the cross-reconstruction score separates the classes but the latent norm
+overlap does not, the VAEs are still useful for discrimination: the separation
+is likely carried by latent direction or decoder reconstruction quality rather
+than by radius alone.</p>
 </section>
 </section>
 
@@ -610,11 +869,15 @@ latent vectors themselves.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-the-models-produce">What the Models Produce</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install">Install</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#train-a-vae">Train a VAE</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-the-default-latent-dimension-is-5">Why the Default Latent Dimension is 5</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-and-sample-models">Load and Sample Models</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#compare-signal-and-glitch-embeddings">Compare Signal and Glitch Embeddings</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next Steps</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#class-separation-score">Class Separation Score</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#latent-projection-study">Latent Projection Study</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#recommended-workflow">Recommended Workflow</a></li>
 </ul>
   </nav></div>
 
