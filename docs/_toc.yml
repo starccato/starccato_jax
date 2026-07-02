@@ -1,14 +1,4 @@
 # Table of contents
-# Learn more at https://jupyterbook.org/customize/toc.html
 
 format: jb-book
 root: README.rst
-parts:
-- caption: " "
-  chapters:
-  - file: example.ipynb
-  - file: CHANGELOG.rst
-- caption: "Studies"
-  chapters:
-  - file: studies/loss_vs_zsize/loss_vs_zsize.rst
-  - file: studies/cyclical_beta/cyclical_beta.rst

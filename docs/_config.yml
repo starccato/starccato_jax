@@ -6,6 +6,11 @@ author: starccato devs
 execute:
   execute_notebooks: 'off'
 
+exclude_patterns:
+  - CHANGELOG.rst
+  - example.ipynb
+  - studies/**
+
 
 
 repository:
