@@ -144,6 +144,20 @@ This makes ``z=5`` a practical compromise: enough dimensions to reconstruct and
 separate the two waveform families, but small enough to keep the latent space
 nearly factorised for downstream sampling and parameter-estimation workflows.
 
+.. figure:: assets/latent_dimensionality_sweep.png
+   :alt: Latent-dimensionality sweep showing geometry, separability, and reconstruction trends
+   :width: 95%
+   :align: center
+
+   Summary of the dimensionality sweep used to choose ``z=5``. Small latent
+   spaces keep total correlation and pairwise coupling low, while reconstruction
+   and cross-model separability have already saturated by about ``z=5``.
+
+The script that makes this figure is
+``docs/studies/latent_dimensionality/latent_dimensionality.py``. It currently
+uses compact summary arrays from the sweep notes; if the full sweep table is
+exported later, that script should be the single place to swap in the raw CSV.
+
 Load and Sample Models
 ----------------------
 
