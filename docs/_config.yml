@@ -1,7 +1,7 @@
 # see https://jupyterbook.org/customize/config.html
 title: Starccato-JAX
 author: starccato devs
-#logo: logo.png
+logo: assets/starccato-logo.png
 
 execute:
   execute_notebooks: 'off'
