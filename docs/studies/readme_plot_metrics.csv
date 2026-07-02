@@ -1,0 +1,13 @@
+metric,value
+signal_latent_norm_overlap,0.7194238445074332
+glitch_latent_norm_overlap,0.0054421768707483
+cross_recon_n_validation,350
+cross_recon_signal_accuracy,1.0
+cross_recon_glitch_accuracy,1.0
+cross_recon_balanced_accuracy,1.0
+cross_recon_signal_score_median,1.1556511
+cross_recon_glitch_score_median,-1.996526
+median_mse_signal_by_signal,0.09745199
+median_mse_signal_by_glitch,1.4823058
+median_mse_glitch_by_signal,1.3080609
+median_mse_glitch_by_glitch,0.0120183155

@@ -22,6 +22,16 @@ The documentation below shows three complementary diagnostics:
 * **Latent PCA projection** asks whether the full latent vectors separate in a
   low-dimensional view.
 
+The README figures are reproducible. To regenerate them from the shipped
+default model artifacts:
+
+.. code-block:: bash
+
+   uv run python docs/studies/make_readme_plots.py
+
+That script writes the figures to ``docs/assets/`` and records the numerical
+caption values in ``docs/studies/readme_plot_metrics.csv``.
+
 What the Models Produce
 -----------------------
 
@@ -101,8 +111,8 @@ Useful knobs:
 Why the Default Latent Dimension is 5
 -------------------------------------
 
-The VAE training default is ``latent_dim=5``. This was selected from a
-dimensionality sweep over small latent sizes, using three families of
+The VAE training default is ``latent_dim=5``. The intended validation is a
+latent-dimensionality sweep over small latent sizes, using three families of
 diagnostics:
 
 * latent geometry: total correlation and maximum off-diagonal correlation;
@@ -111,52 +121,34 @@ diagnostics:
 * model fit: train/validation reconstruction loss and final total KL
   divergence.
 
-The sweep showed that the effective intrinsic dimensionality of the waveform
-morphology is low, around ``4-6`` latent dimensions. Reconstruction loss
-decreases rapidly up to ``z ~= 4-5`` and then saturates. Cross-model
-separability is already strong by ``z ~= 4-5`` and is essentially saturated by
-``z >= 6``. Larger latent spaces do not add much independent descriptive
-power; instead they introduce correlated and sampler-hostile geometry.
+The reproducible sweep script trains both waveform families at each requested
+latent dimension, records the measurements to CSV, and then plots the summary
+figure from those CSV files:
 
-Observed geometry:
+.. code-block:: bash
 
-* For small ``z ~= 4-6``, total correlation is near zero to order unity and the
-  largest pairwise latent correlation is typically weak.
-* For larger ``z ~= 8-16``, total correlation rises quickly and the largest
-  pairwise correlations can become large.
-* The total KL plateaus near the capacity target, about ``4`` nats, so larger
-  latent dimensions mostly spread the same information across more correlated
-  coordinates.
+   uv run python docs/studies/latent_dimensionality/run_latent_sweep.py \
+     --latent-dims 2,3,4,5,6,8,12,16 \
+     --epochs 1000
 
-The chosen default, ``z=5``, sits in the stable part of the sweep:
+The script writes:
 
-* reconstruction loss decreases smoothly with train and validation curves close
-  together;
-* train/validation KL climbs smoothly and sits just below the capacity target;
-* all five dimensions are active by the ``KL >= 0.1`` criterion;
-* roughly ``80%`` of the KL is carried by four dimensions and ``90%`` by all
-  five;
-* mean absolute latent correlation is about ``0.039``;
-* maximum absolute latent correlation is about ``0.106``;
-* total correlation is about ``0.016``.
+* ``docs/studies/latent_dimensionality/out/latent_sweep_metrics.csv`` with
+  reconstruction, KL, active-dimension, correlation, and total-correlation
+  measurements for each trained model;
+* ``docs/studies/latent_dimensionality/out/latent_sweep_separability.csv`` with
+  cross-model LDA ROC-AUC and Gaussian Jensen-Shannon divergence;
+* ``docs/assets/latent_dimensionality_sweep.png`` generated only from those CSV
+  files.
 
-This makes ``z=5`` a practical compromise: enough dimensions to reconstruct and
-separate the two waveform families, but small enough to keep the latent space
-nearly factorised for downstream sampling and parameter-estimation workflows.
+For a quick end-to-end check without claiming publication-quality numbers:
 
-.. figure:: assets/latent_dimensionality_sweep.png
-   :alt: Latent-dimensionality sweep showing geometry, separability, and reconstruction trends
-   :width: 95%
-   :align: center
+.. code-block:: bash
 
-   Summary of the dimensionality sweep used to choose ``z=5``. Small latent
-   spaces keep total correlation and pairwise coupling low, while reconstruction
-   and cross-model separability have already saturated by about ``z=5``.
-
-The script that makes this figure is
-``docs/studies/latent_dimensionality/latent_dimensionality.py``. It currently
-uses compact summary arrays from the sweep notes; if the full sweep table is
-exported later, that script should be the single place to swap in the raw CSV.
+   uv run python docs/studies/latent_dimensionality/run_latent_sweep.py \
+     --latent-dims 2 \
+     --epochs 2 \
+     --outdir /tmp/starccato_latent_sweep_smoke
 
 Load and Sample Models
 ----------------------
