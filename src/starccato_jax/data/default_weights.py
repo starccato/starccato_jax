@@ -25,9 +25,14 @@ def get_default_weights_dir(
             should_download = True
 
     if should_download:
-        if "blip" in dataset:
-            download_with_progress(BLIP_WEIGHTS_URL, fpath)
-        elif "ccsne" in dataset:
-            download_with_progress(CCSNE_WEIGHTS_URL, fpath)
+        url = BLIP_WEIGHTS_URL if "blip" in dataset else CCSNE_WEIGHTS_URL
+        try:
+            download_with_progress(url, fpath)
+        except OSError:
+            # Offline (e.g. HPC compute node with no internet): fall back to
+            # the existing cached weights rather than crashing on a routine
+            # 24h freshness check.
+            if not os.path.exists(fpath):
+                raise
 
     return model_dir
