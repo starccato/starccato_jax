@@ -25,3 +25,6 @@ rich_handler.setFormatter(formatter)
 
 # Add handler to logger
 logger.addHandler(rich_handler)
+
+# Silence arviz's noisy "optional package not installed" preview logs
+logging.getLogger("arviz.preview").setLevel(logging.WARNING)

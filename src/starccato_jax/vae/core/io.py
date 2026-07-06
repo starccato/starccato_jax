@@ -130,27 +130,6 @@ def load_model(savedir: str, model_fname: str = MODEL_FNAME) -> ModelData:
                 )
             raise RuntimeError(msg) from e
 
-    # Non-failing but version mismatch: optionally emit a warning for visibility
-    major_minor_saved = (
-        ".".join(saved_version.split(".")[:2]) if saved_version is not None else None
-    )
-    major_minor_current = ".".join(CURRENT_VERSION.split(".")[:2])
-
-
-    if saved_version is not None and major_minor_saved != major_minor_current:
-        # Lazy import to avoid circular logging dependency during early startup
-        try:
-            from starccato_jax.logging import logger  # type: ignore
-
-            logger.warning(
-                "Model artifact version %s differs from current %s. If you encounter "
-                "shape or field errors later, retrain or pin the earlier version.",
-                saved_version,
-                CURRENT_VERSION,
-            )
-        except Exception:
-            pass
-
     return ModelData(params, config.latent_dim, config.data_dim)
 
 
