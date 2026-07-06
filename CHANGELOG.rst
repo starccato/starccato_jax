@@ -5,6 +5,28 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.2.3:
+
+v0.2.3 (2026-07-06)
+===================
+
+Bug Fixes
+---------
+
+* fix: allow stale weights (`7429b4a`_)
+
+Unknown
+-------
+
+* fix latent dim sweep (`5078ede`_)
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`a6b633b`_)
+
+.. _7429b4a: https://github.com/starccato/starccato_jax/commit/7429b4ae1fed1cc2337a1e110cdf5f1a95bee776
+.. _5078ede: https://github.com/starccato/starccato_jax/commit/5078ede8fcdc127d5bd6a910934cbcad52bbd968
+.. _a6b633b: https://github.com/starccato/starccato_jax/commit/a6b633b19adaca6c57f62d74393fa9945c34a803
+
+
 .. _changelog-v0.2.2:
 
 v0.2.2 (2026-07-02)
@@ -15,12 +37,21 @@ Bug Fixes
 
 * fix: update defaults (`e43836a`_)
 
+Chores
+------
+
+* chore(release): 0.2.2 (`e595731`_)
+
 Unknown
 -------
+
+* hacky plots for z size (`5033480`_)
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`a8c7d7b`_)
 
 .. _e43836a: https://github.com/starccato/starccato_jax/commit/e43836ac52697c213e77bd83fa055b0d7093c60e
+.. _e595731: https://github.com/starccato/starccato_jax/commit/e595731f0c5e9d56d5ff61fdd3346b375ec44461
+.. _5033480: https://github.com/starccato/starccato_jax/commit/50334809a04b6fc2f8bc3409df7f55c15b680fc5
 .. _a8c7d7b: https://github.com/starccato/starccato_jax/commit/a8c7d7b165412910b8f03d5382480a62ad97d7d4
 
 
