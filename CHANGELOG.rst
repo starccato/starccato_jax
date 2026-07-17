@@ -5,6 +5,25 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.2.4:
+
+v0.2.4 (2026-07-06)
+===================
+
+Bug Fixes
+---------
+
+* fix: logging (`6ac3234`_)
+
+Unknown
+-------
+
+* Merge branch 'main' of github.com:starccato/starccato_jax (`9cceba7`_)
+
+.. _6ac3234: https://github.com/starccato/starccato_jax/commit/6ac32343b4cccd8426b5ba66918c05438a6174f3
+.. _9cceba7: https://github.com/starccato/starccato_jax/commit/9cceba7c420ed4d70892221f05626277d74b7d21
+
+
 .. _changelog-v0.2.3:
 
 v0.2.3 (2026-07-06)
@@ -15,14 +34,23 @@ Bug Fixes
 
 * fix: allow stale weights (`7429b4a`_)
 
+Chores
+------
+
+* chore(release): 0.2.3 (`b1ca8c2`_)
+
 Unknown
 -------
+
+* update workflow (`1e07154`_)
 
 * fix latent dim sweep (`5078ede`_)
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`a6b633b`_)
 
 .. _7429b4a: https://github.com/starccato/starccato_jax/commit/7429b4ae1fed1cc2337a1e110cdf5f1a95bee776
+.. _b1ca8c2: https://github.com/starccato/starccato_jax/commit/b1ca8c29a03a1e2a17a07bdcd00d29ee6039ee0d
+.. _1e07154: https://github.com/starccato/starccato_jax/commit/1e07154210ed2ae1f3feb3eeb588b2e15ea158a0
 .. _5078ede: https://github.com/starccato/starccato_jax/commit/5078ede8fcdc127d5bd6a910934cbcad52bbd968
 .. _a6b633b: https://github.com/starccato/starccato_jax/commit/a6b633b19adaca6c57f62d74393fa9945c34a803
 
