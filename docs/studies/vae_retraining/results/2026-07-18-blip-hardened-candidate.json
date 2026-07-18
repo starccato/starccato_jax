@@ -1,0 +1,63 @@
+{
+  "model_dir": "/Users/avi/Documents/projects/starccato_jax/starccato_jax/out_blip_hardened",
+  "model_sha256": "4f7d590bfe5f23f07785fa6b16b68ed8115a8ad1e8333c87341b7731c27c9879",
+  "dataset": "blip",
+  "data_seed": 0,
+  "frequency_band_hz": [
+    300.0,
+    800.0
+  ],
+  "sample_rate_hz": 4096.0,
+  "validation_fidelity": {
+    "time_mse_median": 0.013182441385740516,
+    "time_mse_p90": 0.059993960970388574,
+    "mismatch_median": 0.24024874453491457,
+    "mismatch_p90": 0.8183504621871677,
+    "log_spectral_distance_median": 1.913185352567595,
+    "log_spectral_distance_p90": 2.637950948087181,
+    "peak_time_error_ms_median": 0.0,
+    "peak_time_error_ms_p90": 0.48828125
+  },
+  "prior_geometry": {
+    "n_points": 128,
+    "singular_value_median": [
+      15.67363166809082,
+      9.691792488098145,
+      5.584942817687988,
+      3.2736363410949707,
+      0.14798399806022644
+    ],
+    "condition_number_median": 111.30119323730469,
+    "condition_number_p90": 233.91366577148438,
+    "effective_rank_min": 5,
+    "roundtrip_rmse_median": 0.2746233637545355,
+    "roundtrip_rmse_p90": 0.6111530330344978
+  },
+  "prior_collisions": {
+    "n_points": 128,
+    "eligible_pairs": 8076,
+    "collision_pairs": 0,
+    "minimum_mismatch": 0.0033187270164489746,
+    "mismatch_p01": 0.04605087637901306,
+    "minimum_mismatch_pair": [
+      56,
+      106
+    ],
+    "minimum_mismatch_latent_distance": 1.0701453852217038
+  },
+  "validation_geometry": {
+    "n_points": 128,
+    "singular_value_median": [
+      12.878772735595703,
+      7.19858980178833,
+      4.565482139587402,
+      2.6204676628112793,
+      0.11746686697006226
+    ],
+    "condition_number_median": 119.66192626953125,
+    "condition_number_p90": 212.4856719970703,
+    "effective_rank_min": 5,
+    "roundtrip_rmse_median": 0.07167099092866203,
+    "roundtrip_rmse_p90": 0.13749877920085782
+  }
+}

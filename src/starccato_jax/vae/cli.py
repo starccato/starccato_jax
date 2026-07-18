@@ -7,7 +7,12 @@ from .starccato_vae import StarccatoVAE
 @click.command("train_vae")
 @click.option("--latent-dim", default=5, help="Latent dimension for the VAE")
 @click.option("--epochs", default=1000, help="Number of training epochs")
-@click.option("--cycles", default=3, help="Cyclical annealing cycles")
+@click.option(
+    "--cycles",
+    default=0,
+    show_default=True,
+    help="Cyclical beta annealing cycles (used only with --no-use-capacity)",
+)
 @click.option(
     "--outdir", default="model_out", help="Output directory for the model"
 )
@@ -53,7 +58,7 @@ from .starccato_vae import StarccatoVAE
     "--beta-capacity",
     default=5.0,
     show_default=True,
-    help="Weight on |KL - capacity| during capacity training",
+    help="Weight on max(KL - capacity, 0) during capacity training",
 )
 @click.option(
     "--normalize-decoder-output/--raw-decoder-output",

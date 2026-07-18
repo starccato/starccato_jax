@@ -1,0 +1,243 @@
+{
+  "model_dir": "/Users/avi/Documents/projects/starccato_jax/starccato_jax/out_ccsne",
+  "model_sha256": "bb29a84f913e8dde92e3e5f855606fcc4fbe036cf74bd11dadc18a157b1800aa",
+  "dataset": "ccsne",
+  "data_seed": 0,
+  "frequency_band_hz": [
+    300.0,
+    800.0
+  ],
+  "sample_rate_hz": 4096.0,
+  "validation_fidelity": {
+    "time_mse_median": 0.09447103682938228,
+    "time_mse_p90": 0.4622671671928337,
+    "mismatch_median": 0.0398227467029576,
+    "mismatch_p90": 0.6829017709412719,
+    "log_spectral_distance_median": 0.25952575413948475,
+    "log_spectral_distance_p90": 0.9078008950150555,
+    "peak_time_error_ms_median": 0.0,
+    "peak_time_error_ms_p90": 1.220703125
+  },
+  "prior_geometry": {
+    "n_points": 128,
+    "singular_value_median": [
+      21.448986053466797,
+      12.985525131225586,
+      8.57324504852295,
+      5.496782302856445,
+      3.3426623344421387
+    ],
+    "condition_number_median": 6.093084812164307,
+    "condition_number_p90": 10.544731140136719,
+    "effective_rank_min": 5,
+    "roundtrip_rmse_median": 0.203030722169864,
+    "roundtrip_rmse_p90": 0.43923414538644634
+  },
+  "prior_collisions": {
+    "n_points": 128,
+    "eligible_pairs": 8076,
+    "collision_pairs": 0,
+    "minimum_mismatch": 0.011186420917510986,
+    "mismatch_p01": 0.07365038990974426,
+    "minimum_mismatch_pair": [
+      56,
+      106
+    ],
+    "minimum_mismatch_latent_distance": 1.0701453852217038
+  },
+  "validation_geometry": {
+    "n_points": 128,
+    "singular_value_median": [
+      16.074087142944336,
+      9.38184928894043,
+      6.415640830993652,
+      3.814124584197998,
+      2.376800537109375
+    ],
+    "condition_number_median": 6.582487106323242,
+    "condition_number_p90": 10.289414405822754,
+    "effective_rank_min": 5,
+    "roundtrip_rmse_median": 0.11129986353295834,
+    "roundtrip_rmse_p90": 0.19326131686631004
+  },
+  "posterior_samples": "/Users/avi/.codex/visualizations/2026/07/18/019f72ad-ec01-7b72-898f-d1531d144a78/vae_retraining_final/ccsne_z5_c12_e2000_seed1_map_nuts/samples.npz",
+  "posterior_geometry": {
+    "n_points": 128,
+    "singular_value_median": [
+      33.77430725097656,
+      22.28237533569336,
+      16.722774505615234,
+      13.134881973266602,
+      9.757667541503906
+    ],
+    "condition_number_median": 3.712805986404419,
+    "condition_number_p90": 5.406128883361816,
+    "effective_rank_min": 5,
+    "roundtrip_rmse_median": 0.14699444472540873,
+    "roundtrip_rmse_p90": 0.2070709384310573
+  },
+  "posterior_collisions": {
+    "n_points": 128,
+    "eligible_pairs": 2305,
+    "collision_pairs": 0,
+    "minimum_mismatch": 0.1034730076789856,
+    "mismatch_p01": 0.15541905164718628,
+    "minimum_mismatch_pair": [
+      16,
+      61
+    ],
+    "minimum_mismatch_latent_distance": 1.0210240702254052
+  },
+  "map_diagnostics": "/Users/avi/.codex/visualizations/2026/07/18/019f72ad-ec01-7b72-898f-d1531d144a78/vae_retraining_final/ccsne_z5_c12_e2000_seed1_map_nuts/diagnostics.json",
+  "map_log_density_descending": [
+    64.95853353905653,
+    58.946549633743665,
+    58.94620590764599,
+    58.944178744199434,
+    58.94299306348641,
+    58.942449167952134,
+    54.5121801585564,
+    54.51210755907918,
+    53.65922392809047,
+    53.65900127616072,
+    53.64321681035369,
+    53.49185861017465,
+    51.192179734813976,
+    50.86768652185917,
+    49.44887200750145,
+    45.992671625664975,
+    45.99262636921769,
+    45.9922442820338,
+    45.600733810024686,
+    45.13827586355609
+  ],
+  "map_geometry": {
+    "n_points": 20,
+    "singular_value_median": [
+      34.513126373291016,
+      25.33164405822754,
+      17.962303161621094,
+      12.529410362243652,
+      7.163071632385254
+    ],
+    "condition_number_median": 4.846184730529785,
+    "condition_number_p90": 6.356734275817871,
+    "effective_rank_min": 5,
+    "roundtrip_rmse_median": 0.0989710761367311,
+    "roundtrip_rmse_p90": 0.2215120263248346
+  },
+  "map_collisions": {
+    "n_points": 20,
+    "eligible_pairs": 169,
+    "collision_pairs": 0,
+    "minimum_mismatch": 0.0470922589302063,
+    "mismatch_p01": 0.04805713891983032,
+    "minimum_mismatch_pair": [
+      3,
+      6
+    ],
+    "minimum_mismatch_latent_distance": 0.6965757415332604
+  },
+  "map_to_posterior": [
+    {
+      "attempt_index": 12,
+      "log_density": 64.95853353905653,
+      "minimum_latent_distance": 0.06785806653949995
+    },
+    {
+      "attempt_index": 10,
+      "log_density": 58.946549633743665,
+      "minimum_latent_distance": 1.3860423605596552
+    },
+    {
+      "attempt_index": 5,
+      "log_density": 58.94620590764599,
+      "minimum_latent_distance": 1.3933301740323403
+    },
+    {
+      "attempt_index": 7,
+      "log_density": 58.944178744199434,
+      "minimum_latent_distance": 1.3913039140922945
+    },
+    {
+      "attempt_index": 2,
+      "log_density": 58.94299306348641,
+      "minimum_latent_distance": 1.4044724400786028
+    },
+    {
+      "attempt_index": 11,
+      "log_density": 58.942449167952134,
+      "minimum_latent_distance": 1.3738622111508128
+    },
+    {
+      "attempt_index": 15,
+      "log_density": 54.5121801585564,
+      "minimum_latent_distance": 2.4435463571161042
+    },
+    {
+      "attempt_index": 8,
+      "log_density": 54.51210755907918,
+      "minimum_latent_distance": 2.44365214056742
+    },
+    {
+      "attempt_index": 13,
+      "log_density": 53.65922392809047,
+      "minimum_latent_distance": 2.2132453870909337
+    },
+    {
+      "attempt_index": 1,
+      "log_density": 53.65900127616072,
+      "minimum_latent_distance": 2.216880812618701
+    },
+    {
+      "attempt_index": 3,
+      "log_density": 53.64321681035369,
+      "minimum_latent_distance": 2.3049177428480805
+    },
+    {
+      "attempt_index": 6,
+      "log_density": 53.49185861017465,
+      "minimum_latent_distance": 2.3992536253310526
+    },
+    {
+      "attempt_index": 9,
+      "log_density": 51.192179734813976,
+      "minimum_latent_distance": 1.8439052636328912
+    },
+    {
+      "attempt_index": 16,
+      "log_density": 50.86768652185917,
+      "minimum_latent_distance": 1.605151826102067
+    },
+    {
+      "attempt_index": 17,
+      "log_density": 49.44887200750145,
+      "minimum_latent_distance": 1.4823316150071584
+    },
+    {
+      "attempt_index": 18,
+      "log_density": 45.992671625664975,
+      "minimum_latent_distance": 1.3169648361951776
+    },
+    {
+      "attempt_index": 0,
+      "log_density": 45.99262636921769,
+      "minimum_latent_distance": 1.3179446519185558
+    },
+    {
+      "attempt_index": 14,
+      "log_density": 45.9922442820338,
+      "minimum_latent_distance": 1.3162248717861695
+    },
+    {
+      "attempt_index": 19,
+      "log_density": 45.600733810024686,
+      "minimum_latent_distance": 1.3353493707870192
+    },
+    {
+      "attempt_index": 4,
+      "log_density": 45.13827586355609,
+      "minimum_latent_distance": 1.0254076439880142
+    }
+  ]
+}

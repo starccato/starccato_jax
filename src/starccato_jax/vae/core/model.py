@@ -1,6 +1,5 @@
 from typing import Tuple
 
-import jax
 import jax.numpy as jnp
 from flax import linen as nn
 from flax.core.frozen_dict import FrozenDict
@@ -127,6 +126,22 @@ class VAE(nn.Module):
         recon_x = self.decode(z, deterministic=deterministic)
         return recon_x, mean, logvar
 
+    def reconstruct_from_mean(self, x: jnp.ndarray):
+        """Reconstruct ``x`` from the encoder mean without sampling.
+
+        This path is intended for validation and checkpoint selection.  The
+        ordinary forward path remains stochastic so training and public
+        posterior-reconstruction APIs retain their existing behaviour.
+        """
+        if x.shape[-1] != self.data_dim:
+            raise ValueError(
+                f"Input dimension {x.shape[-1]} does not match configured "
+                f"data_dim={self.data_dim}."
+            )
+        mean, logvar = self.encoder(x)
+        recon_x = self.decode(mean, deterministic=True)
+        return recon_x, mean, logvar
+
     def decode(
         self, z: jnp.ndarray, deterministic: bool = True
     ) -> jnp.ndarray:
@@ -144,7 +159,7 @@ class VAE(nn.Module):
         return z
 
     def encode_mean(self, x: jnp.ndarray) -> jnp.ndarray:
-        """Return the deterministic mean of the approximate latent posterior."""
+        """Return the deterministic approximate-posterior mean."""
         mean, _ = self.encoder(x)
         return mean
 
@@ -155,8 +170,8 @@ def _reparameterize(
     """
     Reparameterization trick for VAE
 
-    This takes in the mean and logvar of the latent distribution and returns a sample
-    from the distribution.
+    This takes the mean and log variance of the latent distribution and returns
+    a sample from the distribution.
     """
     std = jnp.exp(0.5 * logvar)
     eps = random.normal(rng, logvar.shape)

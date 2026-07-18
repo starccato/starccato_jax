@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Selected by the July 2026 retraining study. The blip run intentionally uses
-# 1000 epochs: the matched 2000-epoch run stopped at epoch 1408 and had worse
-# held-out deterministic reconstruction MSE.
+# Selected by the July 2026 retraining and inference-geometry study. Both runs
+# intentionally use seed 2: lower-MSE alternatives produced multimodal or
+# slowly mixing LVK posteriors and failed four-chain convergence.
 uv run train-vae \
   --dataset ccsne \
   --latent-dim 5 \
-  --epochs 2000 \
-  --cycles 3 \
+  --epochs 1000 \
+  --cycles 0 \
   --batch-size 64 \
-  --seed 1 \
+  --seed 2 \
   --data-seed 0 \
   --use-capacity \
   --capacity-start 0 \
@@ -24,9 +24,9 @@ uv run train-vae \
   --dataset blip \
   --latent-dim 5 \
   --epochs 1000 \
-  --cycles 3 \
+  --cycles 0 \
   --batch-size 64 \
-  --seed 0 \
+  --seed 2 \
   --data-seed 0 \
   --use-capacity \
   --capacity-start 0 \

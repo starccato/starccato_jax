@@ -1,9 +1,11 @@
 import os.path
 
 import jax
+import numpy as np
 import pytest
 
 from starccato_jax.data import TrainValData
+from starccato_jax.data import training_data
 from starccato_jax.data.datasets.blip_glitches import BLIP_CACHE
 from starccato_jax.data.datasets.richers_ccsne import CCSNE_CACHE
 
@@ -28,6 +30,27 @@ def test_batch_generation():
     assert batches.shape == (n_batches, batch_size, 512)
 
 
+def test_zero_variance_waveform_is_rejected(monkeypatch):
+    data = np.vstack([np.zeros(8), np.arange(8), np.arange(8)[::-1]])
+    monkeypatch.setattr(
+        training_data, "load_dataset", lambda *args, **kwargs: data
+    )
+
+    with pytest.raises(ValueError, match="zero-variance waveform"):
+        TrainValData.load()
+
+
+def test_non_finite_waveform_is_rejected(monkeypatch):
+    data = np.vstack([np.arange(8), np.arange(8), np.arange(8)]).astype(float)
+    data[1, 3] = np.nan
+    monkeypatch.setattr(
+        training_data, "load_dataset", lambda *args, **kwargs: data
+    )
+
+    with pytest.raises(ValueError, match="non-finite"):
+        TrainValData.load()
+
+
 @pytest.mark.parametrize(
     "source, cache",
     [
@@ -40,4 +63,3 @@ def test_cache_generation(source, cache):
     # assert cache file exists
     assert os.path.exists(cache)
     print(f"{source} -> {cache} [{data.train.shape, data.val.shape}]")
-

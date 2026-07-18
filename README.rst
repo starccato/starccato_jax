@@ -103,7 +103,8 @@ Useful knobs:
 
 * ``--latent-dim`` controls the dimension of the learned latent space. The
   default is ``5``.
-* ``--cycles`` controls cyclical KL annealing.
+* ``--cycles`` controls cyclical KL annealing for ``--no-use-capacity``
+  training. It is not used by the capacity objective.
 * ``--use-capacity`` / ``--no-use-capacity`` switches the capacity-controlled
   KL objective.
 * ``--capacity-end`` and ``--capacity-warmup-epochs`` tune the target KL ramp.
