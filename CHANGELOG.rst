@@ -5,6 +5,27 @@ CHANGELOG
 =========
 
 
+.. _changelog-v0.3.0:
+
+v0.3.0 (2026-07-18)
+===================
+
+Features
+--------
+
+* feat(vae): publish normalized default weights (`e8df22a`_)
+
+Unknown
+-------
+
+* Merge pull request #8 from starccato/new_weights
+
+New weights (`c4233c9`_)
+
+.. _e8df22a: https://github.com/starccato/starccato_jax/commit/e8df22a1c3bb4843d154ddebec283fc6185a8029
+.. _c4233c9: https://github.com/starccato/starccato_jax/commit/c4233c914f56011c515340863e2d3e4eaa68d133
+
+
 .. _changelog-v0.2.5:
 
 v0.2.5 (2026-07-18)
@@ -15,12 +36,18 @@ Bug Fixes
 
 * fix: update KL div (`f53432e`_)
 
+Chores
+------
+
+* chore(release): 0.2.5 (`4be6d16`_)
+
 Unknown
 -------
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`751a229`_)
 
 .. _f53432e: https://github.com/starccato/starccato_jax/commit/f53432e51f228ed39f380b948eecf7d93a281905
+.. _4be6d16: https://github.com/starccato/starccato_jax/commit/4be6d162921e38d103c26d914d7c8dfa94e4b9c8
 .. _751a229: https://github.com/starccato/starccato_jax/commit/751a2299c22fc9fa448b3177b8565c92e372ad72
 
 
