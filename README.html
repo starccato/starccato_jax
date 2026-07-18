@@ -471,7 +471,8 @@ output directory.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">--latent-dim</span></code> controls the dimension of the learned latent space. The
 default is <code class="docutils literal notranslate"><span class="pre">5</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">--cycles</span></code> controls cyclical KL annealing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--cycles</span></code> controls cyclical KL annealing for <code class="docutils literal notranslate"><span class="pre">--no-use-capacity</span></code>
+training. It is not used by the capacity objective.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--use-capacity</span></code> / <code class="docutils literal notranslate"><span class="pre">--no-use-capacity</span></code> switches the capacity-controlled
 KL objective.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--capacity-end</span></code> and <code class="docutils literal notranslate"><span class="pre">--capacity-warmup-epochs</span></code> tune the target KL ramp.</p></li>
