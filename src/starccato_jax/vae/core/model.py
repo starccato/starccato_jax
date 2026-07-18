@@ -9,7 +9,22 @@ from jax.random import PRNGKey
 
 from .data_containers import ModelData
 
-__all__ = ["VAE", "ModelData", "generate", "reconstruct", "encode"]
+__all__ = [
+    "VAE",
+    "ModelData",
+    "generate",
+    "reconstruct",
+    "encode",
+    "encode_mean",
+    "normalize_waveform",
+]
+
+
+def normalize_waveform(x: jnp.ndarray, eps: float = 1e-6) -> jnp.ndarray:
+    """Return a zero-mean, unit-RMS waveform along the final axis."""
+    centered = x - jnp.mean(x, axis=-1, keepdims=True)
+    rms = jnp.sqrt(jnp.mean(jnp.square(centered), axis=-1, keepdims=True))
+    return centered / jnp.maximum(rms, eps)
 
 
 class Encoder(nn.Module):
@@ -44,7 +59,9 @@ class Decoder(nn.Module):
     output_dim: int
 
     @nn.compact
-    def __call__(self, z: jnp.ndarray, deterministic: bool = True) -> jnp.ndarray:
+    def __call__(
+        self, z: jnp.ndarray, deterministic: bool = True
+    ) -> jnp.ndarray:
         z = nn.Dense(64, name="fc1")(z)
         # use_scale/use_bias=False to keep compatibility with older checkpoints
         z = nn.LayerNorm(name="ln1", use_scale=False, use_bias=False)(z)
@@ -66,7 +83,9 @@ class LegacyDecoder(nn.Module):
     output_dim: int
 
     @nn.compact
-    def __call__(self, z: jnp.ndarray, deterministic: bool = True) -> jnp.ndarray:
+    def __call__(
+        self, z: jnp.ndarray, deterministic: bool = True
+    ) -> jnp.ndarray:
         z = nn.Dense(64, name="fc1")(z)
         z = nn.leaky_relu(z, negative_slope=0.01)
         z = nn.Dense(128, name="fc2")(z)
@@ -83,6 +102,7 @@ class VAE(nn.Module):
     latents: int = 32
     data_dim: int | None = None
     use_legacy_decoder: bool = False
+    normalize_decoder_output: bool = True
 
     def setup(self):
         if self.data_dim is None:
@@ -94,7 +114,9 @@ class VAE(nn.Module):
             else Decoder(self.data_dim)
         )
 
-    def __call__(self, x: jnp.ndarray, rng: PRNGKey, deterministic: bool = True):
+    def __call__(
+        self, x: jnp.ndarray, rng: PRNGKey, deterministic: bool = True
+    ):
         if x.shape[-1] != self.data_dim:
             raise ValueError(
                 f"Input dimension {x.shape[-1]} does not match configured "
@@ -102,16 +124,29 @@ class VAE(nn.Module):
             )
         mean, logvar = self.encoder(x)
         z = _reparameterize(rng, mean, logvar)
-        recon_x = self.decoder(z, deterministic=deterministic)
+        recon_x = self.decode(z, deterministic=deterministic)
         return recon_x, mean, logvar
 
+    def decode(
+        self, z: jnp.ndarray, deterministic: bool = True
+    ) -> jnp.ndarray:
+        waveform = self.decoder(z, deterministic=deterministic)
+        if self.normalize_decoder_output:
+            waveform = normalize_waveform(waveform)
+        return waveform
+
     def generate(self, z: jnp.ndarray) -> jnp.ndarray:
-        return self.decoder(z, deterministic=True)
+        return self.decode(z, deterministic=True)
 
     def encode(self, x: jnp.ndarray, rng: PRNGKey) -> jnp.ndarray:
         mean, logvar = self.encoder(x)
         z = _reparameterize(rng, mean, logvar)
         return z
+
+    def encode_mean(self, x: jnp.ndarray) -> jnp.ndarray:
+        """Return the deterministic mean of the approximate latent posterior."""
+        mean, _ = self.encoder(x)
+        return mean
 
 
 def _reparameterize(
@@ -138,6 +173,7 @@ def generate(
             model_data.latent_dim,
             data_dim=model_data.data_dim,
             use_legacy_decoder=_has_legacy_decoder(model_data.params),
+            normalize_decoder_output=model_data.normalize_decoder_output,
         )
 
     return model.apply({"params": model_data.params}, z, method=model.generate)
@@ -167,10 +203,29 @@ def encode(
             model_data.latent_dim,
             data_dim=model_data.data_dim,
             use_legacy_decoder=_has_legacy_decoder(model_data.params),
+            normalize_decoder_output=model_data.normalize_decoder_output,
         )
 
     z = model.apply({"params": model_data.params}, x, rng, method=model.encode)
     return z
+
+
+def encode_mean(
+    x: jnp.ndarray,
+    model_data: ModelData,
+    model: VAE = None,
+) -> jnp.ndarray:
+    """Encode ``x`` using the approximate-posterior mean (no RNG required)."""
+    if model is None:
+        model = VAE(
+            model_data.latent_dim,
+            data_dim=model_data.data_dim,
+            use_legacy_decoder=_has_legacy_decoder(model_data.params),
+            normalize_decoder_output=model_data.normalize_decoder_output,
+        )
+    return model.apply(
+        {"params": model_data.params}, x, method=model.encode_mean
+    )
 
 
 def reconstruct(
@@ -192,6 +247,7 @@ def reconstruct(
             model_data.latent_dim,
             data_dim=model_data.data_dim,
             use_legacy_decoder=_has_legacy_decoder(model_data.params),
+            normalize_decoder_output=model_data.normalize_decoder_output,
         )
 
     return model.apply({"params": model_data.params}, x, rng)[0]

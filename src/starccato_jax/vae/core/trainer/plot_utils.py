@@ -75,10 +75,17 @@ def _save_gifs(save_dir):
 
 
 def _plot_latent_kl(
-    model_data: ModelData, data: TrainValData, rng: jax.random.PRNGKey, save_dir: str
+    model_data: ModelData,
+    data: TrainValData,
+    rng: jax.random.PRNGKey,
+    save_dir: str,
 ):
     """Compute per-dimension KL on the train set and save a diagnostic plot."""
-    model = VAE(model_data.latent_dim, data_dim=model_data.data_dim)
+    model = VAE(
+        model_data.latent_dim,
+        data_dim=model_data.data_dim,
+        normalize_decoder_output=model_data.normalize_decoder_output,
+    )
     stats = compute_latent_stats(model_data.params, model, data.train, rng)
     kl_per_dim = np.array(stats["kl_per_dim"])
     threshold = 0.1

@@ -25,10 +25,10 @@ def vae_loss(
         rng: Random number generator key.
         model: The VAE model.
         beta: Weighting factor for the KL divergence.
-        kl_free_bits: Minimum KL divergence contribution (per batch). Set to 0
-            to disable.
+        kl_free_bits: Minimum total KL contribution in nats. Set to 0 to
+            disable.
         use_capacity: If True, use capacity-controlled KL objective.
-        capacity: Target KL (nats) for capacity objective.
+        capacity: Upper total-KL budget (nats) for capacity objective.
         beta_capacity: Weight for capacity objective.
 
     Returns:
@@ -43,17 +43,19 @@ def vae_loss(
     # Reconstruction loss: mean squared error over all pixels (or features)
     reconstruction_loss = jnp.mean((x - reconstructed) ** 2)
 
-    # BATCH AVERAGE KL DIVERGENCE
-    # which would compute the mean KL divergence over the batch.
-    kl_divergence = -0.5 * jnp.mean(
-        1 + logvar - jnp.square(mean) - jnp.exp(logvar)
+    # Mean over the batch of the *total* latent KL per example. Summing the
+    # latent dimensions is essential: capacity and free-bit values are in
+    # total nats, independent of the chosen latent dimensionality.
+    kl_per_example = -0.5 * jnp.sum(
+        1 + logvar - jnp.square(mean) - jnp.exp(logvar), axis=-1
     )
+    kl_divergence = jnp.mean(kl_per_example)
     # Apply free-bits as a floor; when kl_free_bits=0 this is a no-op.
     kl_divergence = jnp.maximum(kl_divergence, kl_free_bits)
 
     # Total loss: reconstruction loss plus beta-scaled KL divergence.
     if use_capacity:
-        # Capacity-based objective encourages KL to match the target capacity.
+        # Capacity is an upper information budget, not an equality target.
         cap = jnp.asarray(capacity)
         # Hinge version: only penalize when KL exceeds capacity; smoother curves.
         net_loss = reconstruction_loss + beta_capacity * jnp.maximum(

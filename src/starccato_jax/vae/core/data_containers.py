@@ -12,6 +12,7 @@ class ModelData:
     params: Dict
     latent_dim: int
     data_dim: int
+    normalize_decoder_output: bool = False
 
 
 @dataclass
@@ -55,7 +56,9 @@ class TrainValMetrics:
     use_capacity: bool = False
 
     @classmethod
-    def for_epochs(cls, n: int, use_capacity: bool = False) -> "TrainValMetrics":
+    def for_epochs(
+        cls, n: int, use_capacity: bool = False
+    ) -> "TrainValMetrics":
         return cls(
             train_metrics=Losses(
                 reconstruction_loss=np.zeros(n),

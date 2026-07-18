@@ -11,10 +11,20 @@ from .starccato_vae import StarccatoVAE
 @click.option(
     "--outdir", default="model_out", help="Output directory for the model"
 )
-@click.option(
-    "--batch-size", default=64, help="Batch size for training"
-)
+@click.option("--batch-size", default=64, help="Batch size for training")
 @click.option("--dataset", default="ccsne", help="Source of the training data")
+@click.option(
+    "--seed",
+    default=0,
+    show_default=True,
+    help="Seed for parameter initialization and training batches.",
+)
+@click.option(
+    "--data-seed",
+    default=0,
+    show_default=True,
+    help="Seed for the fixed train/validation split.",
+)
 @click.option(
     "--use-capacity/--no-use-capacity",
     default=True,
@@ -29,7 +39,7 @@ from .starccato_vae import StarccatoVAE
 )
 @click.option(
     "--capacity-end",
-    default=4.0,
+    default=12.0,
     show_default=True,
     help="Final target KL capacity (nats)",
 )
@@ -45,6 +55,12 @@ from .starccato_vae import StarccatoVAE
     show_default=True,
     help="Weight on |KL - capacity| during capacity training",
 )
+@click.option(
+    "--normalize-decoder-output/--raw-decoder-output",
+    default=True,
+    show_default=True,
+    help="Constrain generated waveforms to zero mean and unit RMS.",
+)
 def cli_train(
     latent_dim: int,
     epochs: int,
@@ -52,11 +68,14 @@ def cli_train(
     outdir: str,
     batch_size: int,
     dataset: str,
+    seed: int,
+    data_seed: int,
     use_capacity: bool,
     capacity_start: float,
     capacity_end: float,
     capacity_warmup_epochs: int,
     beta_capacity: float,
+    normalize_decoder_output: bool,
 ):
     """Train the Starccato VAE model."""
     config = Config(
@@ -64,12 +83,15 @@ def cli_train(
         epochs=epochs,
         cyclical_annealing_cycles=cycles,
         dataset=dataset,
+        seed=seed,
+        data_seed=data_seed,
         batch_size=batch_size,
         use_capacity=use_capacity,
         capacity_start=capacity_start,
         capacity_end=capacity_end,
         capacity_warmup_epochs=capacity_warmup_epochs,
         beta_capacity=beta_capacity,
+        normalize_decoder_output=normalize_decoder_output,
     )
     StarccatoVAE.train(
         model_dir=outdir,

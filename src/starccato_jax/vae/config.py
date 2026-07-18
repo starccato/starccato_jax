@@ -16,20 +16,25 @@ class Config:
     beta_start: float = 0.0
     beta_end: float = 0.5
     beta_ratio: float = 0.3  # fraction of each cycle spent ramping beta
-    kl_free_bits: float = 0.05  # minimum KL per batch (0 disables free-bits)
+    kl_free_bits: float = 0.05  # total-KL floor in nats (0 disables it)
     gradient_clip_value: float | None = 1.0
-    learning_rate_final_mult: float = 0.1  # final lr fraction for decay schedule
+    learning_rate_final_mult: float = (
+        0.1  # final lr fraction for decay schedule
+    )
     learning_rate_decay_steps: int | None = None  # None -> computed from data
     early_stopping_patience: int = 200
     early_stopping_min_delta: float = 1e-4
     use_capacity: bool = True
     capacity_start: float = 0.0
-    capacity_end: float = 4.0
+    capacity_end: float = 12.0
     capacity_warmup_epochs: int = 500
     beta_capacity: float = 5.0
     train_fraction: float = 0.8
+    seed: int = 0
+    data_seed: int = 0
     dataset: str = "ccsne"
     data_dim: int | None = None
+    normalize_decoder_output: bool = True
 
     def __repr__(self):
         return (
@@ -51,8 +56,11 @@ class Config:
             f"capacity_end={self.capacity_end}, "
             f"capacity_warmup_epochs={self.capacity_warmup_epochs}, "
             f"beta_capacity={self.beta_capacity}, "
+            f"seed={self.seed}, "
+            f"data_seed={self.data_seed}, "
             f"source={self.dataset}, "
-            f"data_dim={self.data_dim}"
+            f"data_dim={self.data_dim}, "
+            f"normalize_decoder_output={self.normalize_decoder_output}"
             ")"
         )
 
@@ -72,7 +80,9 @@ class Config:
         )
 
         self.data = TrainValData.load(
-            train_fraction=self.train_fraction, source=self.dataset
+            train_fraction=self.train_fraction,
+            seed=self.data_seed,
+            source=self.dataset,
         )
 
         # capture the input/output dimensionality for downstream use
@@ -91,7 +101,6 @@ class Config:
         n = self.data.train.shape[0]
         n_batches = self.data.train.shape[0] // self.batch_size
         n_discarded = self.data.train.shape[0] - n_batches * self.batch_size
-
 
 
 def cyclical_annealing_beta(
@@ -136,10 +145,10 @@ def cyclical_annealing_beta(
 def capacity_schedule(
     n_epoch: int,
     start: float = 0.0,
-    stop: float = 4.0,
+    stop: float = 12.0,
     warmup_epochs: int = 500,
 ) -> np.ndarray:
-    """Linear ramp for target KL capacity (Burgess et al. 2018)."""
+    """Linear ramp for the total-KL capacity budget."""
     warmup_epochs = max(1, warmup_epochs)
     ramp = np.linspace(start, stop, warmup_epochs)
     if warmup_epochs < n_epoch:

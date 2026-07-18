@@ -56,8 +56,11 @@ def parse_str_list(value: str) -> list[str]:
     return [part.strip() for part in value.split(",") if part.strip()]
 
 
-def model_dir(outdir: Path, dataset: str, latent_dim: int) -> Path:
-    return outdir / "models" / f"{dataset}_z{latent_dim}"
+def model_dir(
+    outdir: Path, dataset: str, latent_dim: int, capacity_end: float
+) -> Path:
+    capacity_label = str(capacity_end).replace(".", "p")
+    return outdir / "models" / f"{dataset}_z{latent_dim}_c{capacity_label}"
 
 
 def train_if_needed(
@@ -66,9 +69,10 @@ def train_if_needed(
     latent_dim: int,
     epochs: int,
     batch_size: int,
+    capacity_end: float,
     force: bool,
 ) -> Path:
-    target = model_dir(outdir, dataset, latent_dim)
+    target = model_dir(outdir, dataset, latent_dim, capacity_end)
     if (target / MODEL_FNAME).exists() and not force:
         print(f"reusing {target}")
         return target
@@ -80,7 +84,7 @@ def train_if_needed(
         dataset=dataset,
         use_capacity=True,
         capacity_start=0.0,
-        capacity_end=4.0,
+        capacity_end=capacity_end,
         capacity_warmup_epochs=min(500, epochs),
         beta_capacity=5.0,
     )
@@ -104,7 +108,11 @@ def loss_value(losses, split: str, field: str, idx: int) -> float:
 
 def measure_model(savedir: Path, dataset: str, latent_dim: int) -> dict:
     model_data = load_model(str(savedir))
-    model = VAE(model_data.latent_dim, data_dim=model_data.data_dim)
+    model = VAE(
+        model_data.latent_dim,
+        data_dim=model_data.data_dim,
+        normalize_decoder_output=model_data.normalize_decoder_output,
+    )
     data = TrainValData.load(source=dataset)
     rng = jax.random.PRNGKey(0)
     stats = compute_latent_stats(model_data.params, model, data.val, rng)
@@ -211,7 +219,11 @@ def lda_auc_and_jsd(a: np.ndarray, b: np.ndarray) -> tuple[float, float]:
 
 def encoded_latents(savedir: Path, x: np.ndarray) -> np.ndarray:
     model_data = load_model(str(savedir))
-    model = VAE(model_data.latent_dim, data_dim=model_data.data_dim)
+    model = VAE(
+        model_data.latent_dim,
+        data_dim=model_data.data_dim,
+        normalize_decoder_output=model_data.normalize_decoder_output,
+    )
     z = encode(
         jnp.asarray(x), model_data, rng=jax.random.PRNGKey(0), model=model
     )
@@ -222,9 +234,10 @@ def measure_separability(
     outdir: Path,
     latent_dim: int,
     n_validation: int,
+    capacity_end: float,
 ) -> list[dict]:
-    ccsne_dir = model_dir(outdir, "ccsne", latent_dim)
-    blip_dir = model_dir(outdir, "blip", latent_dim)
+    ccsne_dir = model_dir(outdir, "ccsne", latent_dim, capacity_end)
+    blip_dir = model_dir(outdir, "blip", latent_dim, capacity_end)
     if (
         not (ccsne_dir / MODEL_FNAME).exists()
         or not (blip_dir / MODEL_FNAME).exists()
@@ -378,6 +391,12 @@ def main() -> None:
     parser.add_argument("--datasets", default="ccsne,blip")
     parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument(
+        "--capacity-end",
+        type=float,
+        default=12.0,
+        help="final total-KL capacity in nats",
+    )
     parser.add_argument("--outdir", type=Path, default=DEFAULT_OUTDIR)
     parser.add_argument("--n-validation", type=int, default=1000)
     parser.add_argument(
@@ -410,6 +429,7 @@ def main() -> None:
                     latent_dim,
                     args.epochs,
                     args.batch_size,
+                    args.capacity_end,
                     args.force,
                 )
                 metric_rows.append(measure_model(savedir, dataset, latent_dim))
@@ -419,7 +439,10 @@ def main() -> None:
         for latent_dim in latent_dims:
             separability_rows.extend(
                 measure_separability(
-                    args.outdir, latent_dim, args.n_validation
+                    args.outdir,
+                    latent_dim,
+                    args.n_validation,
+                    args.capacity_end,
                 )
             )
         write_csv(args.outdir / SEPARABILITY_CSV, separability_rows)

@@ -64,8 +64,13 @@ def _create_train_state(
     data_len: int,
     learning_rate_schedule,
     gradient_clip_value: float | None = None,
+    normalize_decoder_output: bool = True,
 ) -> Tuple[train_state.TrainState, VAE]:
-    model = VAE(latent_dim, data_dim=data_len)
+    model = VAE(
+        latent_dim,
+        data_dim=data_len,
+        normalize_decoder_output=normalize_decoder_output,
+    )
     # Initialize the model with dummy data of shape (1, DATA_LEN)
     params = model.init(rng, jnp.ones((1, data_len)), rng, True)["params"]
     tx = optax.adam(learning_rate_schedule)
@@ -89,7 +94,7 @@ def train_vae(
 ):
     os.makedirs(save_dir, exist_ok=True)
     n_train, data_len = data.train.shape
-    rng = jax.random.PRNGKey(0)
+    rng = jax.random.PRNGKey(config.seed)
     steps_per_epoch = max(n_train // config.batch_size, 1)
     total_steps = config.epochs * steps_per_epoch
     decay_steps = config.learning_rate_decay_steps or total_steps
@@ -104,6 +109,7 @@ def train_vae(
         data_len,
         lr_schedule,
         config.gradient_clip_value,
+        config.normalize_decoder_output,
     )
     metrics = TrainValMetrics.for_epochs(
         config.epochs, use_capacity=config.use_capacity
@@ -141,6 +147,7 @@ def train_vae(
             params=state.params,
             latent_dim=config.latent_dim,
             data_dim=data_len,
+            normalize_decoder_output=config.normalize_decoder_output,
         )
 
         metrics.append(
@@ -178,7 +185,9 @@ def train_vae(
         if val_recon + config.early_stopping_min_delta < best_val_recon:
             best_val_recon = val_recon
             best_epoch = epoch
-            best_params = jax.tree_util.tree_map(lambda x: x.copy(), state.params)
+            best_params = jax.tree_util.tree_map(
+                lambda x: x.copy(), state.params
+            )
             patience_counter = 0
         else:
             patience_counter += 1
@@ -207,7 +216,10 @@ def train_vae(
     # Restore best params before saving
     state = state.replace(params=best_params)
     model_data = ModelData(
-        params=state.params, latent_dim=config.latent_dim, data_dim=data_len
+        params=state.params,
+        latent_dim=config.latent_dim,
+        data_dim=data_len,
+        normalize_decoder_output=config.normalize_decoder_output,
     )
     save_training_plots(
         model_data, metrics, save_dir, data, rng=rng, epoch=config.epochs

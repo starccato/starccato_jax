@@ -4,6 +4,26 @@
 CHANGELOG
 =========
 
+Unreleased
+==========
+
+Bug Fixes
+---------
+
+* Compute the VAE KL divergence as total nats per waveform (sum over latent
+  dimensions, mean over the batch), so capacity values no longer change
+  meaning with latent dimension.
+* Preserve raw decoder behavior when loading legacy artifacts while recording
+  the decoder normalization contract in newly trained models.
+
+Changed
+-------
+
+* Normalize newly trained decoder outputs to zero mean and unit RMS, separating
+  waveform shape from the downstream ``log_amp`` inference parameter.
+* Add reproducible training/data seeds and deterministic ``encode_mean`` for
+  inexpensive inference initialization.
+
 
 .. _changelog-v0.2.4:
 

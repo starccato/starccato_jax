@@ -59,6 +59,7 @@ def save_model(
         f.create_dataset("config", data=config_json)
         # Store version metadata as a file attribute (scalar string)
         f.attrs["library_version"] = CURRENT_VERSION
+
         # Store architecture (shapes per parameter path) for forward compatibility
         def _flatten_shapes(d, prefix=""):
             out = {}
@@ -71,6 +72,7 @@ def save_model(
                     except Exception:
                         out[f"{prefix}{k}"] = []
             return out
+
         arch = _flatten_shapes(model_params)
         f.create_dataset("architecture", data=json.dumps(arch))
 
@@ -90,7 +92,9 @@ def _recursively_load(h5group):
     return data
 
 
-def get_model_version(savedir: str, model_fname: str = MODEL_FNAME) -> Optional[str]:
+def get_model_version(
+    savedir: str, model_fname: str = MODEL_FNAME
+) -> Optional[str]:
     """Return the stored library version for a saved model if present."""
     filename = f"{savedir}/{model_fname}"
     try:
@@ -115,6 +119,9 @@ def load_model(savedir: str, model_fname: str = MODEL_FNAME) -> ModelData:
         try:
             params = freeze(_recursively_load(f["model_params"]))
             config_dict = json.loads(f["config"][()].decode("utf-8"))
+            # Artifacts predating decoder-output normalization must retain
+            # their original raw decoder behavior when loaded.
+            config_dict.setdefault("normalize_decoder_output", False)
             config = Config(**config_dict)
             saved_arch_json = None
             if "architecture" in f:
@@ -130,7 +137,12 @@ def load_model(savedir: str, model_fname: str = MODEL_FNAME) -> ModelData:
                 )
             raise RuntimeError(msg) from e
 
-    return ModelData(params, config.latent_dim, config.data_dim)
+    return ModelData(
+        params,
+        config.latent_dim,
+        config.data_dim,
+        normalize_decoder_output=config.normalize_decoder_output,
+    )
 
 
 def load_loss_h5(fname: str) -> TrainValMetrics:

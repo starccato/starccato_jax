@@ -175,6 +175,12 @@ directory:
    signal_vae = StarccatoVAE("runs/ccsne_vae")
    glitch_vae = StarccatoVAE("runs/blip_vae")
 
+The current retraining contract, selected hyperparameters, artifact hashes, and
+real-data NUTS validation are recorded in
+``docs/studies/vae_retraining/README.md``. Run
+``scripts/run_training_for_defaults.sh`` to reproduce the selected CCSNE and
+blip candidates.
+
 Compare Signal and Glitch Embeddings
 ------------------------------------
 

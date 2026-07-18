@@ -17,6 +17,7 @@ from .core import (
     VAE,
     ModelData,
     encode,
+    encode_mean,
     generate,
     load_model,
     reconstruct,
@@ -38,7 +39,12 @@ class StarccatoVAE(StarccatoModel):
             latents=self.latent_dim,
             data_dim=self.data_dim,
             use_legacy_decoder=self._has_legacy_decoder,
+            normalize_decoder_output=self._data.normalize_decoder_output,
         )
+
+    @property
+    def normalize_decoder_output(self) -> bool:
+        return self._data.normalize_decoder_output
 
     def __repr__(self):
         return f"StarccatoVAE(z-dim={self.latent_dim})"
@@ -50,10 +56,11 @@ class StarccatoVAE(StarccatoModel):
     @property
     def data_dim(self) -> int:
         return self._data.data_dim
-    
+
     @property
     def _has_legacy_decoder(self) -> bool:
         from .core.model import _has_legacy_decoder
+
         return _has_legacy_decoder(self._data.params)
 
     @classmethod
@@ -94,6 +101,10 @@ class StarccatoVAE(StarccatoModel):
 
     def encode(self, x: jnp.ndarray, rng: PRNGKey = None) -> jnp.ndarray:
         return encode(x, self._data, rng=rng, model=self._model)
+
+    def encode_mean(self, x: jnp.ndarray) -> jnp.ndarray:
+        """Return a deterministic latent initializer for a standardized waveform."""
+        return encode_mean(x, self._data, model=self._model)
 
     def plot(
         self,
