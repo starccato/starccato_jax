@@ -4,6 +4,60 @@
 CHANGELOG
 =========
 
+Unreleased
+==========
+
+Upgrade summary from v0.2.0
+---------------------------
+
+* The default CCSNE and blip surrogates now use five-dimensional,
+  capacity-controlled VAEs with independently standardized waveforms and a
+  zero-mean, unit-RMS decoder contract. Downstream amplitude inference is
+  therefore separated from latent morphology.
+* Default model selection now combines deterministic held-out reconstruction,
+  frequency-domain fidelity, decoder-Jacobian and collision diagnostics,
+  multistart MAP searches, and four-chain NUTS on representative LVK data.
+* The legacy one-detector study code has moved to ``starccato_lvk``; this
+  package now focuses on training, validating, packaging, and loading the
+  surrogate models.
+* Default weights moved from mutable cache-refresh downloads to immutable,
+  checksummed, versioned artifacts. Existing v0.2.x and v0.3.0 installations
+  retain their original model URLs and behavior.
+* Training is reproducible by separate model/data seeds, validates input rows,
+  records split and checkpoint provenance, and selects checkpoints using the
+  deterministic encoder mean.
+
+Bug Fixes
+---------
+
+* Use encoder-mean reconstructions for validation and early stopping; the
+  previous ``deterministic=True`` path disabled dropout but still sampled the
+  latent posterior.
+* Compute the VAE KL divergence as total nats per waveform (sum over latent
+  dimensions, mean over the batch), so capacity values no longer change
+  meaning with latent dimension.
+* Preserve raw decoder behavior when loading legacy artifacts while recording
+  the decoder normalization contract in newly trained models.
+
+Changed
+-------
+
+* Load saved models without downloading or shuffling the training dataset.
+* Pin default weights to immutable versioned URLs and SHA-256 checksums, with
+  atomic replacement of invalid cache files.
+* Record artifact schema, selected/recorded epochs, validation score, seeds,
+  and standardized train/validation split hashes in newly trained weights.
+* Add held-out waveform-fidelity, decoder-Jacobian, latent round-trip, and
+  decoder-collision diagnostics.
+* Make latent sweeps seed-aware and resumable, and include real-glitch
+  multistart-MAP plus NUTS validation in default-model selection.
+* Make cyclical beta annealing opt-in by default because it is inactive under
+  the default capacity-controlled objective.
+* Normalize newly trained decoder outputs to zero mean and unit RMS, separating
+  waveform shape from the downstream ``log_amp`` inference parameter.
+* Add reproducible training/data seeds and deterministic ``encode_mean`` for
+  inexpensive inference initialization.
+
 
 .. _changelog-v0.3.0:
 

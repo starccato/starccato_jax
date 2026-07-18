@@ -9,7 +9,9 @@ from starccato_jax.vae.core.model import VAE
 
 
 class _FixedPosteriorModel:
-    def apply(self, variables, x, rng, deterministic, rngs):
+    reconstruct_from_mean = object()
+
+    def apply(self, variables, x, *args, **kwargs):
         mean = jnp.ones((x.shape[0], 3))
         logvar = jnp.zeros_like(mean)
         return jnp.zeros_like(x), mean, logvar
@@ -47,3 +49,58 @@ def test_encode_mean_is_deterministic():
     first = model.apply({"params": params}, x, method=model.encode_mean)
     second = model.apply({"params": params}, x, method=model.encode_mean)
     np.testing.assert_array_equal(first, second)
+
+
+def test_deterministic_loss_uses_encoder_mean():
+    model = VAE(latents=3, data_dim=32, normalize_decoder_output=True)
+    rng = jax.random.PRNGKey(5)
+    params = model.init(rng, jnp.ones((2, 32)), rng, True)["params"]
+    x = jax.random.normal(jax.random.PRNGKey(6), (4, 32))
+
+    first = vae_loss(
+        params,
+        x,
+        jax.random.PRNGKey(7),
+        model,
+        beta=1.0,
+        deterministic=True,
+    )
+    second = vae_loss(
+        params,
+        x,
+        jax.random.PRNGKey(8),
+        model,
+        beta=1.0,
+        deterministic=True,
+    )
+    np.testing.assert_array_equal(
+        first.reconstruction_loss, second.reconstruction_loss
+    )
+    np.testing.assert_array_equal(first.loss, second.loss)
+
+
+def test_stochastic_loss_still_samples_latent():
+    model = VAE(latents=3, data_dim=32, normalize_decoder_output=True)
+    rng = jax.random.PRNGKey(9)
+    params = model.init(rng, jnp.ones((2, 32)), rng, True)["params"]
+    x = jax.random.normal(jax.random.PRNGKey(10), (4, 32))
+
+    first = vae_loss(
+        params,
+        x,
+        jax.random.PRNGKey(11),
+        model,
+        beta=1.0,
+        deterministic=False,
+    )
+    second = vae_loss(
+        params,
+        x,
+        jax.random.PRNGKey(12),
+        model,
+        beta=1.0,
+        deterministic=False,
+    )
+    assert not np.isclose(
+        first.reconstruction_loss, second.reconstruction_loss
+    )

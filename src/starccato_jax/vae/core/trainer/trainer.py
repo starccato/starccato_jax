@@ -15,7 +15,7 @@ from ....data import TrainValData
 from ....logging import logger
 from ...config import Config
 from ..data_containers import TrainValMetrics
-from ..io import save_model
+from ..io import array_sha256, save_model
 from ..loss import vae_loss
 from ..model import VAE, ModelData
 from .plot_utils import save_training_plots
@@ -121,7 +121,9 @@ def train_vae(
 
     t0 = time.time()
     progress_bar = tqdm(range(config.epochs), desc="Training")
+    last_epoch = -1
     for epoch in progress_bar:
+        last_epoch = epoch
         rng, data_rng, step_rng = jax.random.split(rng, 3)
         batches = data.generate_training_batches(config.batch_size, data_rng)
         train_args = (
@@ -222,9 +224,32 @@ def train_vae(
         normalize_decoder_output=config.normalize_decoder_output,
     )
     save_training_plots(
-        model_data, metrics, save_dir, data, rng=rng, epoch=config.epochs
+        model_data, metrics, save_dir, data, rng=rng, epoch=last_epoch + 1
     )
-    save_model(state, config, metrics, savedir=save_dir)
+    artifact_metadata = {
+        "training": {
+            "dataset": config.dataset,
+            "training_seed": config.seed,
+            "data_seed": config.data_seed,
+            "train_fraction": config.train_fraction,
+            "best_epoch": best_epoch + 1,
+            "recorded_epochs": last_epoch + 1,
+            "best_validation_reconstruction_loss": float(best_val_recon),
+        },
+        "training_data": {
+            "train_sha256": array_sha256(data.train),
+            "validation_sha256": array_sha256(data.val),
+            "train_shape": list(data.train.shape),
+            "validation_shape": list(data.val.shape),
+        },
+    }
+    save_model(
+        state,
+        config,
+        metrics,
+        savedir=save_dir,
+        artifact_metadata=artifact_metadata,
+    )
 
     logger.info(f"Training complete. (time: {time.time() - t0:.2f}s)")
     save_training_plots(

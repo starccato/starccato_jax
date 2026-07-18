@@ -35,10 +35,21 @@ def vae_loss(
         Losses: A container holding the reconstruction loss, KL divergence,
                 total loss, and beta.
     """
-    # Forward pass: get reconstruction, mean, and log variance from the model.
-    reconstructed, mean, logvar = model.apply(
-        {"params": params}, x, rng, deterministic, rngs={"dropout": rng}
-    )
+    # Validation/checkpoint metrics use the encoder mean.  Disabling dropout
+    # alone is not deterministic because the ordinary VAE forward pass still
+    # samples from q(z | x).
+    if deterministic:
+        reconstructed, mean, logvar = model.apply(
+            {"params": params}, x, method=model.reconstruct_from_mean
+        )
+    else:
+        reconstructed, mean, logvar = model.apply(
+            {"params": params},
+            x,
+            rng,
+            False,
+            rngs={"dropout": rng},
+        )
 
     # Reconstruction loss: mean squared error over all pixels (or features)
     reconstruction_loss = jnp.mean((x - reconstructed) ** 2)
@@ -57,7 +68,7 @@ def vae_loss(
     if use_capacity:
         # Capacity is an upper information budget, not an equality target.
         cap = jnp.asarray(capacity)
-        # Hinge version: only penalize when KL exceeds capacity; smoother curves.
+        # Hinge version penalizes only KL above capacity.
         net_loss = reconstruction_loss + beta_capacity * jnp.maximum(
             kl_divergence - jax.lax.stop_gradient(cap), 0.0
         )

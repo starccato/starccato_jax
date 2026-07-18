@@ -1,0 +1,63 @@
+{
+  "model_dir": "/Users/avi/Documents/projects/starccato_jax/starccato_jax/docs/studies/latent_dimensionality/out_hardening_pilot/models/ccsne_z5_c12p0_seed2",
+  "model_sha256": "edf65676b43f0b015dfff4a5613b9189b1f2bc19159e0a599d5db5595abea0be",
+  "dataset": "ccsne",
+  "data_seed": 0,
+  "frequency_band_hz": [
+    300.0,
+    800.0
+  ],
+  "sample_rate_hz": 4096.0,
+  "validation_fidelity": {
+    "time_mse_median": 0.11809674186621136,
+    "time_mse_p90": 0.5179250496332078,
+    "mismatch_median": 0.050046884010724435,
+    "mismatch_p90": 0.6734310442716944,
+    "log_spectral_distance_median": 0.27356107437021937,
+    "log_spectral_distance_p90": 0.9148996389168812,
+    "peak_time_error_ms_median": 0.0,
+    "peak_time_error_ms_p90": 3.173828125
+  },
+  "prior_geometry": {
+    "n_points": 128,
+    "singular_value_median": [
+      17.636035919189453,
+      10.745079040527344,
+      8.10903549194336,
+      4.667646408081055,
+      1.2611231803894043
+    ],
+    "condition_number_median": 13.589981079101562,
+    "condition_number_p90": 30.46465301513672,
+    "effective_rank_min": 5,
+    "roundtrip_rmse_median": 0.26258604171682864,
+    "roundtrip_rmse_p90": 0.5820261904274253
+  },
+  "prior_collisions": {
+    "n_points": 128,
+    "eligible_pairs": 8076,
+    "collision_pairs": 0,
+    "minimum_mismatch": 0.01715141534805298,
+    "mismatch_p01": 0.08021281659603119,
+    "minimum_mismatch_pair": [
+      56,
+      106
+    ],
+    "minimum_mismatch_latent_distance": 1.0701453852217038
+  },
+  "validation_geometry": {
+    "n_points": 128,
+    "singular_value_median": [
+      13.827224731445312,
+      8.949539184570312,
+      6.580092906951904,
+      3.5477912425994873,
+      0.7739644050598145
+    ],
+    "condition_number_median": 15.011564254760742,
+    "condition_number_p90": 30.942094802856445,
+    "effective_rank_min": 5,
+    "roundtrip_rmse_median": 0.11426468082708621,
+    "roundtrip_rmse_p90": 0.19483558741453239
+  }
+}

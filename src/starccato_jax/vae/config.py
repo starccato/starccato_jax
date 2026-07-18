@@ -12,7 +12,8 @@ class Config:
     learning_rate: float = 3e-4
     epochs: int = 1000
     batch_size: int = 64
-    cyclical_annealing_cycles: int = 3  # 0 for no annealing
+    # Used only by the beta-VAE objective (use_capacity=False).
+    cyclical_annealing_cycles: int = 0
     beta_start: float = 0.0
     beta_end: float = 0.5
     beta_ratio: float = 0.3  # fraction of each cycle spent ramping beta
@@ -97,10 +98,21 @@ class Config:
         self._batch_size_check()
 
     def _batch_size_check(self):
-        # check fraction that will be discarded due to batch size
+        if self.batch_size < 1:
+            raise ValueError("batch_size must be positive")
         n = self.data.train.shape[0]
-        n_batches = self.data.train.shape[0] // self.batch_size
-        n_discarded = self.data.train.shape[0] - n_batches * self.batch_size
+        n_batches = n // self.batch_size
+        if n_batches == 0:
+            raise ValueError(
+                f"batch_size={self.batch_size} exceeds {n} training examples"
+            )
+        n_discarded = n - n_batches * self.batch_size
+        if n_discarded / n > 0.1:
+            logger.warning(
+                "Batching discards %d/%d training examples per epoch",
+                n_discarded,
+                n,
+            )
 
 
 def cyclical_annealing_beta(
@@ -117,7 +129,8 @@ def cyclical_annealing_beta(
         start (float): Initial beta value (e.g., 0.0).
         stop (float): Maximum beta value (e.g., 1.0).
         n_epoch (int): Total number of epochs.
-        n_cycle (int): Number of cycles for annealing. Set to 0 for no annealing.
+        n_cycle (int): Number of cycles for annealing. Set to 0 for no
+            annealing.
         ratio (float): Ratio of the increasing phase within each cycle.
 
     Returns:

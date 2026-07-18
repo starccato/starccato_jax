@@ -1,0 +1,70 @@
+{
+  "study_date": "2026-07-18",
+  "latent_dimension": 5,
+  "ccsne_candidate": {
+    "training_seed": 2,
+    "epochs_requested": 1000,
+    "best_epoch": 998,
+    "recorded_epochs": 1000,
+    "validation_mse": 0.203729510307312,
+    "prior_jacobian_condition_median": 13.589981079101562,
+    "next_distinct_map_delta_log_density": 14.689794037765893,
+    "nuts_divergences": 0,
+    "nuts_max_rhat": 1.010437567819996,
+    "nuts_min_ess": 367.6835401746385,
+    "nuts_ebfmi_range": [0.8488923866022141, 0.9747953996289134],
+    "nuts_max_steps": 95,
+    "nuts_tree_depth_saturation_fraction": 0.0,
+    "sha256": "edf65676b43f0b015dfff4a5613b9189b1f2bc19159e0a599d5db5595abea0be"
+  },
+  "rejected_ccsne_candidate": {
+    "training_seed": 1,
+    "epochs_requested": 2000,
+    "best_epoch": 1354,
+    "recorded_epochs": 1554,
+    "validation_mse": 0.18900378048419952,
+    "next_distinct_map_delta_log_density": 4.4080549340542206,
+    "long_nuts_warmup": 2000,
+    "long_nuts_samples_per_chain": 2000,
+    "long_nuts_divergences": 0,
+    "long_nuts_max_rhat": 1.15659255744573,
+    "long_nuts_min_ess": 13.70463113096271,
+    "sha256": "a7aa27cab3909638e8feaace91eb794686123114c3ce6b5dd30369a9c7025760",
+    "selected": false
+  },
+  "blip_seed_screen": [
+    {
+      "training_seed": 0,
+      "validation_mse": 0.03251604363322258,
+      "prior_jacobian_condition_median": 133.42825317382812,
+      "distinct_map_solutions_within_5_log_density": 2,
+      "nuts_divergences": 0,
+      "nuts_max_rhat": 1.7079910527066482,
+      "nuts_min_ess": 3.1216290355052565,
+      "selected": false
+    },
+    {
+      "training_seed": 1,
+      "validation_mse": 0.03445674851536751,
+      "prior_jacobian_condition_median": 207.3605499267578,
+      "distinct_map_solutions_within_5_log_density": 0,
+      "selected": false
+    },
+    {
+      "training_seed": 2,
+      "validation_mse": 0.034756746143102646,
+      "prior_jacobian_condition_median": 112.48458099365234,
+      "distinct_map_solutions_within_5_log_density": 0,
+      "next_distinct_map_delta_log_density": 30.8677424927463,
+      "nuts_divergences": 0,
+      "nuts_max_rhat": 1.001228313810346,
+      "nuts_min_ess": 573.4008599658303,
+      "nuts_ebfmi_range": [0.731780905234986, 0.8515516706105781],
+      "nuts_max_steps": 127,
+      "nuts_tree_depth_saturation_fraction": 0.0,
+      "sha256": "4f7d590bfe5f23f07785fa6b16b68ed8115a8ad1e8333c87341b7731c27c9879",
+      "selected": true
+    }
+  ],
+  "decision": "Retain z=5. Select seed 2 for both CCSNE and blip after multistart MAP and four-chain NUTS. Do not add cycle consistency: the rejected basins decode to distinct waveforms and are not decoder collisions."
+}

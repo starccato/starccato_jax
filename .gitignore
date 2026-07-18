@@ -9,6 +9,8 @@ __pycache__/
 *.pdf
 out_known_psd/
 *.json
+!docs/studies/vae_retraining/results/
+!docs/studies/vae_retraining/results/*.json
 cache/
 out/
 outdir/
@@ -26,6 +28,7 @@ uv.lock
 .idea
 docs/studies/coverage/out_mcmc/
 *.png
+!docs/studies/latent_dimensionality/out_hardening_pilot/summary.png
 tests/data
 MODEL
 model_exploration/
