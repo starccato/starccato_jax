@@ -64,6 +64,11 @@ The weight files are ignored by Git. Uploading/replacing the public default
 weights is a separate release action; code should be merged and both
 ``starccato_jax`` and ``starccato_lvk`` tested before publishing them.
 
+For v0.3.0 the weights are published under versioned URLs at
+``weights/starcatto_jax/v0.3.0/``. The unversioned v0.2.x files remain in place
+so older installations never attempt to load artifacts with the new metadata
+and decoder contract.
+
 ## Cheap NUTS initialization
 
 ``starccato_lvk.analysis.jim_likelihood.find_multistart_map`` performs bounded
