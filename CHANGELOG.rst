@@ -4,25 +4,24 @@
 CHANGELOG
 =========
 
-Unreleased
-==========
+
+.. _changelog-v0.2.5:
+
+v0.2.5 (2026-07-18)
+===================
 
 Bug Fixes
 ---------
 
-* Compute the VAE KL divergence as total nats per waveform (sum over latent
-  dimensions, mean over the batch), so capacity values no longer change
-  meaning with latent dimension.
-* Preserve raw decoder behavior when loading legacy artifacts while recording
-  the decoder normalization contract in newly trained models.
+* fix: update KL div (`f53432e`_)
 
-Changed
+Unknown
 -------
 
-* Normalize newly trained decoder outputs to zero mean and unit RMS, separating
-  waveform shape from the downstream ``log_amp`` inference parameter.
-* Add reproducible training/data seeds and deterministic ``encode_mean`` for
-  inexpensive inference initialization.
+* Merge branch 'main' of github.com:starccato/starccato_jax (`751a229`_)
+
+.. _f53432e: https://github.com/starccato/starccato_jax/commit/f53432e51f228ed39f380b948eecf7d93a281905
+.. _751a229: https://github.com/starccato/starccato_jax/commit/751a2299c22fc9fa448b3177b8565c92e372ad72
 
 
 .. _changelog-v0.2.4:
@@ -35,12 +34,21 @@ Bug Fixes
 
 * fix: logging (`6ac3234`_)
 
+Chores
+------
+
+* chore(release): 0.2.4 (`aec30fa`_)
+
 Unknown
 -------
+
+* updates (`9b0301f`_)
 
 * Merge branch 'main' of github.com:starccato/starccato_jax (`9cceba7`_)
 
 .. _6ac3234: https://github.com/starccato/starccato_jax/commit/6ac32343b4cccd8426b5ba66918c05438a6174f3
+.. _aec30fa: https://github.com/starccato/starccato_jax/commit/aec30fab5fe6d07db15395614df0e7cfdccbd0fa
+.. _9b0301f: https://github.com/starccato/starccato_jax/commit/9b0301f753521a21f280ebc9ddf165377be8bdc7
 .. _9cceba7: https://github.com/starccato/starccato_jax/commit/9cceba7c420ed4d70892221f05626277d74b7d21
 
 
