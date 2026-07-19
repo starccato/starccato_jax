@@ -2,25 +2,25 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.h5
-*.npz
+# Local downloaded datasets and model caches
+/src/starccato_jax/data/datasets/*.h5
+/src/starccato_jax/data/datasets/*.npz
+/src/starccato_jax/data/datasets/*.dat
+/src/starccato_jax/data/default_weights/
+/tests/*.h5
+/tests/test_data/
+
 # C extensions
-*.dat
-*.pdf
 out_known_psd/
-*.json
 !docs/studies/vae_retraining/results/
 !docs/studies/vae_retraining/results/*.json
 cache/
 out/
 outdir/
-datasets
-
-manuscript
-
-
-uv.lock
 *out/
+/out_*/
+/tests/test_output-*/
+/docs/studies/latent_dimensionality/out*/models/
 
 *.zip
 *.so

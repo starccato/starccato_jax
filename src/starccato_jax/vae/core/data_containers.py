@@ -137,26 +137,3 @@ def flatten_params(nested_dict: Dict[str, Any]) -> Dict[str, Array]:
 
     _recurse(nested_dict)
     return flat
-
-
-def extract_gradient_numbers(grad_dict: Dict[str, Any]) -> np.ndarray:
-    """
-    Extract all numerical values from a nested gradient dictionary.
-
-    Args:
-        grad_dict: Nested dictionary containing gradient values
-
-    Returns:
-        JAX array of all extracted numerical values
-    """
-    numbers = []
-
-    def _recursive_extract(obj):
-        if isinstance(obj, dict):
-            for v in obj.values():
-                _recursive_extract(v)
-        elif isinstance(obj, jax.Array):
-            numbers.append(jnp.asarray(obj).item())  # Convert to float
-
-    _recursive_extract(grad_dict)
-    return np.array(numbers)

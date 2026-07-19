@@ -12,22 +12,21 @@ dynamic = ["version"] # scm versioning (using tags)
 requires-python = ">=3.9"
 description = "JAX-VAE stellar core collapse waveform"
 readme = "README.rst"
+license = "MIT"
 authors = [
     { name = "Starccato Team", email = "avi.vajpeyi@gmail.com" },
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
 ]
 dependencies = [
     "jax",
     "flax",
     "numpy",
     "matplotlib",
-    "pandas",
     "h5py",
     "pillow",
     "natsort",
@@ -35,7 +34,6 @@ dependencies = [
     "rich",
     "uniplot",
     "click",
-    "arviz",
 ]
 
 [project.optional-dependencies]
@@ -69,12 +67,8 @@ changelog_file = "CHANGELOG.rst"
 
 [project.urls]  # Optional
 "Homepage" = "https://starccato.github.io/starccato_jax/"
-"Bug Reports" = "https://giuthub.com/starccato/starccato_jax/issues"
+"Bug Reports" = "https://github.com/starccato/starccato_jax/issues"
 "Source" = "https://github.com/starccato/starccato_jax/"
-
-
-[tool.setuptools]
-package-data = { "starccato_jax" = [""] }
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -129,7 +123,7 @@ exclude_lines = [
     "if __name__ == .__main__.:"
 ]
 
-ignore_errors = true
+ignore_errors = false
 
 [tool.coverage.html]
 title = "starccato_jax Coverage Test Report"

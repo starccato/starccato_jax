@@ -6,7 +6,6 @@ import numpy as np
 from ..credible_intervals import coverage_probability
 
 MODEL_COL = "tab:orange"
-OBS_COL = "tab:gray"
 TRUE_COL = "black"
 
 FS = 4096

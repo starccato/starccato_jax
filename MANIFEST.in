@@ -1,0 +1,4 @@
+prune docs/model_out
+prune docs/out_mcmc
+prune docs/studies/latent_dimensionality/out_hardening_pilot
+prune docs/studies/vae_retraining/results

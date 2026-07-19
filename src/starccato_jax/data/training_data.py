@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from dataclasses import dataclass
 
 import jax.numpy as jnp
@@ -17,14 +16,6 @@ class TrainValData:
 
     def __repr__(self):
         return f"TrainValData(train={self.train.shape}, val={self.val.shape})"
-
-    @staticmethod
-    @abstractmethod
-    def _load_raw(clean: bool = False) -> np.ndarray:
-        raise ValueError(
-            "The TrainValData class is abstract and cannot be instantiated "
-            "directly."
-        )
 
     @classmethod
     def load(
